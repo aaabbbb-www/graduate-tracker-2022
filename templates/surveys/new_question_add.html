@@ -1,0 +1,399 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}إضافة سؤال جديد{% endblock %}
+
+{% block extra_css %}
+<style>
+    .question-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem 0;
+    }
+    
+    .question-card {
+        background: white;
+        border-radius: 2rem;
+        padding: 3rem;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        border: none;
+    }
+    
+    .question-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    
+    .question-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 1rem;
+    }
+    
+    .question-subtitle {
+        color: #666;
+        font-size: 1.1rem;
+        line-height: 1.6;
+    }
+    
+    .survey-info {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .survey-name {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .survey-description {
+        opacity: 0.9;
+        font-size: 0.95rem;
+    }
+    
+    .form-group {
+        margin-bottom: 2rem;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .form-control {
+        border: 2px solid #e9ecef;
+        border-radius: 1rem;
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #f8f9fa;
+    }
+    
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        background: white;
+    }
+    
+    .form-control::placeholder {
+        color: #adb5bd;
+    }
+    
+    .choices-preview {
+        background: #f8f9fa;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-top: 1rem;
+        border: 2px dashed #dee2e6;
+    }
+    
+    .preview-title {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+    
+    .choice-item {
+        background: white;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.5rem;
+        border: 1px solid #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .choice-text {
+        color: #333;
+        font-weight: 500;
+    }
+    
+    .choice-number {
+        background: #667eea;
+        color: white;
+        width: 1.5rem;
+        height: 1.5rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .btn-submit {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 2rem;
+        padding: 1rem 3rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: white;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        width: 100%;
+        margin-top: 1rem;
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+    }
+    
+    .btn-back {
+        background: #6c757d;
+        border: none;
+        border-radius: 2rem;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        margin-bottom: 2rem;
+    }
+    
+    .btn-back:hover {
+        background: #5a6268;
+        color: white;
+        text-decoration: none;
+        transform: translateY(-1px);
+    }
+    
+    .help-text {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+    
+    .question-icon {
+        font-size: 4rem;
+        color: #667eea;
+        margin-bottom: 1rem;
+        opacity: 0.8;
+    }
+    
+    .tips-section {
+        background: #fff3cd;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-top: 2rem;
+        border-left: 4px solid #ffc107;
+    }
+    
+    .tips-title {
+        font-weight: 600;
+        color: #856404;
+        margin-bottom: 1rem;
+    }
+    
+    .tips-list {
+        margin: 0;
+        padding-left: 1.5rem;
+        color: #856404;
+    }
+    
+    .tips-list li {
+        margin-bottom: 0.5rem;
+    }
+    
+    .character-count {
+        font-size: 0.8rem;
+        color: #6c757d;
+        text-align: right;
+        margin-top: 0.5rem;
+    }
+    
+    .character-count.warning {
+        color: #ffc107;
+    }
+    
+    .character-count.danger {
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="question-container">
+    <!-- زر العودة -->
+    <a href="{% url 'surveys:detail' survey.pk %}" class="btn-back">
+        <i class="fas fa-arrow-right me-2"></i>العودة للاستبيان
+    </a>
+    
+    <!-- نموذج إضافة السؤال -->
+    <div class="question-card">
+        <div class="question-header">
+            <div class="question-icon">
+                <i class="fas fa-question-circle"></i>
+            </div>
+            <h1 class="question-title">إضافة سؤال جديد</h1>
+            <p class="question-subtitle">
+                أضف سؤالاً من نوع "اختيار من متعدد" مع الخيارات المطلوبة
+            </p>
+        </div>
+        
+        <!-- معلومات الاستبيان -->
+        <div class="survey-info">
+            <div class="survey-name">{{ survey.title }}</div>
+            <div class="survey-description">{{ survey.description|truncatewords:20 }}</div>
+        </div>
+        
+        <form method="post" id="questionForm">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.question_text.id_for_label }}" class="form-label">
+                    <i class="fas fa-question me-2"></i>نص السؤال
+                </label>
+                {{ form.question_text }}
+                <div class="character-count" id="questionCount">0 حرف</div>
+                {% if form.question_text.help_text %}
+                    <div class="help-text">{{ form.question_text.help_text }}</div>
+                {% endif %}
+                {% if form.question_text.errors %}
+                    <div class="text-danger mt-1">
+                        {% for error in form.question_text.errors %}
+                            <small><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.choices.id_for_label }}" class="form-label">
+                    <i class="fas fa-list me-2"></i>الخيارات (كل خيار في سطر)
+                </label>
+                {{ form.choices }}
+                {% if form.choices.help_text %}
+                    <div class="help-text">{{ form.choices.help_text }}</div>
+                {% endif %}
+                {% if form.choices.errors %}
+                    <div class="text-danger mt-1">
+                        {% for error in form.choices.errors %}
+                            <small><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- معاينة الخيارات -->
+            <div class="choices-preview" id="choicesPreview" style="display: none;">
+                <div class="preview-title">
+                    <i class="fas fa-eye me-2"></i>معاينة الخيارات
+                </div>
+                <div id="choicesList"></div>
+            </div>
+            
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-plus me-2"></i>إضافة السؤال
+            </button>
+        </form>
+        
+        <!-- نصائح مفيدة -->
+        <div class="tips-section">
+            <h5 class="tips-title">
+                <i class="fas fa-lightbulb me-2"></i>نصائح لكتابة سؤال فعال
+            </h5>
+            <ul class="tips-list">
+                <li>اكتب السؤال بوضوح وبساطة</li>
+                <li>تأكد من أن جميع الخيارات منطقية ومتساوية</li>
+                <li>أضف خيارين على الأقل</li>
+                <li>تجنب الخيارات المزدوجة أو المربكة</li>
+                <li>رتب الخيارات بشكل منطقي</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // تأثير ظهور البطاقة
+        $('.question-card').css('opacity', '0').animate({
+            opacity: 1
+        }, 500);
+        
+        // عداد الأحرف للسؤال
+        $('#id_question_text').on('input', function() {
+            var length = $(this).val().length;
+            var countElement = $('#questionCount');
+            countElement.text(length + ' حرف');
+            
+            if (length > 200) {
+                countElement.addClass('danger');
+            } else if (length > 150) {
+                countElement.addClass('warning');
+            } else {
+                countElement.removeClass('warning danger');
+            }
+        });
+        
+        // معاينة الخيارات
+        $('#id_choices').on('input', function() {
+            var choices = $(this).val().split('\n').filter(function(choice) {
+                return choice.trim().length > 0;
+            });
+            
+            if (choices.length > 0) {
+                var previewHtml = '';
+                choices.forEach(function(choice, index) {
+                    previewHtml += '<div class="choice-item">' +
+                        '<span class="choice-text">' + choice.trim() + '</span>' +
+                        '<span class="choice-number">' + (index + 1) + '</span>' +
+                        '</div>';
+                });
+                
+                $('#choicesList').html(previewHtml);
+                $('#choicesPreview').show();
+            } else {
+                $('#choicesPreview').hide();
+            }
+        });
+        
+        // التحقق من صحة النموذج
+        $('#questionForm').on('submit', function() {
+            var questionText = $('#id_question_text').val().trim();
+            var choices = $('#id_choices').val().trim();
+            
+            if (!questionText) {
+                alert('يرجى إدخال نص السؤال');
+                return false;
+            }
+            
+            if (!choices) {
+                alert('يرجى إدخال الخيارات');
+                return false;
+            }
+            
+            var choicesArray = choices.split('\n').filter(function(choice) {
+                return choice.trim().length > 0;
+            });
+            
+            if (choicesArray.length < 2) {
+                alert('يرجى إدخال خيارين على الأقل');
+                return false;
+            }
+            
+            return true;
+        });
+        
+        // تأثير التركيز على الحقول
+        $('.form-control').on('focus', function() {
+            $(this).parent().addClass('focused');
+        }).on('blur', function() {
+            $(this).parent().removeClass('focused');
+        });
+    });
+</script>
+{% endblock %} 

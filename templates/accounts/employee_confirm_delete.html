@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}حذف الموظف - {{ employee.user.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            تأكيد حذف الموظف
+                        </h3>
+                        <a href="{% url 'accounts:employee_list' %}" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left me-1"></i>عودة
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- تنبيه مهم -->
+                    <div class="alert alert-danger">
+                        <h5 class="alert-heading">
+                            <i class="fas fa-exclamation-triangle me-2"></i>تنبيه مهم!
+                        </h5>
+                        <p class="mb-0">
+                            أنت على وشك حذف موظف من النظام. هذا الإجراء لا يمكن التراجع عنه.
+                        </p>
+                    </div>
+
+                    <!-- معلومات الموظف -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card border-danger">
+                                <div class="card-header bg-light text-danger">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-user me-2"></i>معلومات الموظف المراد حذفه
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p><strong>الاسم الكامل:</strong> {{ employee.user.get_full_name }}</p>
+                                            <p><strong>اسم المستخدم:</strong> {{ employee.user.username }}</p>
+                                            <p><strong>رقم الموظف:</strong> {{ employee.employee_id }}</p>
+                                            <p><strong>المنصب:</strong> {{ employee.position }}</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p><strong>القسم:</strong> {{ employee.department }}</p>
+                                            <p><strong>البريد الإلكتروني:</strong> {{ employee.user.email }}</p>
+                                            <p><strong>تاريخ التعيين:</strong> {{ employee.hire_date|date:"Y-m-d" }}</p>
+                                            <p><strong>الحالة:</strong> 
+                                                <span class="badge {% if employee.status == 'active' %}bg-success{% elif employee.status == 'inactive' %}bg-danger{% else %}bg-warning{% endif %}">
+                                                    {{ employee.get_status_display }}
+                                                </span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- التأثيرات المحتملة -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card border-warning">
+                                <div class="card-header bg-warning text-dark">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-info-circle me-2"></i>التأثيرات المحتملة للحذف
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-unstyled mb-0">
+                                        <li class="mb-2">
+                                            <i class="fas fa-times text-danger me-2"></i>
+                                            سيتم حذف حساب المستخدم نهائياً
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-times text-danger me-2"></i>
+                                            سيتم حذف جميع الصلاحيات المخصصة
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-times text-danger me-2"></i>
+                                            سيتم حذف جميع سجلات الأنشطة المرتبطة
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-times text-danger me-2"></i>
+                                            إذا كان مديراً، سيتم إزالة المرؤوسين من إدارته
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-times text-danger me-2"></i>
+                                            لا يمكن استرداد البيانات المحذوفة
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- نموذج التأكيد -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-danger text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-check-circle me-2"></i>تأكيد الحذف
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <form method="post">
+                                        {% csrf_token %}
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="confirm_delete" required>
+                                                <label class="form-check-label" for="confirm_delete">
+                                                    <strong>أؤكد أنني أريد حذف هذا الموظف نهائياً</strong>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="reason" class="form-label">سبب الحذف (اختياري):</label>
+                                            <textarea class="form-control" id="reason" name="reason" rows="3" placeholder="اكتب سبب حذف الموظف..."></textarea>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <a href="{% url 'accounts:employee_list' %}" class="btn btn-secondary">
+                                                <i class="fas fa-times me-1"></i>إلغاء
+                                            </a>
+                                            <button type="submit" class="btn btn-danger" id="delete_btn" disabled>
+                                                <i class="fas fa-trash me-1"></i>تأكيد الحذف
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border: 1px solid rgba(0, 0, 0, 0.125);
+    }
+    
+    .card-header {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    }
+    
+    .alert {
+        border: 1px solid rgba(0, 0, 0, 0.125);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// تفعيل/تعطيل زر الحذف حسب حالة التأكيد
+document.getElementById('confirm_delete').addEventListener('change', function() {
+    document.getElementById('delete_btn').disabled = !this.checked;
+});
+
+// تأكيد إضافي عند النقر على زر الحذف
+document.getElementById('delete_btn').addEventListener('click', function(e) {
+    if (!confirm('هل أنت متأكد تماماً من حذف هذا الموظف؟ لا يمكن التراجع عن هذا الإجراء.')) {
+        e.preventDefault();
+    }
+});
+</script>
+{% endblock %}

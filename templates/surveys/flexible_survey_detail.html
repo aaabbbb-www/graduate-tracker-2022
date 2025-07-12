@@ -1,0 +1,276 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ survey.title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- رأس الصفحة -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="main-title animate__animated animate__fadeInDown">
+                    <i class="fas fa-clipboard-list"></i> {{ survey.title }}
+                </h1>
+                <div class="btn-group" role="group">
+                    <a href="{% url 'surveys:flexible_question_create' survey.pk %}" class="btn btn-success">
+                        <i class="fas fa-plus"></i> إضافة سؤال
+                    </a>
+                    <a href="{% url 'surveys:send_survey' survey.pk %}" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> إرسال الاستبيان
+                    </a>
+                    <a href="{% url 'surveys:results' survey.pk %}" class="btn btn-info">
+                        <i class="fas fa-chart-bar"></i> النتائج
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- معلومات الاستبيان -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card shadow-sm animate__animated animate__fadeInUp">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle"></i> معلومات الاستبيان
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>الوصف:</strong> {{ survey.description|default:"لا يوجد وصف" }}</p>
+                            <p><strong>الحالة:</strong> 
+                                <span class="badge bg-{% if survey.status == 'active' %}success{% elif survey.status == 'draft' %}warning{% else %}secondary{% endif %}">
+                                    {{ survey.get_status_display }}
+                                </span>
+                            </p>
+                            <p><strong>تاريخ البداية:</strong> {{ survey.start_date|date:"Y/m/d H:i" }}</p>
+                            <p><strong>تاريخ النهاية:</strong> {{ survey.end_date|date:"Y/m/d H:i" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>طريقة الإرسال:</strong> {{ survey.get_send_method_display }}</p>
+                            <p><strong>عدد الأسئلة:</strong> {{ questions.count }}</p>
+                            <p><strong>عدد الاستجابات:</strong> {{ responses_count }}</p>
+                            <p><strong>أنشئ بواسطة:</strong> {{ survey.created_by.get_full_name|default:survey.created_by.username }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card shadow-sm animate__animated animate__fadeInUp" style="animation-delay: 0.1s;">
+                <div class="card-header bg-gradient-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie"></i> إحصائيات سريعة
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="stat-item">
+                                <i class="fas fa-question-circle fa-2x text-primary"></i>
+                                <h4>{{ questions.count }}</h4>
+                                <small>أسئلة</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-item">
+                                <i class="fas fa-users fa-2x text-success"></i>
+                                <h4>{{ responses_count }}</h4>
+                                <small>استجابات</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- الأسئلة -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
+                <div class="card-header bg-gradient-success text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list"></i> أسئلة الاستبيان
+                    </h5>
+                    <a href="{% url 'surveys:flexible_question_create' survey.pk %}" class="btn btn-light btn-sm">
+                        <i class="fas fa-plus"></i> إضافة سؤال
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if questions %}
+                        <div class="questions-list">
+                            {% for question in questions %}
+                            <div class="question-item mb-3 p-3 border rounded">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-2">
+                                            <span class="badge bg-secondary me-2">{{ forloop.counter }}</span>
+                                            {{ question.question_text }}
+                                        </h6>
+                                        <div class="question-meta">
+                                            <small class="text-muted">
+                                                <i class="fas fa-tag"></i> {{ question.get_question_type_display }}
+                                                {% if question.is_required %}
+                                                    <span class="badge bg-danger ms-2">مطلوب</span>
+                                                {% endif %}
+                                            </small>
+                                        </div>
+                                        {% if question.help_text %}
+                                            <small class="text-info d-block mt-1">
+                                                <i class="fas fa-info-circle"></i> {{ question.help_text }}
+                                            </small>
+                                        {% endif %}
+                                        
+                                        {% if question.choices.exists %}
+                                            <div class="choices-preview mt-2">
+                                                <small class="text-muted">الخيارات:</small>
+                                                <div class="mt-1">
+                                                    {% for choice in question.choices.all %}
+                                                        <span class="badge bg-light text-dark me-1">{{ choice.choice_text }}</span>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="#" class="btn btn-outline-primary" title="تعديل">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-outline-danger" title="حذف">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-question-circle fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">لا توجد أسئلة بعد</h5>
+                            <p class="text-muted">ابدأ بإضافة أسئلة للاستبيان</p>
+                            <a href="{% url 'surveys:flexible_question_create' survey.pk %}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> إضافة أول سؤال
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- أزرار التحكم -->
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <a href="{% url 'surveys:send_survey' survey.pk %}" class="btn btn-success btn-lg me-3">
+                <i class="fas fa-paper-plane"></i> إرسال الاستبيان
+            </a>
+            <a href="{% url 'surveys:results' survey.pk %}" class="btn btn-info btn-lg me-3">
+                <i class="fas fa-chart-bar"></i> عرض النتائج
+            </a>
+            <a href="{% url 'surveys:list' %}" class="btn btn-secondary btn-lg">
+                <i class="fas fa-arrow-left"></i> العودة للقائمة
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.main-title {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.card {
+    border: none;
+    border-radius: 15px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.question-item {
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef !important;
+}
+
+.question-item:hover {
+    border-color: #667eea !important;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+}
+
+.stat-item {
+    padding: 15px;
+}
+
+.stat-item i {
+    margin-bottom: 10px;
+}
+
+.stat-item h4 {
+    margin: 10px 0 5px 0;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.stat-item small {
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.choices-preview .badge {
+    font-size: 0.75rem;
+}
+
+.animate__fadeInUp {
+    animation-duration: 0.6s;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // تحسين تجربة المستخدم
+    $('.question-item').hover(function() {
+        $(this).find('.btn-group').fadeIn();
+    }, function() {
+        $(this).find('.btn-group').fadeOut();
+    });
+    
+    // تأثيرات إضافية
+    $('.card').each(function(index) {
+        $(this).css('animation-delay', (index * 0.1) + 's');
+    });
+});
+</script>
+{% endblock %} 

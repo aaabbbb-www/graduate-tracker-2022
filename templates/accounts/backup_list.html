@@ -1,0 +1,434 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}النسخ الاحتياطية{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <i class="bi bi-cloud-arrow-up me-2"></i>
+                            النسخ الاحتياطية
+                        </h3>
+                        <div>
+                            <button type="button" class="btn btn-success btn-sm me-2" onclick="createBackup()">
+                                <i class="bi bi-plus me-1"></i>إنشاء نسخة احتياطية
+                            </button>
+                            <button type="button" class="btn btn-warning btn-sm" onclick="scheduleBackup()">
+                                <i class="bi bi-clock me-1"></i>جدولة نسخة احتياطية
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- معلومات النسخ الاحتياطية -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">{{ total_backups }}</h5>
+                                    <p class="card-text">إجمالي النسخ</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">{{ successful_backups }}</h5>
+                                    <p class="card-text">ناجحة</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">{{ total_size }}</h5>
+                                    <p class="card-text">الحجم الإجمالي</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">{{ last_backup_date|default:"لا يوجد" }}</h5>
+                                    <p class="card-text">آخر نسخة احتياطية</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- فلترة النسخ الاحتياطية -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">
+                                        <i class="bi bi-funnel me-2"></i>فلترة النسخ الاحتياطية
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-3">
+                                            <label for="status_filter" class="form-label">الحالة</label>
+                                            <select class="form-select" id="status_filter">
+                                                <option value="">جميع الحالات</option>
+                                                <option value="success">ناجحة</option>
+                                                <option value="failed">فاشلة</option>
+                                                <option value="in_progress">قيد التنفيذ</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label for="type_filter" class="form-label">النوع</label>
+                                            <select class="form-select" id="type_filter">
+                                                <option value="">جميع الأنواع</option>
+                                                <option value="manual">يدوية</option>
+                                                <option value="automatic">تلقائية</option>
+                                                <option value="scheduled">مجدولة</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label for="date_filter" class="form-label">التاريخ</label>
+                                            <select class="form-select" id="date_filter">
+                                                <option value="">جميع التواريخ</option>
+                                                <option value="today">اليوم</option>
+                                                <option value="week">هذا الأسبوع</option>
+                                                <option value="month">هذا الشهر</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3 d-flex align-items-end">
+                                            <button type="button" class="btn btn-primary me-2" onclick="applyFilter()">
+                                                <i class="bi bi-search me-1"></i>تطبيق
+                                            </button>
+                                            <button type="button" class="btn btn-secondary" onclick="clearFilter()">
+                                                <i class="bi bi-x-circle me-1"></i>إلغاء
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- قائمة النسخ الاحتياطية -->
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>اسم الملف</th>
+                                    <th>النوع</th>
+                                    <th>الحالة</th>
+                                    <th>الحجم</th>
+                                    <th>تاريخ الإنشاء</th>
+                                    <th>المدة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for backup in backups %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="backup-icon me-2">
+                                                {% if backup.backup_type == 'database' %}
+                                                    <i class="bi bi-database text-primary"></i>
+                                                {% elif backup.backup_type == 'files' %}
+                                                    <i class="bi bi-folder text-warning"></i>
+                                                {% else %}
+                                                    <i class="bi bi-archive text-info"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <strong>{{ backup.filename }}</strong>
+                                                <br>
+                                                <small class="text-muted">{{ backup.description|default:"لا يوجد وصف" }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if backup.backup_type == 'manual' %}
+                                            <span class="badge bg-primary">يدوية</span>
+                                        {% elif backup.backup_type == 'automatic' %}
+                                            <span class="badge bg-success">تلقائية</span>
+                                        {% elif backup.backup_type == 'scheduled' %}
+                                            <span class="badge bg-warning">مجدولة</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if backup.status == 'success' %}
+                                            <span class="badge bg-success">ناجحة</span>
+                                        {% elif backup.status == 'failed' %}
+                                            <span class="badge bg-danger">فاشلة</span>
+                                        {% elif backup.status == 'in_progress' %}
+                                            <span class="badge bg-warning">قيد التنفيذ</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">غير معروف</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ backup.size|filesizeformat }}</td>
+                                    <td>{{ backup.created_at|date:"Y-m-d H:i" }}</td>
+                                    <td>{{ backup.duration|default:"غير محدد" }}</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'accounts:backup_detail' backup.pk %}" 
+                                               class="btn btn-info btn-sm" title="عرض التفاصيل">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            {% if backup.status == 'success' %}
+                                            <button type="button" class="btn btn-success btn-sm" 
+                                                    onclick="downloadBackup({{ backup.pk }})" title="تحميل">
+                                                <i class="bi bi-download"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-warning btn-sm" 
+                                                    onclick="restoreBackup({{ backup.pk }})" title="استعادة">
+                                                <i class="bi bi-arrow-clockwise"></i>
+                                            </button>
+                                            {% endif %}
+                                            <button type="button" class="btn btn-danger btn-sm" 
+                                                    onclick="deleteBackup({{ backup.pk }})" title="حذف">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-4">
+                                        <div class="text-muted">
+                                            <i class="bi bi-cloud-arrow-up fa-3x mb-3"></i>
+                                            <p>لا توجد نسخ احتياطية</p>
+                                            <button type="button" class="btn btn-primary" onclick="createBackup()">
+                                                <i class="bi bi-plus me-1"></i>إنشاء أول نسخة احتياطية
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- التقسيم إلى صفحات -->
+                    {% if backups.has_other_pages %}
+                    <nav aria-label="صفحات النسخ الاحتياطية" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if backups.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1">
+                                        <i class="bi bi-chevron-double-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ backups.previous_page_number }}">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% for num in backups.paginator.page_range %}
+                                {% if backups.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > backups.number|add:'-3' and num < backups.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if backups.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ backups.next_page_number }}">
+                                        <i class="bi bi-chevron-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ backups.paginator.num_pages }}">
+                                        <i class="bi bi-chevron-double-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal إنشاء نسخة احتياطية -->
+<div class="modal fade" id="createBackupModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">إنشاء نسخة احتياطية</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="backupForm">
+                    <div class="mb-3">
+                        <label for="backup_type" class="form-label">نوع النسخة الاحتياطية</label>
+                        <select class="form-select" id="backup_type" name="backup_type" required>
+                            <option value="full">نسخة احتياطية كاملة</option>
+                            <option value="database">قاعدة البيانات فقط</option>
+                            <option value="files">الملفات فقط</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="backup_description" class="form-label">الوصف (اختياري)</label>
+                        <textarea class="form-control" id="backup_description" name="description" rows="3" 
+                                  placeholder="وصف للنسخة الاحتياطية..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="compress_backup" name="compress" checked>
+                            <label class="form-check-label" for="compress_backup">
+                                ضغط النسخة الاحتياطية
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" onclick="submitBackup()">إنشاء</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .backup-icon {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .btn-group .btn {
+        margin-right: 2px;
+    }
+    
+    .badge {
+        font-size: 0.75em;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function createBackup() {
+    const modal = new bootstrap.Modal(document.getElementById('createBackupModal'));
+    modal.show();
+}
+
+function submitBackup() {
+    const form = document.getElementById('backupForm');
+    const formData = new FormData(form);
+    
+    fetch('/accounts/backups/create/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('حدث خطأ أثناء إنشاء النسخة الاحتياطية');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('حدث خطأ أثناء إنشاء النسخة الاحتياطية');
+    });
+}
+
+function downloadBackup(backupId) {
+    window.open(`/accounts/backups/${backupId}/download/`, '_blank');
+}
+
+function restoreBackup(backupId) {
+    if (confirm('هل أنت متأكد من استعادة هذه النسخة الاحتياطية؟ سيتم استبدال البيانات الحالية.')) {
+        fetch(`/accounts/backups/${backupId}/restore/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('تم استعادة النسخة الاحتياطية بنجاح');
+                location.reload();
+            } else {
+                alert('حدث خطأ أثناء استعادة النسخة الاحتياطية');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('حدث خطأ أثناء استعادة النسخة الاحتياطية');
+        });
+    }
+}
+
+function deleteBackup(backupId) {
+    if (confirm('هل أنت متأكد من حذف هذه النسخة الاحتياطية؟')) {
+        fetch(`/accounts/backups/${backupId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('حدث خطأ أثناء حذف النسخة الاحتياطية');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('حدث خطأ أثناء حذف النسخة الاحتياطية');
+        });
+    }
+}
+
+function scheduleBackup() {
+    // يمكن إضافة كود لجدولة النسخ الاحتياطية هنا
+    alert('سيتم إضافة ميزة جدولة النسخ الاحتياطية قريباً');
+}
+
+function applyFilter() {
+    const statusFilter = document.getElementById('status_filter').value;
+    const typeFilter = document.getElementById('type_filter').value;
+    const dateFilter = document.getElementById('date_filter').value;
+    
+    const params = new URLSearchParams();
+    if (statusFilter) params.append('status', statusFilter);
+    if (typeFilter) params.append('type', typeFilter);
+    if (dateFilter) params.append('date', dateFilter);
+    
+    window.location.href = `?${params.toString()}`;
+}
+
+function clearFilter() {
+    document.getElementById('status_filter').value = '';
+    document.getElementById('type_filter').value = '';
+    document.getElementById('date_filter').value = '';
+    window.location.href = window.location.pathname;
+}
+</script>
+{% endblock %} 

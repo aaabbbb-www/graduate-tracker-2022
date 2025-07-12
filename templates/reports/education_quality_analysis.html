@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}تحليل جودة التعليم والبرامج الدراسية{% endblock %}
+{% block extra_css %}
+<style>
+.eq-box {background: #f8f9ff; border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 4px 20px rgba(102,126,234,0.08);}
+.eq-title {font-size: 1.2rem; font-weight: 700; color: #2d3748; margin-bottom: 1rem;}
+.eq-value {font-size: 2.2rem; font-weight: 800; color: #43e97b;}
+.table thead {background: linear-gradient(90deg, #43e97b, #38f9d7); color: white;}
+.filter-form {margin-bottom: 2rem; background: #f1f5f9; border-radius: 12px; padding: 1rem 1.5rem;}
+</style>
+{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4 gradient-text"><i class="bi bi-award me-2"></i> تحليل جودة التعليم والبرامج الدراسية</h2>
+    <!-- فلاتر التصفية -->
+    <form method="get" class="row filter-form align-items-end">
+        <div class="col-md-3">
+            <label>الكلية</label>
+            <select name="college" class="form-select">
+                <option value="">كل الكليات</option>
+                {% for c in colleges %}
+                    <option value="{{ c }}" {% if c == selected_college %}selected{% endif %}>{{ c|default:'-' }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label>التخصص</label>
+            <select name="major" class="form-select">
+                <option value="">كل التخصصات</option>
+                {% for m in majors %}
+                    <option value="{{ m }}" {% if m == selected_major %}selected{% endif %}>{{ m|default:'-' }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label>سنة التخرج</label>
+            <select name="year" class="form-select">
+                <option value="">كل السنوات</option>
+                {% for y in years %}
+                    <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y|default:'-' }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-success w-100"><i class="bi bi-funnel"></i> تصفية</button>
+        </div>
+    </form>
+    <!-- ملخص التقرير -->
+    <div class="eq-box mb-4">
+        <h5 class="mb-2">ملخص التقرير</h5>
+        <ul class="mb-0">
+            <li>عدد الخريجين في النطاق الحالي: <strong>{{ graduates_count }}</strong></li>
+            <li>عدد الاستبيانات المستلمة: <strong>{{ responses_count }}</strong></li>
+            <li>نسبة المشاركة في الاستبيان: <strong>{% if graduates_count > 0 %}{{ (responses_count|floatformat:2|default:0|floatval) |divisibleby:graduates_count|floatformat:2 }}{% else %}-{% endif %}%</strong></li>
+        </ul>
+        <div class="text-muted small mt-2">
+            هذا التقرير مبني على بيانات الخريجين {% if selected_college %}لكلية <strong>{{ selected_college }}</strong>{% endif %}{% if selected_major %}، تخصص <strong>{{ selected_major }}</strong>{% endif %}{% if selected_year %}، دفعة <strong>{{ selected_year }}</strong>{% endif %}.
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="eq-box text-center">
+                <div class="eq-title">متوسط تقييم جودة التعليم من الخريجين</div>
+                <div class="eq-value">{{ avg_quality|floatformat:2|default:'-' }}</div>
+                <div class="text-muted">(من استبيانات الخريجين)</div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="eq-box text-center">
+                <div class="eq-title">نسب التوظيف حسب البرنامج</div>
+                <table class="table table-sm table-bordered mb-0">
+                    <thead><tr><th>البرنامج/التخصص</th><th>إجمالي الخريجين</th><th>نسبة التوظيف</th></tr></thead>
+                    <tbody>
+                    {% for p in by_program %}
+                        <tr>
+                            <td>{{ p.major|default:'-' }}</td>
+                            <td>{{ p.total }}</td>
+                            <td>{% if p.total > 0 %}{{ (p.employed|floatformat:2|default:0|floatval) |divisibleby:p.total|floatformat:2 }}%{% else %}-{% endif %}</td>
+                        </tr>
+                    {% empty %}<tr><td colspan="3">لا يوجد بيانات</td></tr>{% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

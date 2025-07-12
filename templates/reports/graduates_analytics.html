@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}تحليلات الخريجين{% endblock %}
+{% block extra_css %}
+<style>
+.analytics-box {background: #f8f9ff; border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 4px 20px rgba(102,126,234,0.08);}
+.analytics-title {font-size: 1.2rem; font-weight: 700; color: #2d3748; margin-bottom: 1rem;}
+.analytics-value {font-size: 2.2rem; font-weight: 800; color: #764ba2;}
+.chart-canvas {width: 100% !important; max-width: 600px; height: 300px !important; margin: 0 auto;}
+</style>
+{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4 gradient-text"><i class="bi bi-graph-up me-2"></i> تحليلات الخريجين</h2>
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="analytics-box text-center">
+                <div class="analytics-title">متوسط المعدل التراكمي</div>
+                <div class="analytics-value">{{ avg_gpa|floatformat:2|default:'-' }}</div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="analytics-box">
+                <div class="analytics-title">توزيع الخريجين حسب سنة التخرج</div>
+                <canvas id="yearChart" class="chart-canvas"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <div class="card-header bg-gradient-primary text-white">
+            <i class="bi bi-bar-chart me-2"></i> أكثر التخصصات تخرجًا
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-striped mb-0">
+                <thead><tr><th>التخصص</th><th>عدد الخريجين</th></tr></thead>
+                <tbody>
+                {% for m in by_major %}
+                    <tr><td>{{ m.major|default:'-' }}</td><td>{{ m.count }}</td></tr>
+                {% empty %}<tr><td colspan="2">لا يوجد بيانات</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// رسم توزيع الخريجين حسب سنة التخرج
+const yearLabels = [{% for y in by_year %}'{{ y.graduation_year|default:"-" }}',{% endfor %}];
+const yearData = [{% for y in by_year %}{{ y.count }},{% endfor %}];
+const ctx = document.getElementById('yearChart').getContext('2d');
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: yearLabels,
+        datasets: [{
+            label: 'عدد الخريجين',
+            data: yearData,
+            backgroundColor: 'rgba(102,126,234,0.7)',
+            borderColor: 'rgba(102,126,234,1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {legend: {display: false}},
+        scales: {y: {beginAtZero: true}}
+    }
+});
+</script>
+{% endblock %}

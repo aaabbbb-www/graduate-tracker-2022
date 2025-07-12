@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% block title %}لوحة تحكم التحليلات للخريجين{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h2 class="gradient-text display-4 mb-2"><i class="bi bi-graph-up-arrow me-2"></i>لوحة تحكم التحليلات</h2>
+        <p class="lead text-muted">استكشف تحليلات وبيانات الخريجين وجودة التعليم والبرامج بشكل بصري تفاعلي</p>
+    </div>
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card stats-card shadow-hover text-center fade-in-up">
+                <div class="card-body">
+                    <i class="bi bi-people-fill display-5 gradient-text mb-3"></i>
+                    <h5 class="card-title">إجمالي الخريجين</h5>
+                    <span class="stats-number display-6">1234</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card shadow-hover text-center fade-in-up">
+                <div class="card-body">
+                    <i class="bi bi-briefcase-fill display-5 gradient-text mb-3"></i>
+                    <h5 class="card-title">عدد الموظفين</h5>
+                    <span class="stats-number display-6">890</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card shadow-hover text-center fade-in-up">
+                <div class="card-body">
+                    <i class="bi bi-bar-chart-fill display-5 gradient-text mb-3"></i>
+                    <h5 class="card-title">نسبة التوظيف</h5>
+                    <span class="stats-number display-6">72%</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card shadow-hover text-center fade-in-up">
+                <div class="card-body">
+                    <i class="bi bi-award-fill display-5 gradient-text mb-3"></i>
+                    <h5 class="card-title">جودة التعليم</h5>
+                    <span class="stats-number display-6">4.2/5</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card shadow-hover fade-in-up">
+                <div class="card-header gradient-text d-flex align-items-center">
+                    <i class="bi bi-pie-chart-fill fs-4 me-2"></i>
+                    توزيع تقييم جودة التعليم
+                </div>
+                <div class="card-body">
+                    <canvas id="educationQualityPieChart" height="180"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card shadow-hover fade-in-up">
+                <div class="card-header gradient-text d-flex align-items-center">
+                    <i class="bi bi-bar-chart-steps fs-4 me-2"></i>
+                    تقييم جودة البرامج
+                </div>
+                <div class="card-body">
+                    <canvas id="programsBarChart" height="180"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="card shadow-hover fade-in-up">
+                <div class="card-header gradient-text d-flex align-items-center">
+                    <i class="bi bi-lightbulb-fill fs-4 me-2"></i>
+                    توصيات حول البرامج والمقررات
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped align-middle">
+                            <thead>
+                                <tr>
+                                    <th>البرنامج</th>
+                                    <th>المقرر</th>
+                                    <th>التقييم</th>
+                                    <th>التوصية</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>علوم الحاسب</td>
+                                    <td>برمجة متقدمة</td>
+                                    <td><span class="badge bg-success">ممتاز</span></td>
+                                    <td>استمر في تطويره</td>
+                                </tr>
+                                <tr>
+                                    <td>إدارة الأعمال</td>
+                                    <td>إدارة المشاريع</td>
+                                    <td><span class="badge bg-warning text-dark">جيد</span></td>
+                                    <td>يحتاج تحديث محتوى</td>
+                                </tr>
+                                <tr>
+                                    <td>الهندسة</td>
+                                    <td>الرياضيات الهندسية</td>
+                                    <td><span class="badge bg-danger">ضعيف</span></td>
+                                    <td>يوصى بإعادة هيكلته</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+// رسم بياني دائري لجودة التعليم
+const educationQualityPieCtx = document.getElementById('educationQualityPieChart').getContext('2d');
+new Chart(educationQualityPieCtx, {
+    type: 'pie',
+    data: {
+        labels: ['ممتاز', 'جيد جداً', 'جيد', 'مقبول', 'ضعيف'],
+        datasets: [{
+            data: [120, 200, 350, 180, 60],
+            backgroundColor: [
+                'rgba(40,167,69,0.8)',
+                'rgba(102,126,234,0.8)',
+                'rgba(255,193,7,0.8)',
+                'rgba(118,75,162,0.8)',
+                'rgba(220,53,69,0.8)'
+            ],
+            borderWidth: 2
+        }]
+    },
+    options: {
+        plugins: {
+            legend: { position: 'bottom', labels: { font: { family: 'Tajawal, Segoe UI, sans-serif', size: 16 } } }
+        }
+    }
+});
+// رسم بياني شريطي لجودة البرامج
+const programsBarCtx = document.getElementById('programsBarChart').getContext('2d');
+new Chart(programsBarCtx, {
+    type: 'bar',
+    data: {
+        labels: ['علوم الحاسب', 'إدارة الأعمال', 'الهندسة', 'الطب', 'العلوم'],
+        datasets: [{
+            label: 'متوسط التقييم',
+            data: [4.5, 3.8, 3.2, 4.0, 3.5],
+            backgroundColor: [
+                'rgba(102,126,234,0.8)',
+                'rgba(118,75,162,0.8)',
+                'rgba(40,167,69,0.8)',
+                'rgba(255,193,7,0.8)',
+                'rgba(220,53,69,0.8)'
+            ],
+            borderRadius: 8
+        }]
+    },
+    options: {
+        plugins: {
+            legend: { display: false },
+        },
+        scales: {
+            y: { beginAtZero: true, max: 5 }
+        }
+    }
+});
+</script>
+{% endblock %} 

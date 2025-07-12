@@ -1,0 +1,862 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}إدارة الخريجين - نظام تتبع الخريجين{% endblock %}
+
+{% block extra_css %}
+<style>
+.app-hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 4rem 0;
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.app-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="graduate-pattern" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="15" cy="15" r="8" fill="white" opacity="0.05"/><rect x="10" y="5" width="10" height="3" fill="white" opacity="0.1"/><polygon points="15,8 12,12 18,12" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23graduate-pattern)"/></svg>');
+    opacity: 0.3;
+}
+
+.app-hero-content {
+    position: relative;
+    z-index: 2;
+}
+
+.task-card {
+    background: white;
+    border-radius: 24px;
+    padding: 2.5rem;
+    box-shadow: 0 15px 50px rgba(0,0,0,0.1);
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid rgba(255,255,255,0.1);
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+.task-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    transform: scaleX(0);
+    transition: transform 0.4s ease;
+}
+
+.task-card:hover::before {
+    transform: scaleX(1);
+}
+
+.task-card:hover {
+    transform: translateY(-15px) scale(1.02);
+    box-shadow: 0 25px 70px rgba(0,0,0,0.2);
+    text-decoration: none;
+    color: inherit;
+}
+
+.task-icon {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.task-icon::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+    transform: rotate(45deg);
+    transition: all 0.8s;
+    opacity: 0;
+}
+
+.task-card:hover .task-icon::before {
+    animation: shimmer 2s ease-in-out;
+    opacity: 1;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+.task-icon i {
+    font-size: 3rem;
+    color: white;
+    position: relative;
+    z-index: 2;
+}
+
+.task-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #2d3748;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.task-description {
+    color: #718096;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+    text-align: center;
+    font-size: 1rem;
+}
+
+.task-stats {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 2rem;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: block;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: #a0aec0;
+    font-weight: 600;
+    margin-top: 0.25rem;
+}
+
+.task-action {
+    text-align: center;
+}
+
+.task-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 2rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    text-decoration: none;
+    border-radius: 16px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    font-size: 0.9rem;
+}
+
+.task-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.6s;
+}
+
+.task-btn:hover::before {
+    left: 100%;
+}
+
+.task-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    color: white;
+    text-decoration: none;
+}
+
+.task-btn i {
+    margin-left: 0.5rem;
+    transition: transform 0.3s ease;
+}
+
+.task-btn:hover i {
+    transform: translateX(5px);
+}
+
+.stats-overview {
+    background: linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 3rem;
+}
+
+.overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.overview-item {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.overview-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+}
+
+.overview-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+}
+
+.overview-label {
+    color: #718096;
+    font-weight: 600;
+}
+
+.breadcrumb-custom {
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.breadcrumb-custom .breadcrumb {
+    margin-bottom: 0;
+    background: none;
+}
+
+.breadcrumb-custom .breadcrumb-item a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.breadcrumb-custom .breadcrumb-item.active {
+    color: #2d3748;
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .app-hero {
+        padding: 2rem 0;
+    }
+    
+    .task-card {
+        margin-bottom: 2rem;
+        padding: 2rem;
+    }
+    
+    .task-icon {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .task-icon i {
+        font-size: 2.5rem;
+    }
+}
+
+.pulse-animation {
+    animation: pulse 3s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.floating-help {
+    position: fixed;
+    bottom: 2rem;
+    left: 2rem;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-decoration: none;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.floating-help:hover {
+    transform: scale(1.1);
+    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.floating-help i {
+    font-size: 1.5rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="app-hero">
+    <div class="container">
+        <div class="app-hero-content text-center">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <h1 class="display-4 fw-bold mb-3">
+                        <i class="bi bi-mortarboard-fill me-3"></i>
+                        إدارة الخريجين
+                    </h1>
+                    <p class="lead mb-4">
+                        منصة شاملة لإدارة بيانات الخريجين، تتبع مسيرتهم المهنية، وبناء قاعدة بيانات متكاملة
+                    </p>
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        <a href="{% url 'graduates:create' %}" class="btn btn-light btn-lg px-4 py-2">
+                            <i class="bi bi-person-plus me-2"></i>
+                            إضافة خريج جديد
+                        </a>
+                        <a href="{% url 'graduates:list' %}" class="btn btn-outline-light btn-lg px-4 py-2">
+                            <i class="bi bi-list-ul me-2"></i>
+                            عرض جميع الخريجين
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-custom">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">الرئيسية</a></li>
+                <li class="breadcrumb-item active" aria-current="page">إدارة الخريجين</li>
+            </ol>
+        </nav>
+    </div>
+
+    <!-- Statistics Overview -->
+    <div class="stats-overview">
+        <h4 class="text-center mb-4" style="color: #2d3748; font-weight: 700;">
+            <i class="bi bi-graph-up me-2"></i>
+            نظرة عامة على الخريجين
+        </h4>
+        <div class="overview-grid">
+            <div class="overview-item pulse-animation">
+                <div class="overview-number">{{ total_graduates|default:"0" }}</div>
+                <div class="overview-label">إجمالي الخريجين</div>
+            </div>
+            <div class="overview-item">
+                <div class="overview-number">{{ employed_graduates|default:"0" }}</div>
+                <div class="overview-label">الخريجون الموظفون</div>
+            </div>
+            <div class="overview-item">
+                <div class="overview-number">{{ recent_graduates|default:"0" }}</div>
+                <div class="overview-label">خريجو هذا العام</div>
+            </div>
+            <div class="overview-item">
+                <div class="overview-number">{{ active_profiles|default:"0" }}</div>
+                <div class="overview-label">الملفات النشطة</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- بعد قسم نظرة عامة على الخريجين مباشرة -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card stats-card shadow-hover text-center fade-in-up">
+                <div class="card-body">
+                    <i class="bi bi-award-fill display-5 gradient-text mb-3"></i>
+                    <h5 class="card-title">جودة التعليم</h5>
+                    <span class="stats-number display-6">4.2/5</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card shadow-hover text-center fade-in-up">
+                <div class="card-body">
+                    <i class="bi bi-bar-chart-fill display-5 gradient-text mb-3"></i>
+                    <h5 class="card-title">جودة البرامج</h5>
+                    <span class="stats-number display-6">3.8/5</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card shadow-hover text-center fade-in-up">
+                <div class="card-body">
+                    <i class="bi bi-book-half display-5 gradient-text mb-3"></i>
+                    <h5 class="card-title">برامج التعليم</h5>
+                    <span class="stats-number display-6">12</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card shadow-hover text-center fade-in-up">
+                <div class="card-body">
+                    <i class="bi bi-lightbulb-fill display-5 gradient-text mb-3"></i>
+                    <h5 class="card-title">توصيات</h5>
+                    <span class="stats-number display-6">5</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card shadow-hover fade-in-up">
+                <div class="card-header gradient-text d-flex align-items-center">
+                    <i class="bi bi-pie-chart-fill fs-4 me-2"></i>
+                    توزيع تقييم جودة التعليم
+                </div>
+                <div class="card-body">
+                    <canvas id="educationQualityPieChart" height="180"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card shadow-hover fade-in-up">
+                <div class="card-header gradient-text d-flex align-items-center">
+                    <i class="bi bi-bar-chart-steps fs-4 me-2"></i>
+                    تقييم جودة البرامج
+                </div>
+                <div class="card-body">
+                    <canvas id="programsBarChart" height="180"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="card shadow-hover fade-in-up">
+                <div class="card-header gradient-text d-flex align-items-center">
+                    <i class="bi bi-lightbulb-fill fs-4 me-2"></i>
+                    توصيات حول البرامج والمقررات
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped align-middle">
+                            <thead>
+                                <tr>
+                                    <th>البرنامج</th>
+                                    <th>المقرر</th>
+                                    <th>التقييم</th>
+                                    <th>التوصية</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>علوم الحاسب</td>
+                                    <td>برمجة متقدمة</td>
+                                    <td><span class="badge bg-success">ممتاز</span></td>
+                                    <td>استمر في تطويره</td>
+                                </tr>
+                                <tr>
+                                    <td>إدارة الأعمال</td>
+                                    <td>إدارة المشاريع</td>
+                                    <td><span class="badge bg-warning text-dark">جيد</span></td>
+                                    <td>يحتاج تحديث محتوى</td>
+                                </tr>
+                                <tr>
+                                    <td>الهندسة</td>
+                                    <td>الرياضيات الهندسية</td>
+                                    <td><span class="badge bg-danger">ضعيف</span></td>
+                                    <td>يوصى بإعادة هيكلته</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tasks Grid -->
+    <div class="row g-4">
+        <!-- قائمة الخريجين -->
+        <div class="col-lg-4 col-md-6">
+            <a href="{% url 'graduates:list' %}" class="task-card">
+                <div class="task-icon">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <h3 class="task-title">قائمة الخريجين</h3>
+                <p class="task-description">
+                    عرض وإدارة جميع بيانات الخريجين مع إمكانية البحث والفلترة المتقدمة
+                </p>
+                <div class="task-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">{{ total_graduates|default:"0" }}</span>
+                        <span class="stat-label">خريج</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">{{ employed_graduates|default:"0" }}</span>
+                        <span class="stat-label">موظف</span>
+                    </div>
+                </div>
+                <div class="task-action">
+                    <span class="task-btn">
+                        عرض القائمة <i class="bi bi-arrow-left"></i>
+                    </span>
+                </div>
+            </a>
+        </div>
+
+        <!-- إضافة خريج جديد -->
+        <div class="col-lg-4 col-md-6">
+            <a href="{% url 'graduates:create' %}" class="task-card">
+                <div class="task-icon">
+                    <i class="bi bi-person-plus-fill"></i>
+                </div>
+                <h3 class="task-title">إضافة خريج جديد</h3>
+                <p class="task-description">
+                    إضافة بيانات خريج جديد مع جميع المعلومات الشخصية والأكاديمية والمهنية
+                </p>
+                <div class="task-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">{{ recent_graduates|default:"0" }}</span>
+                        <span class="stat-label">هذا العام</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">{{ active_profiles|default:"0" }}</span>
+                        <span class="stat-label">نشط</span>
+                    </div>
+                </div>
+                <div class="task-action">
+                    <span class="task-btn">
+                        إضافة خريج <i class="bi bi-arrow-left"></i>
+                    </span>
+                </div>
+            </a>
+        </div>
+
+        <!-- البحث المتقدم -->
+        <div class="col-lg-4 col-md-6">
+            <a href="{% url 'graduates:search' %}" class="task-card">
+                <div class="task-icon">
+                    <i class="bi bi-search"></i>
+                </div>
+                <h3 class="task-title">البحث المتقدم</h3>
+                <p class="task-description">
+                    بحث متقدم في بيانات الخريجين مع فلاتر متعددة حسب التخصص والمدينة وسنة التخرج
+                </p>
+                <div class="task-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">15</span>
+                        <span class="stat-label">تخصص</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">25</span>
+                        <span class="stat-label">مدينة</span>
+                    </div>
+                </div>
+                <div class="task-action">
+                    <span class="task-btn">
+                        بحث متقدم <i class="bi bi-arrow-left"></i>
+                    </span>
+                </div>
+            </a>
+        </div>
+
+        <!-- إحصائيات التوظيف -->
+        <div class="col-lg-4 col-md-6">
+            <a href="{% url 'graduates:statistics' %}" class="task-card">
+                <div class="task-icon">
+                    <i class="bi bi-briefcase-fill"></i>
+                </div>
+                <h3 class="task-title">إحصائيات التوظيف</h3>
+                <p class="task-description">
+                    تتبع حالة التوظيف للخريجين ومعدلات التوظيف وتحليل البيانات المهنية
+                </p>
+                <div class="task-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">85%</span>
+                        <span class="stat-label">معدل التوظيف</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">{{ employed_graduates|default:"0" }}</span>
+                        <span class="stat-label">موظف</span>
+                    </div>
+                </div>
+                <div class="task-action">
+                    <span class="task-btn">
+                        عرض الإحصائيات <i class="bi bi-arrow-left"></i>
+                    </span>
+                </div>
+            </a>
+        </div>
+
+        <!-- التحليلات والرسوم البيانية -->
+        <div class="col-lg-4 col-md-6">
+            <a href="{% url 'graduates:analytics' %}" class="task-card">
+                <div class="task-icon">
+                    <i class="bi bi-graph-up"></i>
+                </div>
+                <h3 class="task-title">التحليلات والرسوم البيانية</h3>
+                <p class="task-description">
+                    رسوم بيانية تفاعلية وتحليلات متقدمة لبيانات الخريجين والاتجاهات
+                </p>
+                <div class="task-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">12</span>
+                        <span class="stat-label">رسم بياني</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">5</span>
+                        <span class="stat-label">تقرير</span>
+                    </div>
+                </div>
+                <div class="task-action">
+                    <span class="task-btn">
+                        عرض التحليلات <i class="bi bi-arrow-left"></i>
+                    </span>
+                </div>
+            </a>
+        </div>
+
+        <!-- استيراد وتصدير البيانات -->
+        <div class="col-lg-4 col-md-6">
+            <a href="{% url 'graduates:import_export' %}" class="task-card">
+                <div class="task-icon">
+                    <i class="bi bi-arrow-down-up"></i>
+                </div>
+                <h3 class="task-title">استيراد وتصدير البيانات</h3>
+                <p class="task-description">
+                    استيراد بيانات الخريجين من ملفات Excel/CSV وتصدير التقارير بصيغ متعددة
+                </p>
+                <div class="task-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">3</span>
+                        <span class="stat-label">صيغة استيراد</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">5</span>
+                        <span class="stat-label">صيغة تصدير</span>
+                    </div>
+                </div>
+                <div class="task-action">
+                    <span class="task-btn">
+                        إدارة البيانات <i class="bi bi-arrow-left"></i>
+                    </span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Actions Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%); border-radius: 20px;">
+                <div class="card-body p-4">
+                    <h4 class="gradient-text mb-4">
+                        <i class="bi bi-lightning-charge-fill me-2"></i>
+                        إجراءات سريعة
+                    </h4>
+                    <div class="row g-3">
+                        <div class="col-md-3 col-sm-6">
+                            <a href="{% url 'graduates:create' %}" class="btn btn-outline-primary w-100 py-3" style="border-radius: 12px;">
+                                <i class="bi bi-person-plus d-block mb-2" style="font-size: 1.5rem;"></i>
+                                إضافة خريج جديد
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <a href="{% url 'graduates:import_export' %}" class="btn btn-outline-success w-100 py-3" style="border-radius: 12px;">
+                                <i class="bi bi-file-earmark-spreadsheet d-block mb-2" style="font-size: 1.5rem;"></i>
+                                استيراد من Excel
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <a href="{% url 'graduates:search' %}" class="btn btn-outline-warning w-100 py-3" style="border-radius: 12px;">
+                                <i class="bi bi-search d-block mb-2" style="font-size: 1.5rem;"></i>
+                                البحث المتقدم
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <a href="{% url 'graduates:import_export' %}" class="btn btn-outline-info w-100 py-3" style="border-radius: 12px;">
+                                <i class="bi bi-download d-block mb-2" style="font-size: 1.5rem;"></i>
+                                تصدير البيانات
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Help Button -->
+<a href="#" class="floating-help" title="المساعدة والدعم">
+    <i class="bi bi-question-lg"></i>
+</a>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add hover effects to task cards
+    document.querySelectorAll('.task-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-15px) scale(1.02)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+
+    // Add counter animation to stats
+    function animateCounter(element, target) {
+        let current = 0;
+        const increment = target / 100;
+        const timer = setInterval(() => {
+            current += increment;
+            element.textContent = Math.floor(current);
+            if (current >= target) {
+                element.textContent = target;
+                clearInterval(timer);
+            }
+        }, 20);
+    }
+
+    // Trigger counter animation when stats come into view
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const numbers = entry.target.querySelectorAll('.overview-number, .stat-number');
+                numbers.forEach(number => {
+                    const target = parseInt(number.textContent);
+                    if (target > 0) {
+                        animateCounter(number, target);
+                    }
+                });
+                observer.unobserve(entry.target);
+            }
+        });
+    });
+
+    document.querySelectorAll('.overview-item, .task-stats').forEach(item => {
+        observer.observe(item);
+    });
+
+    // Add loading animation to quick action buttons
+    document.querySelectorAll('.btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            if (!this.classList.contains('loading')) {
+                this.classList.add('loading');
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>جاري التحميل...';
+                
+                // Simulate loading (remove this in production)
+                setTimeout(() => {
+                    this.classList.remove('loading');
+                    this.innerHTML = originalText;
+                }, 1000);
+            }
+        });
+    });
+
+    // رسم بياني دائري لجودة التعليم
+    const educationQualityPieCtx = document.getElementById('educationQualityPieChart').getContext('2d');
+    new Chart(educationQualityPieCtx, {
+        type: 'pie',
+        data: {
+            labels: ['ممتاز', 'جيد جداً', 'جيد', 'مقبول', 'ضعيف'],
+            datasets: [{
+                data: [120, 200, 350, 180, 60],
+                backgroundColor: [
+                    'rgba(40,167,69,0.8)',
+                    'rgba(102,126,234,0.8)',
+                    'rgba(255,193,7,0.8)',
+                    'rgba(118,75,162,0.8)',
+                    'rgba(220,53,69,0.8)'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            plugins: {
+                legend: { position: 'bottom', labels: { font: { family: 'Tajawal, Segoe UI, sans-serif', size: 16 } } }
+            }
+        }
+    });
+    // رسم بياني شريطي لجودة البرامج
+    const programsBarCtx = document.getElementById('programsBarChart').getContext('2d');
+    new Chart(programsBarCtx, {
+        type: 'bar',
+        data: {
+            labels: ['علوم الحاسب', 'إدارة الأعمال', 'الهندسة', 'الطب', 'العلوم'],
+            datasets: [{
+                label: 'متوسط التقييم',
+                data: [4.5, 3.8, 3.2, 4.0, 3.5],
+                backgroundColor: [
+                    'rgba(102,126,234,0.8)',
+                    'rgba(118,75,162,0.8)',
+                    'rgba(40,167,69,0.8)',
+                    'rgba(255,193,7,0.8)',
+                    'rgba(220,53,69,0.8)'
+                ],
+                borderRadius: 8
+            }]
+        },
+        options: {
+            plugins: {
+                legend: { display: false },
+            },
+            scales: {
+                y: { beginAtZero: true, max: 5 }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
+

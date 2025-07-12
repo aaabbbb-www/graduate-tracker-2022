@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}اختيار قالب الاستبيان{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="mb-4 text-center">إنشاء استبيان جديد</h2>
+    <div class="row justify-content-center mb-5">
+        <div class="col-md-8">
+            <div class="alert alert-info text-center">
+                اختر أحد القوالب الجاهزة أو أنشئ استبياناً جديداً عبر Google Forms.
+            </div>
+        </div>
+    </div>
+    <div class="row g-4 justify-content-center">
+        <!-- قالب رضا عن المناهج -->
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title mb-3">قالب: رضا عن المناهج الدراسية</h5>
+                    <p class="card-text flex-grow-1">استبيان يقيس مدى رضا الخريجين عن المناهج الدراسية وجودة البرامج الأكاديمية.</p>
+                    <a href="{% url 'surveys:create_from_template' template_id='curriculum_satisfaction' %}" class="btn btn-primary mt-3 w-100">استخدام هذا القالب</a>
+                </div>
+            </div>
+        </div>
+        <!-- قالب توافق البرامج مع سوق العمل -->
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title mb-3">قالب: توافق البرامج مع سوق العمل</h5>
+                    <p class="card-text flex-grow-1">استبيان لقياس مدى توافق البرامج الجامعية مع متطلبات سوق العمل.</p>
+                    <a href="#" class="btn btn-outline-secondary mt-3 w-100 disabled">قريباً</a>
+                </div>
+            </div>
+        </div>
+        <!-- قالب Google Forms -->
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-info">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title mb-3">إنشاء عبر Google Forms</h5>
+                    <p class="card-text flex-grow-1">يمكنك إنشاء استبيان مخصص عبر Google Forms واستيراده للنظام.</p>
+                    <a href="https://forms.google.com" target="_blank" class="btn btn-outline-info mt-3 w-100">الانتقال إلى Google Forms</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

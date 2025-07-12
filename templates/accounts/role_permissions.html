@@ -1,0 +1,270 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}إدارة صلاحيات الدور - {{ role.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <i class="fas fa-key me-2"></i>
+                            إدارة صلاحيات الدور
+                        </h3>
+                        <div>
+                            <a href="{% url 'accounts:role_detail' role.pk %}" class="btn btn-info btn-sm">
+                                <i class="fas fa-arrow-left me-1"></i>عودة
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- معلومات الدور -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-user-tag fa-2x me-3"></i>
+                                    <div>
+                                        <h5 class="mb-1">{{ role.name }}</h5>
+                                        <p class="mb-1">{{ role.description|default:"لا يوجد وصف" }}</p>
+                                        <p class="mb-0"><strong>عدد الموظفين المرتبطين:</strong> {{ role.employee_set.count }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- الصلاحيات الحالية -->
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-list me-2"></i>الصلاحيات الحالية
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    {% if current_permissions %}
+                                        <div class="row">
+                                            {% for permission in current_permissions %}
+                                            <div class="col-md-6 mb-2">
+                                                <div class="d-flex align-items-center p-2 border rounded bg-light">
+                                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                                    <span>{{ permission.get_name_display }}</span>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        <p class="text-muted">لا توجد صلاحيات لهذا الدور</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- إضافة/إزالة صلاحيات -->
+                        <div class="col-md-4">
+                            
+                            <div class="card">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-edit me-2"></i>تعديل الصلاحيات
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <form method="post">
+                                        {% csrf_token %}
+                                        <div class="mb-3">
+                                            <label for="{{ form.permissions.id_for_label }}" class="form-label">
+                                                {{ form.permissions.label }}
+                                            </label>
+                                            {{ form.permissions }}
+                                            {% if form.permissions.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.permissions.errors.0 }}
+                                                </div>
+                                            {% endif %}
+                                            <small class="form-text text-muted">
+                                                اختر الصلاحيات التي تريد إضافتها أو إزالتها
+                                            </small>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="fas fa-save me-1"></i>حفظ التغييرات
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- ملاحظات مهمة -->
+                            <div class="card mt-3">
+                                <div class="card-header bg-warning text-dark">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-info-circle me-2"></i>ملاحظات مهمة
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-unstyled mb-0">
+                                        <li class="mb-2">
+                                            <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                            تغيير صلاحيات الدور يؤثر على جميع الموظفين المرتبطين
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            يمكن إضافة صلاحيات إضافية لموظفين محددين
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            سيتم تسجيل جميع التغييرات في سجل الأنشطة
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            الصلاحيات المحددة ستطبق فوراً
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- الموظفون المتأثرون -->
+                    {% if role.employee_set.count > 0 %}
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-warning text-dark">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-users me-2"></i>الموظفون المتأثرون بالتغييرات
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>الاسم</th>
+                                                    <th>رقم الموظف</th>
+                                                    <th>المنصب</th>
+                                                    <th>الحالة</th>
+                                                    <th>تاريخ التعيين</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for employee in role.employee_set.all %}
+                                                <tr>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <i class="fas fa-user-circle text-primary me-2"></i>
+                                                            {{ employee.user.get_full_name }}
+                                                        </div>
+                                                    </td>
+                                                    <td>{{ employee.employee_id }}</td>
+                                                    <td>{{ employee.position }}</td>
+                                                    <td>
+                                                        <span class="badge {% if employee.status == 'active' %}bg-success{% elif employee.status == 'inactive' %}bg-danger{% else %}bg-warning{% endif %}">
+                                                            {{ employee.get_status_display }}
+                                                        </span>
+                                                    </td>
+                                                    <td>{{ employee.hire_date|date:"Y-m-d" }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- إحصائيات الصلاحيات -->
+                    <div class="row mt-4">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-key fa-2x mb-2"></i>
+                                    <h5 class="card-title">الصلاحيات الحالية</h5>
+                                    <h3 class="mb-0">{{ current_permissions|length }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-users fa-2x mb-2"></i>
+                                    <h5 class="card-title">الموظفون المتأثرون</h5>
+                                    <h3 class="mb-0">{{ role.employee_set.count }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-user-check fa-2x mb-2"></i>
+                                    <h5 class="card-title">الموظفون النشطون</h5>
+                                    <h3 class="mb-0" id="active-employees">-</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-clock fa-2x mb-2"></i>
+                                    <h5 class="card-title">آخر تحديث</h5>
+                                    <h6 class="mb-0">{{ role.updated_at|date:"Y-m-d H:i" }}</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border: 1px solid rgba(0, 0, 0, 0.125);
+    }
+    
+    .card-header {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    }
+    
+    .badge {
+        font-size: 0.875em;
+    }
+    
+    .table-sm td, .table-sm th {
+        padding: 0.5rem;
+    }
+    
+    .alert {
+        border: 1px solid rgba(0, 0, 0, 0.125);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// حساب الموظفين النشطون
+document.addEventListener('DOMContentLoaded', function() {
+    const activeEmployees = document.querySelectorAll('.badge.bg-success').length;
+    document.getElementById('active-employees').textContent = activeEmployees;
+    
+    // تأكيد عند حفظ التغييرات
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        if (!confirm('هل أنت متأكد من حفظ التغييرات؟ سيتم تطبيقها على جميع الموظفين المرتبطين.')) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}

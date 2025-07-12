@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}إرسال الاستبيان: {{ survey.title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="card shadow-lg animate__animated animate__fadeIn">
+        <div class="card-header bg-gradient-primary text-white">
+            <h2 class="mb-0"><i class="fas fa-paper-plane"></i> إرسال الاستبيان: {{ survey.title }}</h2>
+        </div>
+        <div class="card-body">
+            <p class="lead text-muted">{{ survey.description|default:"لا يوجد وصف لهذا الاستبيان." }}</p>
+            <hr>
+
+            <form method="POST" id="sendSurveyForm">
+                {% csrf_token %}
+
+                <h4 class="mb-3"><i class="fas fa-users"></i> اختيار الخريجين</h4>
+
+                <!-- Filter Controls -->
+                <div class="card mb-4">
+                    <div class="card-body bg-light">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <input type="text" id="nameFilter" class="form-control" placeholder="بحث بالاسم...">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" id="collegeFilter" class="form-control" placeholder="بحث بالكلية...">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" id="departmentFilter" class="form-control" placeholder="بحث بالقسم...">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graduates Table -->
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    <table class="table table-hover table-striped">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th scope="col"><input type="checkbox" id="selectAll"></th>
+                                <th scope="col">الاسم الكامل</th>
+                                <th scope="col">البريد الإلكتروني</th>
+                                <th scope="col">الكلية</th>
+                                <th scope="col">القسم</th>
+                            </tr>
+                        </thead>
+                        <tbody id="graduatesTableBody">
+                            {% for graduate in graduates %}
+                            <tr class="graduate-row">
+                                <td><input type="checkbox" name="graduates" value="{{ graduate.pk }}" class="graduate-checkbox"></td>
+                                <td class="name">{{ graduate.full_name }}</td>
+                                <td class="email">{{ graduate.email }}</td>
+                                <td class="college">{{ graduate.college }}</td>
+                                <td class="department">{{ graduate.department }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">لا يوجد خريجون لعرضهم.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                    <button type="submit" class="btn btn-success btn-lg"><i class="fas fa-envelope"></i> إرسال إلى المحددين</button>
+                    <a href="{% url 'surveys:detail' survey.pk %}" class="btn btn-secondary">العودة إلى تفاصيل الاستبيان</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .graduate-row {
+        cursor: pointer;
+    }
+    .graduate-row.table-active, .graduate-row.table-active:hover {
+        background-color: #d1ecf1 !important; /* A light blue color for selection */
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Select/Deselect all checkboxes
+    $('#selectAll').click(function() {
+        var isChecked = this.checked;
+        $('.graduate-checkbox').prop('checked', isChecked);
+        $('.graduate-row').toggleClass('table-active', isChecked);
+    });
+
+    // Make table rows clickable
+    $('#graduatesTableBody').on('click', '.graduate-row', function(e) {
+        // if the click is on the checkbox itself, don't interfere
+        if (e.target.type === 'checkbox') {
+            $(this).toggleClass('table-active', e.target.checked);
+            return;
+        }
+
+        var checkbox = $(this).find('.graduate-checkbox');
+        var isChecked = checkbox.prop('checked');
+        checkbox.prop('checked', !isChecked);
+        $(this).toggleClass('table-active', !isChecked);
+    });
+    
+    // Update select all checkbox state if individual checkboxes are changed
+    $('.graduate-checkbox').change(function() {
+        if ($('.graduate-checkbox:checked').length == $('.graduate-checkbox').length) {
+            $('#selectAll').prop('checked', true);
+        } else {
+            $('#selectAll').prop('checked', false);
+        }
+    });
+
+    // Form submission validation
+    $('#sendSurveyForm').submit(function(e) {
+        var selectedGraduates = $('.graduate-checkbox:checked');
+        if (selectedGraduates.length === 0) {
+            e.preventDefault(); // Stop form submission
+            alert('الرجاء تحديد خريج واحد على الأقل لإرسال الاستبيان.');
+        }
+    });
+
+    // Filtering logic
+    function filterTable() {
+        var nameFilter = $('#nameFilter').val().toLowerCase();
+        var collegeFilter = $('#collegeFilter').val().toLowerCase();
+        var departmentFilter = $('#departmentFilter').val().toLowerCase();
+
+        $('#graduatesTableBody .graduate-row').each(function() {
+            var name = $(this).find('.name').text().toLowerCase();
+            var college = $(this).find('.college').text().toLowerCase();
+            var department = $(this).find('.department').text().toLowerCase();
+
+            var showRow = name.includes(nameFilter) && 
+                          college.includes(collegeFilter) && 
+                          department.includes(departmentFilter);
+
+            $(this).toggle(showRow);
+        });
+    }
+
+    $('#nameFilter, #collegeFilter, #departmentFilter').on('keyup', filterTable);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,479 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}قائمة الردود - {{ survey.title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h1 class="main-title mb-4 animate__animated animate__fadeInDown">قائمة الردود <i class="fas fa-reply-all"></i></h1>
+    
+    <!-- معلومات الاستبيان -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm animate__animated animate__fadeInUp">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-clipboard-list"></i> {{ survey.title }}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <p><strong>الوصف:</strong> {{ survey.description }}</p>
+                            <p><strong>فترة الاستبيان:</strong> {{ survey.start_date|date:"Y-m-d" }} إلى {{ survey.end_date|date:"Y-m-d" }}</p>
+                            {% if survey.google_form_url %}
+                            <p><strong>نوع الاستبيان:</strong> 
+                                <span class="badge bg-primary"><i class="fab fa-google"></i> Google Forms</span>
+                                <a href="{{ survey.google_form_url }}" target="_blank" class="btn btn-sm btn-outline-primary ms-2">
+                                    <i class="fas fa-external-link-alt"></i> عرض النموذج
+                                </a>
+                            </p>
+                            {% else %}
+                            <p><strong>نوع الاستبيان:</strong> <span class="badge bg-success">محلي</span></p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <div class="progress mb-2" style="height: 20px;">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ completion_percentage }}%">
+                                        {{ completion_percentage|floatformat:1 }}%
+                                    </div>
+                                </div>
+                                <small class="text-muted">معدل الإكمال العام</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- إحصائيات سريعة -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card dashboard-card animate__animated animate__fadeInUp animate__delay-0-2s">
+                <div class="card-body text-center">
+                    <div class="icon-wrapper mb-2">
+                        <i class="fas fa-reply-all fa-2x text-info"></i>
+                    </div>
+                    <h5 class="card-title">إجمالي الردود</h5>
+                    <p class="card-text display-6 font-weight-bold text-info" data-toggle="counterup">{{ total_responses }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card dashboard-card animate__animated animate__fadeInUp animate__delay-0-4s">
+                <div class="card-body text-center">
+                    <div class="icon-wrapper mb-2">
+                        <i class="fas fa-check-circle fa-2x text-success"></i>
+                    </div>
+                    <h5 class="card-title">ردود مكتملة</h5>
+                    <p class="card-text display-6 font-weight-bold text-success" data-toggle="counterup">{{ completed_responses }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card dashboard-card animate__animated animate__fadeInUp animate__delay-0-6s">
+                <div class="card-body text-center">
+                    <div class="icon-wrapper mb-2">
+                        <i class="fas fa-hourglass-half fa-2x text-warning"></i>
+                    </div>
+                    <h5 class="card-title">ردود جزئية</h5>
+                    <p class="card-text display-6 font-weight-bold text-warning" data-toggle="counterup">{{ partial_responses }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card dashboard-card animate__animated animate__fadeInUp animate__delay-0-8s">
+                <div class="card-body text-center">
+                    <div class="icon-wrapper mb-2">
+                        <i class="fas fa-clock fa-2x text-danger"></i>
+                    </div>
+                    <h5 class="card-title">متوسط الوقت</h5>
+                    <p class="card-text display-6 font-weight-bold text-danger">{{ average_time }} دقيقة</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- أدوات التصفية والبحث -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm animate__animated animate__fadeInUp animate__delay-1s">
+                <div class="card-header bg-gradient-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-filter"></i> أدوات التصفية والبحث</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="row g-3" id="filterForm">
+                        <div class="col-md-3">
+                            <label for="search" class="form-label">البحث</label>
+                            <input type="text" class="form-control" id="search" name="search" 
+                                   value="{{ request.GET.search }}" placeholder="اسم الخريج أو البريد الإلكتروني">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="status" class="form-label">الحالة</label>
+                            <select class="form-control" id="status" name="status">
+                                <option value="">جميع الحالات</option>
+                                <option value="completed" {% if request.GET.status == 'completed' %}selected{% endif %}>مكتمل</option>
+                                <option value="partial" {% if request.GET.status == 'partial' %}selected{% endif %}>جزئي</option>
+                                <option value="not_started" {% if request.GET.status == 'not_started' %}selected{% endif %}>لم يبدأ</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="date_from" class="form-label">من تاريخ</label>
+                            <input type="date" class="form-control" id="date_from" name="date_from" 
+                                   value="{{ request.GET.date_from }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="date_to" class="form-label">إلى تاريخ</label>
+                            <input type="date" class="form-control" id="date_to" name="date_to" 
+                                   value="{{ request.GET.date_to }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="sort_by" class="form-label">ترتيب حسب</label>
+                            <select class="form-control" id="sort_by" name="sort_by">
+                                <option value="-submitted_at" {% if request.GET.sort_by == '-submitted_at' %}selected{% endif %}>الأحدث</option>
+                                <option value="submitted_at" {% if request.GET.sort_by == 'submitted_at' %}selected{% endif %}>الأقدم</option>
+                                <option value="graduate__full_name" {% if request.GET.sort_by == 'graduate__full_name' %}selected{% endif %}>الاسم (أ-ي)</option>
+                                <option value="-graduate__full_name" {% if request.GET.sort_by == '-graduate__full_name' %}selected{% endif %}>الاسم (ي-أ)</option>
+                                <option value="-completion_percentage" {% if request.GET.sort_by == '-completion_percentage' %}selected{% endif %}>نسبة الإكمال</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1">
+                            <label class="form-label">&nbsp;</label>
+                            <button type="submit" class="btn btn-primary d-block">
+                                <i class="fas fa-search"></i> بحث
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div class="mt-3">
+                        <a href="{% url 'surveys:response_list' survey.id %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-undo"></i> إعادة تعيين
+                        </a>
+                        <button class="btn btn-outline-success btn-sm" onclick="exportResponses()">
+                            <i class="fas fa-file-excel"></i> تصدير Excel
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm" onclick="exportPDF()">
+                            <i class="fas fa-file-pdf"></i> تصدير PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- قائمة الردود -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm animate__animated animate__fadeInUp animate__delay-1-2s">
+                <div class="card-header bg-gradient-info text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-list"></i> قائمة الردود ({{ responses.count }} من {{ total_responses }})</h5>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-light" onclick="selectAll()"><i class="fas fa-check-square"></i> تحديد الكل</button>
+                        <button class="btn btn-light" onclick="deselectAll()"><i class="fas fa-square"></i> إلغاء التحديد</button>
+                        <button class="btn btn-danger" onclick="bulkDelete()" id="bulkDeleteBtn" disabled>
+                            <i class="fas fa-trash"></i> حذف المحدد
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    {% if responses %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th width="50">
+                                        <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()">
+                                    </th>
+                                    <th>الخريج</th>
+                                    <th>البريد الإلكتروني</th>
+                                    <th>تاريخ البداية</th>
+                                    <th>تاريخ الإرسال</th>
+                                    <th>الحالة</th>
+                                    <th>نسبة الإكمال</th>
+                                    <th>الوقت المستغرق</th>
+                                    <th width="150">الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for response in responses %}
+                                <tr class="response-row" data-response-id="{{ response.id }}">
+                                    <td>
+                                        <input type="checkbox" class="response-checkbox" value="{{ response.id }}" 
+                                               onchange="updateBulkActions()">
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                                {{ response.graduate.full_name|first }}
+                                            </div>
+                                            <div>
+                                                <strong>{{ response.graduate.full_name }}</strong>
+                                                <br><small class="text-muted">{{ response.graduate.graduation_year }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ response.graduate.email }}</td>
+                                    <td>
+                                        {% if response.started_at %}
+                                            {{ response.started_at|date:"Y-m-d H:i" }}
+                                        {% else %}
+                                            <span class="text-muted">لم يبدأ</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if response.submitted_at %}
+                                            {{ response.submitted_at|date:"Y-m-d H:i" }}
+                                        {% else %}
+                                            <span class="text-muted">لم يكتمل</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if response.is_complete %}
+                                            <span class="badge bg-success"><i class="fas fa-check"></i> مكتمل</span>
+                                        {% elif response.started_at %}
+                                            <span class="badge bg-warning"><i class="fas fa-hourglass-half"></i> جزئي</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary"><i class="fas fa-clock"></i> لم يبدأ</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar {% if response.completion_percentage == 100 %}bg-success{% elif response.completion_percentage > 50 %}bg-info{% elif response.completion_percentage > 0 %}bg-warning{% else %}bg-secondary{% endif %}" 
+                                                 style="width: {{ response.completion_percentage }}%">
+                                                {{ response.completion_percentage|floatformat:0 }}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if response.time_spent %}
+                                            {{ response.time_spent }} دقيقة
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'surveys:response_detail' response.id %}" 
+                                               class="btn btn-outline-info" title="عرض التفاصيل">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% if not response.is_complete %}
+                                            <a href="{% url 'surveys:send_reminder' survey.id response.id %}" 
+                                               class="btn btn-outline-warning" title="إرسال تذكير">
+                                                <i class="fas fa-bell"></i>
+                                            </a>
+                                            {% endif %}
+                                            <button class="btn btn-outline-danger" 
+                                                    onclick="deleteResponse({{ response.id }})" title="حذف">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- التصفح -->
+                    {% if responses.has_other_pages %}
+                    <div class="card-footer">
+                        {% include 'partials/_pagination.html' with page_obj=responses %}
+                    </div>
+                    {% endif %}
+                    
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">لا توجد ردود</h5>
+                        <p class="text-muted">لم يتم العثور على ردود تطابق معايير البحث المحددة.</p>
+                        <a href="{% url 'surveys:send_survey' pk=survey.id %}" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> إرسال الاستبيان
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{% url 'surveys:detail' survey.id %}" class="btn btn-secondary btn-lg me-2">
+            <i class="fas fa-arrow-left"></i> العودة إلى تفاصيل الاستبيان
+        </a>
+        <a href="{% url 'surveys:analytics_detail' survey.id %}" class="btn btn-primary btn-lg">
+            <i class="fas fa-chart-line"></i> عرض التحليلات التفصيلية
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-card {
+        transition: all 0.3s ease;
+    }
+    
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
+    }
+    
+    .avatar-sm {
+        width: 35px;
+        height: 35px;
+        font-size: 14px;
+        font-weight: bold;
+    }
+    
+    .response-row:hover {
+        background-color: rgba(0,123,255,.05);
+    }
+    
+    .response-row.selected {
+        background-color: rgba(0,123,255,.1);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // تفعيل تأثير العدادات
+        $('[data-toggle="counterup"]').counterUp({
+            delay: 10,
+            time: 1000
+        });
+
+        // تأثيرات Hover للبطاقات
+        $(".dashboard-card").hover(function() {
+            $(this).addClass("shadow-lg");
+        }, function() {
+            $(this).removeClass("shadow-lg");
+        });
+    });
+
+    // تحديد/إلغاء تحديد جميع الردود
+    function toggleSelectAll() {
+        const selectAll = document.getElementById('selectAllCheckbox');
+        const checkboxes = document.querySelectorAll('.response-checkbox');
+        
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = selectAll.checked;
+            updateRowSelection(checkbox);
+        });
+        
+        updateBulkActions();
+    }
+
+    function selectAll() {
+        document.getElementById('selectAllCheckbox').checked = true;
+        toggleSelectAll();
+    }
+
+    function deselectAll() {
+        document.getElementById('selectAllCheckbox').checked = false;
+        toggleSelectAll();
+    }
+
+    // تحديث حالة الصف المحدد
+    function updateRowSelection(checkbox) {
+        const row = checkbox.closest('.response-row');
+        if (checkbox.checked) {
+            row.classList.add('selected');
+        } else {
+            row.classList.remove('selected');
+        }
+    }
+
+    // تحديث أزرار الإجراءات المجمعة
+    function updateBulkActions() {
+        const selectedCheckboxes = document.querySelectorAll('.response-checkbox:checked');
+        const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+        
+        if (selectedCheckboxes.length > 0) {
+            bulkDeleteBtn.disabled = false;
+            bulkDeleteBtn.innerHTML = `<i class="fas fa-trash"></i> حذف المحدد (${selectedCheckboxes.length})`;
+        } else {
+            bulkDeleteBtn.disabled = true;
+            bulkDeleteBtn.innerHTML = '<i class="fas fa-trash"></i> حذف المحدد';
+        }
+        
+        // تحديث حالة checkbox "تحديد الكل"
+        const allCheckboxes = document.querySelectorAll('.response-checkbox');
+        const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+        
+        if (selectedCheckboxes.length === allCheckboxes.length && allCheckboxes.length > 0) {
+            selectAllCheckbox.checked = true;
+            selectAllCheckbox.indeterminate = false;
+        } else if (selectedCheckboxes.length > 0) {
+            selectAllCheckbox.checked = false;
+            selectAllCheckbox.indeterminate = true;
+        } else {
+            selectAllCheckbox.checked = false;
+            selectAllCheckbox.indeterminate = false;
+        }
+    }
+
+    // حذف رد واحد
+    function deleteResponse(responseId) {
+        if (confirm('هل أنت متأكد من حذف هذا الرد؟ لا يمكن التراجع عن هذا الإجراء.')) {
+            $.post('{% url "surveys:delete_response" %}', {
+                'response_id': responseId,
+                'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+            }, function(response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert('حدث خطأ أثناء حذف الرد.');
+                }
+            });
+        }
+    }
+
+    // حذف مجمع للردود المحددة
+    function bulkDelete() {
+        const selectedCheckboxes = document.querySelectorAll('.response-checkbox:checked');
+        const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
+        
+        if (selectedIds.length === 0) {
+            alert('يرجى تحديد ردود للحذف');
+            return;
+        }
+        
+        if (confirm(`هل أنت متأكد من حذف ${selectedIds.length} رد؟ لا يمكن التراجع عن هذا الإجراء.`)) {
+            $.post('{% url "surveys:bulk_delete_responses" %}', {
+                'response_ids': selectedIds,
+                'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+            }, function(response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert('حدث خطأ أثناء حذف الردود.');
+                }
+            });
+        }
+    }
+
+    // تصدير الردود إلى Excel
+    function exportResponses() {
+        const params = new URLSearchParams(window.location.search);
+        params.set('export', 'excel');
+        window.location.href = '{% url "surveys:response_list" survey.id %}?' + params.toString();
+    }
+
+    // تصدير الردود إلى PDF
+    function exportPDF() {
+        const params = new URLSearchParams(window.location.search);
+        params.set('export', 'pdf');
+        window.location.href = '{% url "surveys:response_list" survey.id %}?' + params.toString();
+    }
+
+    // تحديث حالة الصفوف عند تغيير checkboxes
+    $(document).on('change', '.response-checkbox', function() {
+        updateRowSelection(this);
+        updateBulkActions();
+    });
+</script>
+{% endblock %}
+

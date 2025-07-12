@@ -1,0 +1,287 @@
+ا{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}لوحة تحكم الاستبيانات{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: #f4f6fb;
+        direction: rtl;
+    }
+    .survey-sidebar {
+        position: fixed;
+        top: 0; right: 0;
+        width: 220px;
+        height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2.5rem 1rem 1rem 1rem;
+        z-index: 100;
+        box-shadow: -2px 0 18px rgba(102,126,234,0.08);
+    }
+    .survey-sidebar .logo {
+        font-size: 2.2rem;
+        font-weight: 900;
+        margin-bottom: 2.5rem;
+        letter-spacing: 2px;
+        text-shadow: 1px 2px 8px #3332;
+    }
+    .survey-sidebar .sidebar-link {
+        color: #fff;
+        font-size: 1.1rem;
+        margin: 1.2rem 0;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+    }
+    .survey-sidebar .sidebar-link:hover {
+        color: #ffe082;
+    }
+    .main-content {
+        margin-right: 240px;
+        padding: 2.5rem 2rem 2rem 2rem;
+    }
+    .dashboard-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2.5rem 2rem 2rem 2rem;
+        border-radius: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.10);
+        margin-bottom: 2.5rem;
+        text-align: right;
+        position: relative;
+        overflow: hidden;
+    }
+    .dashboard-hero h1 {
+        font-size: 2.7rem;
+        font-weight: 900;
+        margin-bottom: 0.7rem;
+        letter-spacing: 1px;
+    }
+    .dashboard-hero p {
+        font-size: 1.25rem;
+        opacity: 0.97;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+    .dashboard-hero .hero-bg {
+        position: absolute;
+        left: 0; bottom: 0;
+        width: 220px; height: 220px;
+        background: radial-gradient(circle, #fff3 0%, #764ba2 80%);
+        border-radius: 50%;
+        z-index: 0;
+        opacity: 0.25;
+    }
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 2.2rem;
+        margin-bottom: 3rem;
+    }
+    .stat-circle {
+        background: linear-gradient(135deg, #fff 60%, #e9ecef 100%);
+        border-radius: 50%;
+        width: 140px; height: 140px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.10);
+        margin: 0 auto;
+        position: relative;
+        transition: transform 0.2s;
+    }
+    .stat-circle:hover {
+        transform: scale(1.07) rotate(-2deg);
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.18);
+    }
+    .stat-icon {
+        font-size: 2.7rem;
+        margin-bottom: 0.3rem;
+        color: #764ba2;
+        opacity: 0.88;
+    }
+    .stat-title {
+        font-size: 1.1rem;
+        color: #666;
+        margin-bottom: 0.1rem;
+        font-weight: 600;
+    }
+    .stat-value {
+        font-size: 2.3rem;
+        font-weight: 900;
+        color: #667eea;
+        letter-spacing: 1px;
+        margin-bottom: 0.1rem;
+        transition: all 0.7s;
+    }
+    .actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 2.2rem;
+        margin-bottom: 2rem;
+    }
+    .action-card {
+        background: linear-gradient(135deg, #f8fafc 0%, #e9ecef 100%);
+        border-radius: 2rem;
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.10);
+        padding: 2.5rem 2rem 2rem 2rem;
+        text-align: center;
+        transition: transform 0.2s, box-shadow 0.2s;
+        position: relative;
+        cursor: pointer;
+        overflow: hidden;
+    }
+    .action-card:hover {
+        transform: translateY(-7px) scale(1.04);
+        box-shadow: 0 12px 32px rgba(102, 126, 234, 0.16);
+        background: linear-gradient(135deg, #e9ecef 0%, #f8fafc 100%);
+    }
+    .action-icon {
+        font-size: 3.2rem;
+        margin-bottom: 1.1rem;
+        color: #667eea;
+        opacity: 0.93;
+        transition: color 0.2s;
+    }
+    .action-card:hover .action-icon {
+        color: #764ba2;
+    }
+    .action-title {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    .action-desc {
+        color: #666;
+        font-size: 1.05rem;
+        margin-bottom: 1.5rem;
+        min-height: 48px;
+    }
+    .action-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 2rem;
+        padding: 0.8rem 2.5rem;
+        font-weight: 700;
+        font-size: 1.1rem;
+        box-shadow: 0 3px 10px rgba(102, 126, 234, 0.13);
+        transition: all 0.2s;
+    }
+    .action-btn:hover {
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        box-shadow: 0 6px 18px rgba(102, 126, 234, 0.18);
+        color: #fff;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="survey-sidebar">
+    <div class="logo"><i class="fas fa-poll-h"></i> استبيانات</div>
+    <a href="#" class="sidebar-link"><i class="fas fa-home"></i>الرئيسية</a>
+    <a href="#" class="sidebar-link"><i class="fas fa-user"></i>حسابي</a>
+    <a href="#" class="sidebar-link"><i class="fas fa-cog"></i>الإعدادات</a>
+</div>
+<div class="main-content">
+    <div class="dashboard-hero">
+        <div class="hero-bg"></div>
+        <h1>مرحباً بك في لوحة تحكم الاستبيانات!</h1>
+        <p>هنا يمكنك إدارة جميع الاستبيانات الخاصة بك، إنشاء استبيانات جديدة، متابعة الردود، وإرسالها للمستهدفين بسهولة ومرونة.</p>
+    </div>
+    <div class="stats-grid">
+        <div class="stat-circle">
+            <div class="stat-icon"><i class="fas fa-clipboard-list"></i></div>
+            <div class="stat-title">الاستبيانات المنشأة</div>
+            <div class="stat-value" id="created-surveys">{{ stats.created_surveys|default:0 }}</div>
+        </div>
+        <div class="stat-circle">
+            <div class="stat-icon"><i class="fas fa-paper-plane"></i></div>
+            <div class="stat-title">الاستبيانات المرسلة</div>
+            <div class="stat-value" id="sent-surveys">{{ stats.sent_surveys|default:0 }}</div>
+        </div>
+        <div class="stat-circle">
+            <div class="stat-icon"><i class="fas fa-inbox"></i></div>
+            <div class="stat-title">الاستبيانات المستلمة</div>
+            <div class="stat-value" id="received-surveys">{{ stats.received_surveys|default:0 }}</div>
+        </div>
+        <div class="stat-circle">
+            <div class="stat-icon"><i class="fas fa-reply"></i></div>
+            <div class="stat-title">إجمالي الردود</div>
+            <div class="stat-value" id="total-responses">{{ stats.total_responses|default:0 }}</div>
+        </div>
+    </div>
+    <div class="actions-grid">
+        <div class="action-card" onclick="window.location.href='{% url 'surveys:create' %}'">
+            <div class="action-icon"><i class="fas fa-plus-circle"></i></div>
+            <div class="action-title">إنشاء استبيان</div>
+            <div class="action-desc">ابدأ بإنشاء استبيان جديد مخصص حسب احتياجك، مع أسئلة ديناميكية وخيارات متنوعة.</div>
+            <button class="action-btn">إنشاء</button>
+        </div>
+        <div class="action-card" onclick="window.location.href='{% url 'surveys:list' %}'">
+            <div class="action-icon"><i class="fas fa-list-ul"></i></div>
+            <div class="action-title">عرض الاستبيانات</div>
+            <div class="action-desc">تصفح جميع الاستبيانات التي أنشأتها أو أرسلتها وتابع نتائجها.</div>
+            <button class="action-btn">عرض</button>
+        </div>
+        <div class="action-card" onclick="window.location.href='{% url 'surveys:edit_select' %}'">
+            <div class="action-icon"><i class="fas fa-edit"></i></div>
+            <div class="action-title">تعديل استبيان</div>
+            <div class="action-desc">قم بتعديل أي استبيان سابق بسهولة ومرونة.</div>
+            <button class="action-btn">تعديل</button>
+        </div>
+        <div class="action-card" onclick="window.location.href='{% url 'surveys:delete_select' %}'">
+            <div class="action-icon"><i class="fas fa-trash-alt"></i></div>
+            <div class="action-title">حذف استبيان</div>
+            <div class="action-desc">احذف الاستبيانات التي لم تعد بحاجة إليها بشكل آمن.</div>
+            <button class="action-btn">حذف</button>
+        </div>
+        <div class="action-card" onclick="window.location.href='{% url 'surveys:send_select' %}'">
+            <div class="action-icon"><i class="fas fa-paper-plane"></i></div>
+            <div class="action-title">إرسال استبيان</div>
+            <div class="action-desc">أرسل الاستبيانات للخريجين أو المستهدفين بسهولة واحترافية.</div>
+            <button class="action-btn">إرسال</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// عدادات متحركة للإحصائيات
+function animateCounter(id, end) {
+    let el = document.getElementById(id);
+    if (!el) return;
+    let start = 0;
+    let duration = 900;
+    let step = Math.ceil(end / 40);
+    let current = start;
+    let interval = setInterval(function() {
+        current += step;
+        if (current >= end) {
+            el.textContent = end;
+            clearInterval(interval);
+        } else {
+            el.textContent = current;
+        }
+    }, duration / 40);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    animateCounter('created-surveys', parseInt(document.getElementById('created-surveys').textContent) || 0);
+    animateCounter('sent-surveys', parseInt(document.getElementById('sent-surveys').textContent) || 0);
+    animateCounter('received-surveys', parseInt(document.getElementById('received-surveys').textContent) || 0);
+    animateCounter('total-responses', parseInt(document.getElementById('total-responses').textContent) || 0);
+});
+</script>
+{% endblock %} 

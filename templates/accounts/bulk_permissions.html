@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}منح صلاحيات جماعية{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <i class="fas fa-users-cog me-2"></i>
+                            منح صلاحيات جماعية
+                        </h3>
+                        <a href="{% url 'accounts:employee_list' %}" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left me-1"></i>عودة
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <!-- اختيار الموظفين -->
+                            <div class="col-md-6">
+                                <div class="card mb-3">
+                                    <div class="card-header bg-info text-white">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-users me-2"></i>اختيار الموظفين
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label for="{{ form.employees.id_for_label }}" class="form-label">
+                                                {{ form.employees.label }}
+                                            </label>
+                                            {{ form.employees }}
+                                            {% if form.employees.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.employees.errors.0 }}
+                                                </div>
+                                            {% endif %}
+                                            <small class="form-text text-muted">
+                                                اختر الموظفين الذين تريد منحهم الصلاحيات
+                                            </small>
+                                        </div>
+                                        
+                                        <!-- إحصائيات سريعة -->
+                                        <div class="alert alert-info">
+                                            <h6 class="alert-heading">
+                                                <i class="fas fa-info-circle me-2"></i>إحصائيات سريعة
+                                            </h6>
+                                            <p class="mb-1"><strong>إجمالي الموظفين النشطين:</strong> <span id="total-employees">-</span></p>
+                                            <p class="mb-0"><strong>الموظفون المحددون:</strong> <span id="selected-employees">0</span></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- اختيار الصلاحيات -->
+                            <div class="col-md-6">
+                                <div class="card mb-3">
+                                    <div class="card-header bg-success text-white">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-key me-2"></i>اختيار الصلاحيات
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label for="{{ form.permissions.id_for_label }}" class="form-label">
+                                                {{ form.permissions.label }}
+                                            </label>
+                                            {{ form.permissions }}
+                                            {% if form.permissions.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.permissions.errors.0 }}
+                                                </div>
+                                            {% endif %}
+                                            <small class="form-text text-muted">
+                                                اختر الصلاحيات التي تريد منحها للموظفين المحددين
+                                            </small>
+                                        </div>
+                                        
+                                        <!-- إعدادات إضافية -->
+                                        <div class="mb-3">
+                                            <label for="{{ form.expires_at.id_for_label }}" class="form-label">
+                                                {{ form.expires_at.label }}
+                                            </label>
+                                            {{ form.expires_at }}
+                                            <small class="form-text text-muted">
+                                                اختر تاريخ انتهاء الصلاحيات (اختياري)
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ملخص العملية -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-warning text-dark">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-clipboard-list me-2"></i>ملخص العملية
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="text-center">
+                                                    <i class="fas fa-users fa-3x text-primary mb-2"></i>
+                                                    <h5>الموظفون المحددون</h5>
+                                                    <p class="text-muted" id="summary-employees">0 موظف</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="text-center">
+                                                    <i class="fas fa-key fa-3x text-success mb-2"></i>
+                                                    <h5>الصلاحيات المحددة</h5>
+                                                    <p class="text-muted" id="summary-permissions">0 صلاحية</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="text-center">
+                                                    <i class="fas fa-calculator fa-3x text-warning mb-2"></i>
+                                                    <h5>إجمالي العمليات</h5>
+                                                    <p class="text-muted" id="summary-total">0 عملية</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- أزرار الإجراءات -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    <a href="{% url 'accounts:employee_list' %}" class="btn btn-secondary">
+                                        <i class="fas fa-times me-1"></i>إلغاء
+                                    </a>
+                                    <button type="submit" class="btn btn-primary" id="submit-btn">
+                                        <i class="fas fa-save me-1"></i>منح الصلاحيات
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border: 1px solid rgba(0, 0, 0, 0.125);
+    }
+    
+    .card-header {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    }
+    
+    .alert {
+        border: 1px solid rgba(0, 0, 0, 0.125);
+    }
+    
+    .form-check {
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const employeeCheckboxes = document.querySelectorAll('input[name="employees"]');
+    const permissionCheckboxes = document.querySelectorAll('input[name="permissions"]');
+    const submitBtn = document.getElementById('submit-btn');
+    
+    // تحديث الإحصائيات
+    function updateStats() {
+        const selectedEmployees = document.querySelectorAll('input[name="employees"]:checked').length;
+        const selectedPermissions = document.querySelectorAll('input[name="permissions"]:checked').length;
+        const totalOperations = selectedEmployees * selectedPermissions;
+        
+        document.getElementById('selected-employees').textContent = selectedEmployees;
+        document.getElementById('summary-employees').textContent = selectedEmployees + ' موظف';
+        document.getElementById('summary-permissions').textContent = selectedPermissions + ' صلاحية';
+        document.getElementById('summary-total').textContent = totalOperations + ' عملية';
+        
+        // تفعيل/تعطيل زر الإرسال
+        submitBtn.disabled = (selectedEmployees === 0 || selectedPermissions === 0);
+    }
+    
+    // إضافة مستمعي الأحداث
+    employeeCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateStats);
+    });
+    
+    permissionCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateStats);
+    });
+    
+    // تحديث الإحصائيات الأولية
+    updateStats();
+    
+    // تحديث إجمالي الموظفين
+    document.getElementById('total-employees').textContent = employeeCheckboxes.length;
+    
+    // تأكيد عند الإرسال
+    submitBtn.addEventListener('click', function(e) {
+        const selectedEmployees = document.querySelectorAll('input[name="employees"]:checked').length;
+        const selectedPermissions = document.querySelectorAll('input[name="permissions"]:checked').length;
+        
+        if (!confirm(`هل أنت متأكد من منح ${selectedPermissions} صلاحية لـ ${selectedEmployees} موظف؟`)) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}

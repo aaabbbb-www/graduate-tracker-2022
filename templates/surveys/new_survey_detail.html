@@ -1,0 +1,446 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ survey.title }} - تفاصيل الاستبيان{% endblock %}
+
+{% block extra_css %}
+<style>
+    .survey-detail-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem 0;
+    }
+    
+    .survey-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 2rem;
+        padding: 3rem;
+        margin-bottom: 3rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .survey-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .survey-description {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+    }
+    
+    .survey-meta {
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+        opacity: 0.9;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-top: 2rem;
+    }
+    
+    .btn-primary-custom {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 2rem;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        color: white;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    .btn-primary-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-success-custom {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        border-radius: 2rem;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        color: white;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    .btn-success-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(40, 167, 69, 0.6);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-info-custom {
+        background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%);
+        border: none;
+        border-radius: 2rem;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        color: white;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(23, 162, 184, 0.4);
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    .btn-info-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(23, 162, 184, 0.6);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-outline-custom {
+        background: transparent;
+        border: 2px solid white;
+        border-radius: 2rem;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        color: white;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    .btn-outline-custom:hover {
+        background: white;
+        color: #667eea;
+        text-decoration: none;
+        transform: translateY(-2px);
+    }
+    
+    .questions-section {
+        background: white;
+        border-radius: 2rem;
+        padding: 3rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        border: none;
+    }
+    
+    .section-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .question-card {
+        background: #f8f9fa;
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .question-card:hover {
+        border-color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+    }
+    
+    .question-number {
+        position: absolute;
+        top: -10px;
+        right: 20px;
+        background: #667eea;
+        color: white;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .question-text {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 1.5rem;
+        padding-right: 3rem;
+    }
+    
+    .choices-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .choice-item {
+        background: white;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        border: 1px solid #e9ecef;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .choice-item:hover {
+        border-color: #667eea;
+        background: #f8f9ff;
+    }
+    
+    .choice-radio {
+        width: 1.2rem;
+        height: 1.2rem;
+        border: 2px solid #667eea;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    .choice-radio::after {
+        content: '';
+        width: 0.6rem;
+        height: 0.6rem;
+        background: #667eea;
+        border-radius: 50%;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .choice-item:hover .choice-radio::after {
+        opacity: 1;
+    }
+    
+    .choice-text {
+        color: #333;
+        font-weight: 500;
+        flex-grow: 1;
+    }
+    
+    .question-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        justify-content: flex-end;
+    }
+    
+    .btn-sm {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        border-radius: 1rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-danger-sm {
+        background: #dc3545;
+        color: white;
+        border: none;
+    }
+    
+    .btn-danger-sm:hover {
+        background: #c82333;
+        color: white;
+        text-decoration: none;
+        transform: translateY(-1px);
+    }
+    
+    .empty-questions {
+        text-align: center;
+        padding: 3rem;
+        color: #666;
+    }
+    
+    .empty-icon {
+        font-size: 4rem;
+        color: #ddd;
+        margin-bottom: 1rem;
+    }
+    
+    .stats-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-3px);
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #667eea;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="survey-detail-container">
+    <!-- رأس الاستبيان -->
+    <div class="survey-header">
+        <h1 class="survey-title">{{ survey.title }}</h1>
+        <p class="survey-description">{{ survey.description }}</p>
+        
+        <div class="survey-meta">
+            <div class="meta-item">
+                <i class="fas fa-calendar"></i>
+                <span>تاريخ الإنشاء: {{ survey.created_at|date:"Y/m/d" }}</span>
+            </div>
+            <div class="meta-item">
+                <i class="fas fa-user"></i>
+                <span>أنشئ بواسطة: {{ survey.created_by.get_full_name|default:survey.created_by.username }}</span>
+            </div>
+            <div class="meta-item">
+                <i class="fas fa-question-circle"></i>
+                <span>{{ questions.count }} سؤال</span>
+            </div>
+        </div>
+        
+        <div class="action-buttons">
+            <a href="{% url 'surveys:add_question' survey.pk %}" class="btn-success-custom">
+                <i class="fas fa-plus me-2"></i>إضافة سؤال جديد
+            </a>
+            <a href="{% url 'surveys:send' survey.pk %}" class="btn-info-custom">
+                <i class="fas fa-paper-plane me-2"></i>إرسال الاستبيان
+            </a>
+            <a href="{% url 'surveys:home' %}" class="btn-outline-custom">
+                <i class="fas fa-home me-2"></i>العودة للرئيسية
+            </a>
+        </div>
+    </div>
+    
+    <!-- إحصائيات سريعة -->
+    <div class="stats-cards">
+        <div class="stat-card">
+            <div class="stat-number">{{ questions.count }}</div>
+            <div class="stat-label">عدد الأسئلة</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">0</div>
+            <div class="stat-label">عدد الردود</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ survey.status|title }}</div>
+            <div class="stat-label">حالة الاستبيان</div>
+        </div>
+    </div>
+    
+    <!-- قسم الأسئلة -->
+    <div class="questions-section">
+        <h2 class="section-title">
+            <i class="fas fa-list me-2"></i>أسئلة الاستبيان
+        </h2>
+        
+        {% if questions %}
+            {% for question in questions %}
+            <div class="question-card">
+                <div class="question-number">{{ forloop.counter }}</div>
+                <div class="question-text">{{ question.question_text }}</div>
+                
+                <div class="choices-list">
+                    {% for choice in question.choices.all %}
+                    <div class="choice-item">
+                        <div class="choice-radio"></div>
+                        <div class="choice-text">{{ choice.choice_text }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="question-actions">
+                    <a href="{% url 'surveys:delete_question' survey.pk question.pk %}" 
+                       class="btn-sm btn-danger-sm"
+                       onclick="return confirm('هل أنت متأكد من حذف هذا السؤال؟')">
+                        <i class="fas fa-trash me-1"></i>حذف السؤال
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-questions">
+                <div class="empty-icon">
+                    <i class="fas fa-question-circle"></i>
+                </div>
+                <h3>لا توجد أسئلة بعد</h3>
+                <p>ابدأ بإضافة أول سؤال للاستبيان</p>
+                <a href="{% url 'surveys:add_question' survey.pk %}" class="btn-success-custom">
+                    <i class="fas fa-plus me-2"></i>إضافة سؤال جديد
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // تأثير ظهور العناصر تدريجياً
+        $('.survey-header, .stats-cards, .questions-section').each(function(index) {
+            $(this).css('opacity', '0').animate({
+                opacity: 1
+            }, 500 + (index * 200));
+        });
+        
+        // تأثير الأزرار
+        $('.btn-primary-custom, .btn-success-custom, .btn-info-custom, .btn-outline-custom').on('mouseenter', function() {
+            $(this).addClass('pulse');
+        }).on('mouseleave', function() {
+            $(this).removeClass('pulse');
+        });
+        
+        // تأثير البطاقات
+        $('.question-card').on('mouseenter', function() {
+            $(this).addClass('shadow-lg');
+        }).on('mouseleave', function() {
+            $(this).removeClass('shadow-lg');
+        });
+    });
+</script>
+{% endblock %} 

@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% block title %}إحصائيات التوظيف للخريجين{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h2 class="gradient-text display-5 mb-2"><i class="bi bi-bar-chart-line-fill me-2"></i>إحصائيات التوظيف للخريجين</h2>
+        <p class="lead text-muted">نظرة شاملة على توظيف الخريجين حسب التخصص وسنة التخرج</p>
+    </div>
+    <div class="row g-4">
+        {% if major_stats %}
+        <div class="col-12 mb-4">
+            <div class="card stats-card shadow-hover fade-in-up">
+                <div class="card-header d-flex align-items-center gradient-text">
+                    <i class="bi bi-people-fill fs-3 me-2"></i>
+                    <span class="fs-5">إحصائيات حسب التخصص</span>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-12 col-lg-8 mx-auto">
+                            <canvas id="majorEmploymentChart" height="120"></canvas>
+                        </div>
+                    </div>
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+                        {% for stat in major_stats %}
+                        <div class="col">
+                            <div class="card border-0 shadow-sm stats-card h-100">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title mb-2 gradient-text">{{ stat.major }}</h5>
+                                    <div class="mb-2">
+                                        <span class="badge bg-primary stats-number">{{ stat.total }}</span>
+                                        <span class="text-muted">خريج</span>
+                                    </div>
+                                    <div class="d-flex justify-content-center gap-2 mb-2">
+                                        <span class="badge bg-success"><i class="bi bi-briefcase-fill me-1"></i>موظفون: {{ stat.employed }}</span>
+                                        <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i>باحثون: {{ stat.seeking }}</span>
+                                        <span class="badge bg-danger"><i class="bi bi-x-circle-fill me-1"></i>غير موظفون: {{ stat.unemployed }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% if year_stats %}
+        <div class="col-12 mb-4">
+            <div class="card stats-card shadow-hover fade-in-up">
+                <div class="card-header d-flex align-items-center gradient-text">
+                    <i class="bi bi-calendar-event-fill fs-3 me-2"></i>
+                    <span class="fs-5">إحصائيات حسب سنة التخرج</span>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-12 col-lg-8 mx-auto">
+                            <canvas id="yearEmploymentChart" height="120"></canvas>
+                        </div>
+                    </div>
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+                        {% for stat in year_stats %}
+                        <div class="col">
+                            <div class="card border-0 shadow-sm stats-card h-100">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title mb-2 gradient-text">سنة {{ stat.graduation_year }}</h5>
+                                    <div class="mb-2">
+                                        <span class="badge bg-primary stats-number">{{ stat.total }}</span>
+                                        <span class="text-muted">خريج</span>
+                                    </div>
+                                    <span class="badge bg-success"><i class="bi bi-briefcase-fill me-1"></i>موظفون: {{ stat.employed }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% if not major_stats and not year_stats %}
+        <div class="col-12">
+            <div class="alert alert-info text-center py-4 fade-in-up">
+                <i class="bi bi-info-circle-fill fs-3 me-2"></i>
+                لا توجد بيانات إحصائية متاحة حالياً.
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+    // بيانات الرسم البياني حسب التخصص
+    {% if major_stats %}
+    const majorLabels = [{% for stat in major_stats %}'{{ stat.major }}'{% if not forloop.last %}, {% endif %}{% endfor %}];
+    const employedData = [{% for stat in major_stats %}{{ stat.employed }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+    const seekingData = [{% for stat in major_stats %}{{ stat.seeking }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+    const unemployedData = [{% for stat in major_stats %}{{ stat.unemployed }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+    const ctxMajor = document.getElementById('majorEmploymentChart').getContext('2d');
+    new Chart(ctxMajor, {
+        type: 'bar',
+        data: {
+            labels: majorLabels,
+            datasets: [
+                {
+                    label: 'موظفون',
+                    data: employedData,
+                    backgroundColor: 'rgba(40, 167, 69, 0.7)',
+                    borderRadius: 8
+                },
+                {
+                    label: 'باحثون عن عمل',
+                    data: seekingData,
+                    backgroundColor: 'rgba(255, 193, 7, 0.7)',
+                    borderRadius: 8
+                },
+                {
+                    label: 'غير موظفون',
+                    data: unemployedData,
+                    backgroundColor: 'rgba(220, 53, 69, 0.7)',
+                    borderRadius: 8
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top', labels: { font: { family: 'Tajawal, Segoe UI, sans-serif', size: 16 } } },
+                title: { display: false }
+            },
+            scales: {
+                x: { stacked: true },
+                y: { stacked: true, beginAtZero: true }
+            }
+        }
+    });
+    {% endif %}
+
+    // بيانات الرسم البياني حسب سنة التخرج
+    {% if year_stats %}
+    const yearLabels = [{% for stat in year_stats %}'{{ stat.graduation_year }}'{% if not forloop.last %}, {% endif %}{% endfor %}];
+    const yearEmployedData = [{% for stat in year_stats %}{{ stat.employed }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+    const yearTotalData = [{% for stat in year_stats %}{{ stat.total }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+    const ctxYear = document.getElementById('yearEmploymentChart').getContext('2d');
+    new Chart(ctxYear, {
+        type: 'line',
+        data: {
+            labels: yearLabels,
+            datasets: [
+                {
+                    label: 'إجمالي الخريجين',
+                    data: yearTotalData,
+                    borderColor: 'rgba(102, 126, 234, 1)',
+                    backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 5,
+                    pointBackgroundColor: 'rgba(102, 126, 234, 1)'
+                },
+                {
+                    label: 'عدد الموظفين',
+                    data: yearEmployedData,
+                    borderColor: 'rgba(40, 167, 69, 1)',
+                    backgroundColor: 'rgba(40, 167, 69, 0.2)',
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 5,
+                    pointBackgroundColor: 'rgba(40, 167, 69, 1)'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top', labels: { font: { family: 'Tajawal, Segoe UI, sans-serif', size: 16 } } },
+                title: { display: false }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+    {% endif %}
+</script>
+{% endblock %} 

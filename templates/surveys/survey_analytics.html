@@ -1,0 +1,491 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}تحليلات الاستبيانات{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h1 class="main-title mb-4 animate__animated animate__fadeInDown">تحليلات الاستبيانات <i class="fas fa-chart-bar"></i></h1>
+
+    <div class="row mb-4">
+        <!-- بطاقة إجمالي الردود -->
+        <div class="col-md-4 mb-4">
+            <div class="card dashboard-card animate__animated animate__fadeInUp animate__delay-0-2s">
+                <div class="card-body text-center">
+                    <div class="icon-wrapper mb-3">
+                        <i class="fas fa-reply-all fa-3x text-info"></i>
+                    </div>
+                    <h5 class="card-title">إجمالي الردود</h5>
+                    <p class="card-text display-4 font-weight-bold text-info" data-toggle="counterup">{{ total_responses }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- بطاقة متوسط عدد الأسئلة -->
+        <div class="col-md-4 mb-4">
+            <div class="card dashboard-card animate__animated animate__fadeInUp animate__delay-0-4s">
+                <div class="card-body text-center">
+                    <div class="icon-wrapper mb-3">
+                        <i class="fas fa-question fa-3x text-warning"></i>
+                    </div>
+                    <h5 class="card-title">متوسط الأسئلة لكل استبيان</h5>
+                    <p class="card-text display-4 font-weight-bold text-warning" data-toggle="counterup">{{ avg_questions|floatformat:1 }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- بطاقة متوسط معدل الاستجابة -->
+        <div class="col-md-4 mb-4">
+            <div class="card dashboard-card animate__animated animate__fadeInUp animate__delay-0-6s">
+                <div class="card-body text-center">
+                    <div class="icon-wrapper mb-3">
+                        <i class="fas fa-percent fa-3x text-success"></i>
+                    </div>
+                    <h5 class="card-title">متوسط معدل الاستجابة</h5>
+                    <p class="card-text display-4 font-weight-bold text-success" data-toggle="counterup">{{ avg_response_rate|floatformat:1 }}%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm animate__animated animate__fadeInUp animate__delay-0-8s">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-chart-pie"></i> توزيع أنواع الأسئلة</h4>
+                </div>
+                <div class="card-body">
+                    <canvas id="questionTypeChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm animate__animated animate__fadeInUp animate__delay-1s">
+                <div class="card-header bg-gradient-info text-white">
+                    <h4 class="mb-0"><i class="fas fa-chart-line"></i> نشاط الاستبيانات (الردود بمرور الوقت)</h4>
+                </div>
+                <div class="card-body">
+                    <canvas id="responseActivityChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12 mb-4">
+            <div class="card shadow-sm animate__animated animate__fadeInUp animate__delay-1-2s">
+                <div class="card-header bg-gradient-warning text-white">
+                    <h4 class="mb-0"><i class="fas fa-table"></i> الاستبيانات الأكثر استجابة</h4>
+                </div>
+                <div class="card-body">
+                    {% if top_surveys %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>عنوان الاستبيان</th>
+                                    <th>عدد الردود</th>
+                                    <th>معدل الاستجابة</th>
+                                    <th>الحالة</th>
+                                    <th>إجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for survey in top_surveys %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ survey.title }}</td>
+                                    <td>{{ survey.responses_count }}</td>
+                                    <td>{{ survey.response_rate }}%</td>
+                                    <td>
+                                        {% if survey.is_active %}
+                                            <span class="badge bg-success">نشط</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">غير نشط</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'surveys:analytics_detail' pk=survey.pk %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-chart-line"></i> تفاصيل التحليل</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info text-center">
+                        <i class="fas fa-info-circle"></i> لا توجد بيانات لعرضها حالياً.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{% url 'surveys:home' %}" class="btn btn-secondary btn-lg"><i class="fas fa-arrow-left"></i> العودة إلى لوحة تحكم الاستبيانات</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    $(document).ready(function() {
+        // تفعيل تأثير العدادات
+        $("[data-toggle='counterup']").counterUp({
+            delay: 10,
+            time: 1000
+        });
+
+        // تأثيرات Hover للبطاقات
+        $(".dashboard-card, .card").hover(function() {
+            $(this).addClass("shadow-lg").css("transform", "translateY(-5px)");
+        }, function() {
+            $(this).removeClass("shadow-lg").css("transform", "translateY(0)");
+        });
+
+        // بيانات الرسوم البيانية (يجب أن تأتي من Django View)
+        var questionTypeData = {
+            labels: [{% for type, count in question_type_distribution.items %}"{{ type }}"{% if not forloop.last %}, {% endif %}{% endfor %}],
+            datasets: [{
+                data: [{% for type, count in question_type_distribution.items %}{{ count }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.8)',
+                    'rgba(54, 162, 235, 0.8)',
+                    'rgba(255, 206, 86, 0.8)',
+                    'rgba(75, 192, 192, 0.8)',
+                    'rgba(153, 102, 255, 0.8)',
+                    'rgba(255, 159, 64, 0.8)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        var responseActivityData = {
+            labels: [{% for date in response_activity_dates %}"{{ date }}"{% if not forloop.last %}, {% endif %}{% endfor %}],
+            datasets: [{
+                label: 'عدد الردود',
+                data: [{% for count in response_activity_counts %}{{ count }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4
+            }]
+        };
+
+        // رسم المخططات
+        var questionTypeCtx = document.getElementById('questionTypeChart').getContext('2d');
+        new Chart(questionTypeCtx, {
+            type: 'pie',
+            data: questionTypeData,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: false,
+                        text: 'توزيع أنواع الأسئلة'
+                    }
+                }
+            },
+        });
+
+        var responseActivityCtx = document.getElementById('responseActivityChart').getContext('2d');
+        new Chart(responseActivityCtx, {
+            type: 'line',
+            data: responseActivityData,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: false,
+                        text: 'نشاط الاستبيانات (الردود بمرور الوقت)'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            },
+        });
+    });
+</script>
+{% endblock %}
+
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}تحليلات الاستبيانات{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h1 class="main-title mb-4 animate__animated animate__fadeInDown">تحليلات الاستبيانات <i class="fas fa-chart-bar"></i></h1>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm animate__animated animate__fadeInUp">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-filter"></i> فلترة التحليلات</h4>
+                </div>
+                <div class="card-body">
+                    <form method="GET" class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label for="survey_filter" class="form-label">اختر استبيان:</label>
+                            <select class="form-select select2" id="survey_filter" name="survey_id">
+                                <option value="">جميع الاستبيانات</option>
+                                {% for survey in surveys %}
+                                    <option value="{{ survey.id }}" {% if selected_survey_id == survey.id %}selected{% endif %}>{{ survey.title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="start_date" class="form-label">من تاريخ:</label>
+                            <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="end_date" class="form-label">إلى تاريخ:</label>
+                            <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
+                        </div>
+                        <div class="col-12 mt-3">
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> تطبيق الفلتر</button>
+                            <a href="{% url 'surveys:analytics' %}" class="btn btn-secondary"><i class="fas fa-redo"></i> إعادة تعيين</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <!-- بطاقة إجمالي الردود -->
+        <div class="col-md-4 mb-4">
+            <div class="card dashboard-card animate__animated animate__fadeInUp animate__delay-0-2s">
+                <div class="card-body text-center">
+                    <div class="icon-wrapper mb-3">
+                        <i class="fas fa-reply-all fa-3x text-info"></i>
+                    </div>
+                    <h5 class="card-title">إجمالي الردود</h5>
+                    <p class="card-text display-4 font-weight-bold text-info" data-toggle="counterup">{{ total_responses }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- بطاقة متوسط درجة الاستبيان -->
+        <div class="col-md-4 mb-4">
+            <div class="card dashboard-card animate__animated animate__fadeInUp animate__delay-0-4s">
+                <div class="card-body text-center">
+                    <div class="icon-wrapper mb-3">
+                        <i class="fas fa-star-half-alt fa-3x text-warning"></i>
+                    </div>
+                    <h5 class="card-title">متوسط درجة الاستبيان</h5>
+                    <p class="card-text display-4 font-weight-bold text-warning" data-toggle="counterup">{{ average_score|floatformat:2 }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- بطاقة معدل الإكمال -->
+        <div class="col-md-4 mb-4">
+            <div class="card dashboard-card animate__animated animate__fadeInUp animate__delay-0-6s">
+                <div class="card-body text-center">
+                    <div class="icon-wrapper mb-3">
+                        <i class="fas fa-percent fa-3x text-success"></i>
+                    </div>
+                    <h5 class="card-title">معدل الإكمال</h5>
+                    <p class="card-text display-4 font-weight-bold text-success" data-toggle="counterup">{{ completion_rate|floatformat:2 }}%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm animate__animated animate__fadeInUp animate__delay-0-8s">
+                <div class="card-header bg-gradient-info text-white">
+                    <h4 class="mb-0"><i class="fas fa-chart-line"></i> توزيع الردود حسب الوقت</h4>
+                </div>
+                <div class="card-body">
+                    <canvas id="responsesOverTimeChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm animate__animated animate__fadeInUp animate__delay-1s">
+                <div class="card-header bg-gradient-warning text-white">
+                    <h4 class="mb-0"><i class="fas fa-chart-pie"></i> توزيع حالة الاستبيانات</h4>
+                </div>
+                <div class="card-body">
+                    <canvas id="surveyStatusChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm animate__animated animate__fadeInUp animate__delay-1-2s">
+                <div class="card-header bg-gradient-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-list-alt"></i> الاستبيانات الفردية والتحليلات التفصيلية</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped">
+                            <thead>
+                                <tr>
+                                    <th>عنوان الاستبيان</th>
+                                    <th>عدد الردود</th>
+                                    <th>متوسط الدرجة</th>
+                                    <th>معدل الإكمال</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for survey in individual_surveys %}
+                                <tr>
+                                    <td>{{ survey.title }}</td>
+                                    <td>{{ survey.response_count }}</td>
+                                    <td>{{ survey.average_score|floatformat:2 }}</td>
+                                    <td>{{ survey.completion_rate|floatformat:2 }}%</td>
+                                    <td>
+                                        <a href="{% url 'surveys:analytics_detail' survey.id %}" class="btn btn-info btn-sm">
+                                            <i class="fas fa-chart-bar"></i> عرض التحليلات
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">لا توجد بيانات تحليلية لعرضها.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    $(document).ready(function() {
+        // تفعيل Select2 للفلترة
+        $('.select2').select2({
+            theme: 'bootstrap-5',
+            width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+            placeholder: 'اختر استبيان',
+            allowClear: true,
+        });
+
+        // تفعيل تأثير العدادات
+        $('[data-toggle="counterup"]').counterUp({
+            delay: 10,
+            time: 1000
+        });
+
+        // تأثيرات Hover للبطاقات
+        $(".dashboard-card").hover(function() {
+            $(this).addClass("shadow-lg").css("transform", "translateY(-5px)");
+        }, function() {
+            $(this).removeClass("shadow-lg").css("transform", "translateY(0)");
+        });
+
+        // بيانات الرسوم البيانية (يجب أن تأتي من Django View)
+        const responsesOverTimeData = {
+            labels: [{% for label in responses_over_time_labels %}'{{ label }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+            datasets: [{
+                label: 'عدد الردود',
+                data: [{% for data in responses_over_time_data %}{{ data }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1,
+                fill: true
+            }]
+        };
+
+        const surveyStatusData = {
+            labels: ['مكتمل', 'غير مكتمل'],
+            datasets: [{
+                data: [{{ completed_surveys_count }}, {{ incomplete_surveys_count }}],
+                backgroundColor: [
+                    'rgba(40, 167, 69, 0.7)', // Success
+                    'rgba(220, 53, 69, 0.7)'  // Danger
+                ],
+                borderColor: [
+                    'rgba(40, 167, 69, 1)',
+                    'rgba(220, 53, 69, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        // رسم بياني للردود حسب الوقت
+        const responsesOverTimeCtx = document.getElementById('responsesOverTimeChart').getContext('2d');
+        new Chart(responsesOverTimeCtx, {
+            type: 'line',
+            data: responsesOverTimeData,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: false,
+                        text: 'توزيع الردود حسب الوقت'
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true
+                    },
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // رسم بياني لحالة الاستبيانات
+        const surveyStatusCtx = document.getElementById('surveyStatusChart').getContext('2d');
+        new Chart(surveyStatusCtx, {
+            type: 'doughnut',
+            data: surveyStatusData,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: false,
+                        text: 'توزيع حالة الاستبيانات'
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
+
+

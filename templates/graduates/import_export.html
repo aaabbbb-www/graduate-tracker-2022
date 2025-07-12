@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}استيراد وتصدير بيانات الخريجين{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="mb-4">استيراد وتصدير بيانات الخريجين</h2>
+    <div class="alert alert-info">هذه الصفحة مخصصة لاستيراد أو تصدير بيانات الخريجين من وإلى ملفات Excel/CSV.</div>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <button type="submit" name="export" class="btn btn-primary">تصدير جميع الخريجين إلى ملف CSV</button>
+    </form>
+    <hr>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="importFile" class="form-label">استيراد من ملف CSV</label>
+            <input type="file" class="form-control" id="importFile" name="import_file">
+        </div>
+        <button type="submit" name="import" class="btn btn-success">استيراد</button>
+    </form>
+</div>
+{% endblock %} 

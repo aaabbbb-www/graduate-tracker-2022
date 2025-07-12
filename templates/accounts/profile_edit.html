@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}تعديل الملف الشخصي - {{ user.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <i class="bi bi-pencil-square me-2"></i>
+                            تعديل الملف الشخصي
+                        </h3>
+                        <a href="{% url 'accounts:profile' %}" class="btn btn-light btn-sm">
+                            <i class="bi bi-arrow-left me-1"></i>عودة
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- معلومات المستخدم الأساسية -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="bi bi-person me-2"></i>معلومات المستخدم
+                                </h5>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ user_form.first_name.id_for_label }}" class="form-label">
+                                    <i class="bi bi-person me-1"></i>
+                                    الاسم الأول *
+                                </label>
+                                <input type="text" 
+                                       class="form-control {% if user_form.first_name.errors %}is-invalid{% endif %}" 
+                                       id="{{ user_form.first_name.id_for_label }}" 
+                                       name="{{ user_form.first_name.name }}" 
+                                       value="{{ user_form.first_name.value|default:'' }}"
+                                       placeholder="الاسم الأول"
+                                       required>
+                                {% if user_form.first_name.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ user_form.first_name.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ user_form.last_name.id_for_label }}" class="form-label">
+                                    <i class="bi bi-person me-1"></i>
+                                    اسم العائلة *
+                                </label>
+                                <input type="text" 
+                                       class="form-control {% if user_form.last_name.errors %}is-invalid{% endif %}" 
+                                       id="{{ user_form.last_name.id_for_label }}" 
+                                       name="{{ user_form.last_name.name }}" 
+                                       value="{{ user_form.last_name.value|default:'' }}"
+                                       placeholder="اسم العائلة"
+                                       required>
+                                {% if user_form.last_name.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ user_form.last_name.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ user_form.email.id_for_label }}" class="form-label">
+                                    <i class="bi bi-envelope me-1"></i>
+                                    البريد الإلكتروني *
+                                </label>
+                                <input type="email" 
+                                       class="form-control {% if user_form.email.errors %}is-invalid{% endif %}" 
+                                       id="{{ user_form.email.id_for_label }}" 
+                                       name="{{ user_form.email.name }}" 
+                                       value="{{ user_form.email.value|default:'' }}"
+                                       placeholder="example@email.com"
+                                       required>
+                                {% if user_form.email.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ user_form.email.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ user_form.username.id_for_label }}" class="form-label">
+                                    <i class="bi bi-at me-1"></i>
+                                    اسم المستخدم *
+                                </label>
+                                <input type="text" 
+                                       class="form-control {% if user_form.username.errors %}is-invalid{% endif %}" 
+                                       id="{{ user_form.username.id_for_label }}" 
+                                       name="{{ user_form.username.name }}" 
+                                       value="{{ user_form.username.value|default:'' }}"
+                                       placeholder="اسم المستخدم"
+                                       required>
+                                {% if user_form.username.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ user_form.username.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- معلومات الملف الشخصي -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="bi bi-info-circle me-2"></i>معلومات إضافية
+                                </h5>
+                            </div>
+                            
+                            {% if profile_form.phone %}
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ profile_form.phone.id_for_label }}" class="form-label">
+                                    <i class="bi bi-telephone me-1"></i>
+                                    رقم الهاتف
+                                </label>
+                                <input type="tel" 
+                                       class="form-control {% if profile_form.phone.errors %}is-invalid{% endif %}" 
+                                       id="{{ profile_form.phone.id_for_label }}" 
+                                       name="{{ profile_form.phone.name }}" 
+                                       value="{{ profile_form.phone.value|default:'' }}"
+                                       placeholder="+966 50 123 4567">
+                                {% if profile_form.phone.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ profile_form.phone.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+
+                            {% if profile_form.address %}
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ profile_form.address.id_for_label }}" class="form-label">
+                                    <i class="bi bi-geo-alt me-1"></i>
+                                    العنوان
+                                </label>
+                                <input type="text" 
+                                       class="form-control {% if profile_form.address.errors %}is-invalid{% endif %}" 
+                                       id="{{ profile_form.address.id_for_label }}" 
+                                       name="{{ profile_form.address.name }}" 
+                                       value="{{ profile_form.address.value|default:'' }}"
+                                       placeholder="العنوان">
+                                {% if profile_form.address.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ profile_form.address.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+
+                            {% if profile_form.bio %}
+                            <div class="col-12 mb-3">
+                                <label for="{{ profile_form.bio.id_for_label }}" class="form-label">
+                                    <i class="bi bi-card-text me-1"></i>
+                                    نبذة شخصية
+                                </label>
+                                <textarea class="form-control {% if profile_form.bio.errors %}is-invalid{% endif %}" 
+                                          id="{{ profile_form.bio.id_for_label }}" 
+                                          name="{{ profile_form.bio.name }}" 
+                                          rows="3"
+                                          placeholder="اكتب نبذة عن نفسك...">{{ profile_form.bio.value|default:'' }}</textarea>
+                                {% if profile_form.bio.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ profile_form.bio.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- رسائل الخطأ العامة -->
+                        {% if user_form.non_field_errors or profile_form.non_field_errors %}
+                            <div class="alert alert-danger" role="alert">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                {% if user_form.non_field_errors %}
+                                    {{ user_form.non_field_errors.0 }}
+                                {% endif %}
+                                {% if profile_form.non_field_errors %}
+                                    {{ profile_form.non_field_errors.0 }}
+                                {% endif %}
+                            </div>
+                        {% endif %}
+
+                        <!-- أزرار الإجراءات -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left me-1"></i>إلغاء
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle me-1"></i>حفظ التغييرات
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form validation
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const requiredFields = form.querySelectorAll('[required]');
+            let isValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+            
+            if (!isValid) {
+                e.preventDefault();
+                alert('يرجى ملء جميع الحقول المطلوبة');
+            }
+        });
+    }
+    
+    // Real-time validation
+    const inputs = form.querySelectorAll('input, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.hasAttribute('required') && !this.value.trim()) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+        
+        input.addEventListener('input', function() {
+            if (this.classList.contains('is-invalid') && this.value.trim()) {
+                this.classList.remove('is-invalid');
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 

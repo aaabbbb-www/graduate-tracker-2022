@@ -1,0 +1,274 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}إدارة صلاحيات {{ employee.user.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <i class="fas fa-key me-2"></i>
+                            إدارة صلاحيات الموظف
+                        </h3>
+                        <div>
+                            <a href="{% url 'accounts:employee_detail' employee.pk %}" class="btn btn-info btn-sm">
+                                <i class="fas fa-arrow-left me-1"></i>عودة
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- معلومات الموظف -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-user-circle fa-2x me-3"></i>
+                                    <div>
+                                        <h5 class="mb-1">{{ employee.user.get_full_name }}</h5>
+                                        <p class="mb-1"><strong>المنصب:</strong> {{ employee.position }} | <strong>القسم:</strong> {{ employee.department }}</p>
+                                        <p class="mb-0"><strong>الدور:</strong> {% if employee.role %}{{ employee.role.name }}{% else %}غير محدد{% endif %}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- الصلاحيات الحالية -->
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-list me-2"></i>الصلاحيات الحالية
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <!-- صلاحيات الدور -->
+                                    <div class="mb-4">
+                                        <h6 class="text-success">
+                                            <i class="fas fa-shield-alt me-1"></i>صلاحيات الدور
+                                        </h6>
+                                        {% if role_permissions %}
+                                            <div class="row">
+                                                {% for permission in role_permissions %}
+                                                <div class="col-md-6 mb-2">
+                                                    <div class="d-flex align-items-center p-2 border rounded bg-light">
+                                                        <i class="fas fa-check-circle text-success me-2"></i>
+                                                        <span>{{ permission.get_name_display }}</span>
+                                                    </div>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            <p class="text-muted">لا توجد صلاحيات من الدور</p>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- الصلاحيات الإضافية -->
+                                    <div class="mb-4">
+                                        <h6 class="text-warning">
+                                            <i class="fas fa-plus-circle me-1"></i>الصلاحيات الإضافية
+                                        </h6>
+                                        {% if custom_permissions %}
+                                            <div class="table-responsive">
+                                                <table class="table table-sm">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>الصلاحية</th>
+                                                            <th>منح بواسطة</th>
+                                                            <th>تاريخ المنح</th>
+                                                            <th>تاريخ الانتهاء</th>
+                                                            <th>الإجراءات</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% for permission in custom_permissions %}
+                                                        <tr>
+                                                            <td>
+                                                                <span class="badge bg-warning">{{ permission.permission.get_name_display }}</span>
+                                                            </td>
+                                                            <td>{{ permission.granted_by.get_full_name }}</td>
+                                                            <td>{{ permission.granted_at|date:"Y-m-d H:i" }}</td>
+                                                            <td>
+                                                                {% if permission.expires_at %}
+                                                                    <span class="text-danger">{{ permission.expires_at|date:"Y-m-d" }}</span>
+                                                                {% else %}
+                                                                    <span class="text-success">غير محدد</span>
+                                                                {% endif %}
+                                                            </td>
+                                                            <td>
+                                                                <a href="{% url 'accounts:remove_permission' permission.pk %}" 
+                                                                   class="btn btn-danger btn-sm"
+                                                                   onclick="return confirm('هل أنت متأكد من إزالة هذه الصلاحية؟')">
+                                                                    <i class="fas fa-trash"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        {% else %}
+                                            <p class="text-muted">لا توجد صلاحيات إضافية</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- إضافة صلاحية جديدة -->
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-plus me-2"></i>إضافة صلاحية جديدة
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <form method="post">
+                                        {% csrf_token %}
+                                        <div class="mb-3">
+                                            <label for="{{ form.permission.id_for_label }}" class="form-label">
+                                                {{ form.permission.label }}
+                                            </label>
+                                            {{ form.permission }}
+                                            {% if form.permission.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.permission.errors.0 }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="{{ form.expires_at.id_for_label }}" class="form-label">
+                                                {{ form.expires_at.label }}
+                                            </label>
+                                            {{ form.expires_at }}
+                                            <small class="form-text text-muted">اختياري - تاريخ انتهاء الصلاحية</small>
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                {{ form.is_active }}
+                                                <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                                    {{ form.is_active.label }}
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="fas fa-plus me-1"></i>إضافة الصلاحية
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- ملاحظات مهمة -->
+                            <div class="card mt-3">
+                                <div class="card-header bg-warning text-dark">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-info-circle me-2"></i>ملاحظات مهمة
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-unstyled mb-0">
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            الصلاحيات من الدور لا يمكن إزالتها من هنا
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            يمكن إضافة صلاحيات إضافية مؤقتة
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            الصلاحيات المنتهية الصلاحية تختفي تلقائياً
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            لتغيير الدور، استخدم صفحة تعديل الموظف
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- إحصائيات الصلاحيات -->
+                    <div class="row mt-4">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-shield-alt fa-2x mb-2"></i>
+                                    <h5 class="card-title">صلاحيات الدور</h5>
+                                    <h3 class="mb-0">{{ role_permissions|length }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-plus-circle fa-2x mb-2"></i>
+                                    <h5 class="card-title">صلاحيات إضافية</h5>
+                                    <h3 class="mb-0">{{ custom_permissions|length }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-key fa-2x mb-2"></i>
+                                    <h5 class="card-title">إجمالي الصلاحيات</h5>
+                                    <h3 class="mb-0">{{ role_permissions|length|add:custom_permissions|length }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-clock fa-2x mb-2"></i>
+                                    <h5 class="card-title">صلاحيات منتهية</h5>
+                                    <h3 class="mb-0" id="expired-count">-</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border: 1px solid rgba(0, 0, 0, 0.125);
+    }
+    
+    .card-header {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    }
+    
+    .badge {
+        font-size: 0.875em;
+    }
+    
+    .table-sm td, .table-sm th {
+        padding: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// حساب الصلاحيات المنتهية
+document.addEventListener('DOMContentLoaded', function() {
+    const expiredPermissions = document.querySelectorAll('.text-danger');
+    document.getElementById('expired-count').textContent = expiredPermissions.length;
+});
+</script>
+{% endblock %}

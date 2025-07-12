@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}إدارة الصلاحيات والأدوار{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <i class="bi bi-shield-lock me-2"></i>
+                            إدارة الصلاحيات والأدوار
+                        </h3>
+                        <div>
+                            <a href="{% url 'accounts:role_create' %}" class="btn btn-success btn-sm">
+                                <i class="bi bi-plus me-1"></i>إضافة دور جديد
+                            </a>
+                            <a href="{% url 'accounts:bulk_permissions' %}" class="btn btn-warning btn-sm">
+                                <i class="bi bi-key me-1"></i>منح صلاحيات جماعية
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- إدارة المجموعات -->
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-people me-2"></i>
+                                        المجموعات والأدوار
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    {% if groups %}
+                                        <div class="list-group">
+                                            {% for group in groups %}
+                                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-1">{{ group.name }}</h6>
+                                                    <small class="text-muted">
+                                                        {{ group.user_set.count }} مستخدم
+                                                    </small>
+                                                </div>
+                                                <div class="btn-group" role="group">
+                                                    <a href="{% url 'accounts:role_update' group.pk %}" 
+                                                       class="btn btn-warning btn-sm" title="تعديل">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <a href="{% url 'accounts:role_delete' group.pk %}" 
+                                                       class="btn btn-danger btn-sm" title="حذف">
+                                                        <i class="bi bi-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        <div class="text-center py-4">
+                                            <i class="bi bi-people fa-3x text-muted mb-3"></i>
+                                            <p class="text-muted">لا توجد مجموعات</p>
+                                            <a href="{% url 'accounts:role_create' %}" class="btn btn-primary">
+                                                <i class="bi bi-plus me-1"></i>إنشاء أول مجموعة
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- إدارة المستخدمين -->
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-person-gear me-2"></i>
+                                        إدارة المستخدمين
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    {% if users %}
+                                        <div class="list-group">
+                                            {% for user in users %}
+                                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-1">{{ user.get_full_name|default:user.username }}</h6>
+                                                    <small class="text-muted">
+                                                        {{ user.groups.count }} مجموعة
+                                                        {% if user.is_staff %}
+                                                            <span class="badge bg-warning ms-1">موظف</span>
+                                                        {% endif %}
+                                                    </small>
+                                                </div>
+                                                <div class="btn-group" role="group">
+                                                    <a href="{% url 'accounts:user_update' user.pk %}" 
+                                                       class="btn btn-info btn-sm" title="تعديل">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    {% if user.is_staff %}
+                                                    <a href="{% url 'accounts:employee_permissions' user.pk %}" 
+                                                       class="btn btn-primary btn-sm" title="الصلاحيات">
+                                                        <i class="bi bi-key"></i>
+                                                    </a>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        <div class="text-center py-4">
+                                            <i class="bi bi-person fa-3x text-muted mb-3"></i>
+                                            <p class="text-muted">لا يوجد مستخدمون</p>
+                                            <a href="{% url 'accounts:user_create' %}" class="btn btn-primary">
+                                                <i class="bi bi-plus me-1"></i>إضافة أول مستخدم
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- إحصائيات سريعة -->
+                    <div class="row mt-4">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">{{ groups.count }}</h5>
+                                    <p class="card-text">إجمالي المجموعات</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">{{ users.count }}</h5>
+                                    <p class="card-text">إجمالي المستخدمين</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">{{ users|length }}</h5>
+                                    <p class="card-text">الموظفون</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">{{ users|length }}</h5>
+                                    <p class="card-text">المستخدمون النشطون</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- روابط سريعة -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">
+                                        <i class="bi bi-lightning me-2"></i>روابط سريعة
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3 mb-2">
+                                            <a href="{% url 'accounts:user_list' %}" class="btn btn-outline-primary w-100">
+                                                <i class="bi bi-people me-1"></i>قائمة المستخدمين
+                                            </a>
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <a href="{% url 'accounts:role_list' %}" class="btn btn-outline-info w-100">
+                                                <i class="bi bi-shield me-1"></i>قائمة الأدوار
+                                            </a>
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <a href="{% url 'accounts:permission_list' %}" class="btn btn-outline-warning w-100">
+                                                <i class="bi bi-key me-1"></i>قائمة الصلاحيات
+                                            </a>
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <a href="{% url 'accounts:activity_log' %}" class="btn btn-outline-secondary w-100">
+                                                <i class="bi bi-clock-history me-1"></i>سجل الأنشطة
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .list-group-item {
+        border: 1px solid rgba(0, 0, 0, 0.125);
+        margin-bottom: 0.5rem;
+    }
+    
+    .btn-group .btn {
+        margin-right: 2px;
+    }
+    
+    .badge {
+        font-size: 0.75em;
+    }
+</style>
+{% endblock %} 

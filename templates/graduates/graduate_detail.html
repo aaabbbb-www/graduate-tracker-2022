@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}تفاصيل الخريج - {{ graduate.full_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <i class="fas fa-user-graduate me-2"></i>
+                            تفاصيل الخريج
+                        </h3>
+                        <div>
+                            <a href="{% url 'graduates:update' graduate.pk %}" class="btn btn-warning btn-sm">
+                                <i class="fas fa-edit me-1"></i>تعديل
+                            </a>
+                            <a href="{% url 'graduates:delete' graduate.pk %}" class="btn btn-danger btn-sm">
+                                <i class="fas fa-trash me-1"></i>حذف
+                            </a>
+                            <a href="{% url 'graduates:list' %}" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-arrow-left me-1"></i>عودة
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- المعلومات الشخصية -->
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-user me-2"></i>المعلومات الشخصية
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <p><strong>الاسم الأول:</strong> {{ graduate.first_name|default:"غير محدد" }}</p>
+                                            <p><strong>اسم العائلة:</strong> {{ graduate.last_name|default:"غير محدد" }}</p>
+                                            <p><strong>البريد الإلكتروني:</strong> 
+                                                {% if graduate.email %}
+                                                    <a href="mailto:{{ graduate.email }}">{{ graduate.email }}</a>
+                                                {% else %}
+                                                    غير محدد
+                                                {% endif %}
+                                            </p>
+                                            <p><strong>رقم الهاتف:</strong> 
+                                                {% if graduate.phone %}
+                                                    <a href="tel:{{ graduate.phone }}">{{ graduate.phone }}</a>
+                                                {% else %}
+                                                    غير محدد
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <p><strong>رقم الهوية:</strong> {{ graduate.national_id|default:"غير محدد" }}</p>
+                                            <p><strong>الجنس:</strong> {{ graduate.get_gender_display|default:"غير محدد" }}</p>
+                                            <p><strong>تاريخ الميلاد:</strong> {{ graduate.birth_date|date:"Y-m-d"|default:"غير محدد" }}</p>
+                                            {% if graduate.birth_date %}
+                                                <p><strong>العمر:</strong> {{ graduate.age }} سنة</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- المعلومات الأكاديمية -->
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-graduation-cap me-2"></i>المعلومات الأكاديمية
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <p><strong>الرقم الجامعي:</strong> {{ graduate.student_id }}</p>
+                                            <p><strong>الدرجة العلمية:</strong> {{ graduate.get_degree_display|default:"غير محدد" }}</p>
+                                            <p><strong>التخصص:</strong> {{ graduate.major|default:"غير محدد" }}</p>
+                                            <p><strong>الكلية:</strong> {{ graduate.college|default:"غير محدد" }}</p>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <p><strong>سنة التخرج:</strong> {{ graduate.graduation_year|default:"غير محدد" }}</p>
+                                            <p><strong>المعدل التراكمي:</strong> {{ graduate.gpa|default:"غير محدد" }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- معلومات التوظيف -->
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-header bg-warning text-dark">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-briefcase me-2"></i>معلومات التوظيف
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <p><strong>حالة التوظيف:</strong> 
+                                                <span class="badge {% if graduate.employment_status == 'employed' %}bg-success{% elif graduate.employment_status == 'unemployed' %}bg-danger{% else %}bg-warning{% endif %}">
+                                                    {{ graduate.get_employment_status_display|default:"غير محدد" }}
+                                                </span>
+                                            </p>
+                                            <p><strong>اسم الشركة:</strong> {{ graduate.company_name|default:"غير محدد" }}</p>
+                                            <p><strong>المسمى الوظيفي:</strong> {{ graduate.job_title|default:"غير محدد" }}</p>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <p><strong>الراتب:</strong> 
+                                                {% if graduate.salary %}
+                                                    {{ graduate.salary }} ريال
+                                                {% else %}
+                                                    غير محدد
+                                                {% endif %}
+                                            </p>
+                                            <p><strong>تاريخ بداية العمل:</strong> {{ graduate.work_start_date|date:"Y-m-d"|default:"غير محدد" }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- معلومات الاتصال -->
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-header bg-secondary text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-map-marker-alt me-2"></i>معلومات الاتصال
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <p><strong>العنوان:</strong> {{ graduate.address|default:"غير محدد" }}</p>
+                                            <p><strong>المدينة:</strong> {{ graduate.city|default:"غير محدد" }}</p>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <p><strong>الدولة:</strong> {{ graduate.country|default:"السعودية" }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- معلومات النظام -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-dark text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-cog me-2"></i>معلومات النظام
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            <p><strong>تاريخ الإنشاء:</strong> {{ graduate.created_at|date:"Y-m-d H:i" }}</p>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <p><strong>آخر تحديث:</strong> {{ graduate.updated_at|date:"Y-m-d H:i" }}</p>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <p><strong>الحالة:</strong> 
+                                                <span class="badge {% if graduate.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                                                    {% if graduate.is_active %}نشط{% else %}غير نشط{% endif %}
+                                                </span>
+                                            </p>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <p><strong>رقم الخريج:</strong> {{ graduate.pk }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ملاحظات الخريج -->
+                    {% if graduate.notes.all %}
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-sticky-note me-2"></i>ملاحظات الخريج
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    {% for note in graduate.notes.all %}
+                                    <div class="alert alert-light border">
+                                        <div class="d-flex justify-content-between">
+                                            <small class="text-muted">
+                                                <i class="fas fa-user me-1"></i>{{ note.created_by.get_full_name|default:note.created_by.username }}
+                                                <i class="fas fa-clock ms-2 me-1"></i>{{ note.created_at|date:"Y-m-d H:i" }}
+                                            </small>
+                                        </div>
+                                        <p class="mb-0 mt-2">{{ note.note }}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border: 1px solid rgba(0, 0, 0, 0.125);
+    }
+    
+    .card-header {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    }
+    
+    .badge {
+        font-size: 0.875em;
+    }
+    
+    .alert {
+        margin-bottom: 0.5rem;
+    }
+    
+    .alert:last-child {
+        margin-bottom: 0;
+    }
+</style>
+{% endblock %}

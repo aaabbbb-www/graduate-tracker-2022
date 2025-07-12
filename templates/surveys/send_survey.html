@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}إرسال الاستبيان{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h1 class="main-title mb-4 animate__animated animate__fadeInDown">إرسال الاستبيان <i class="fas fa-paper-plane"></i></h1>
+
+    {% if survey %}
+    <div class="card shadow-sm animate__animated animate__fadeInUp">
+        <div class="card-header bg-gradient-primary text-white">
+            <h4 class="mb-0"><i class="fas fa-clipboard-list"></i> {{ survey.title }}</h4>
+        </div>
+        <div class="card-body">
+            <p class="lead">اختر الخريجين الذين ترغب في إرسال هذا الاستبيان إليهم.</p>
+            
+            {% if survey.google_form_url %}
+            <div class="alert alert-info mb-4">
+                <i class="fab fa-google"></i> <strong>ملاحظة:</strong> هذا الاستبيان مرتبط بـ Google Forms. سيتم تضمين رابط Google Form في الرسالة المرسلة للخريجين.
+                <br>
+                <small class="text-muted">رابط Google Form: <a href="{{ survey.google_form_url }}" target="_blank">{{ survey.google_form_url }}</a></small>
+            </div>
+            {% endif %}
+            
+            <form method="post" class="row g-3">
+                {% csrf_token %}
+                <div class="col-md-12 mb-3">
+                    <label for="id_graduates" class="form-label">الخريجون المستهدفون:</label>
+                    <select class="form-control select2" id="id_graduates" name="graduates" multiple="multiple" required>
+                        {% for graduate in graduates %}
+                            <option value="{{ graduate.pk }}">{{ graduate.full_name }} ({{ graduate.email }})</option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-text text-muted">يمكنك اختيار خريج واحد أو أكثر.</div>
+                </div>
+
+                <div class="col-md-12 mb-3">
+                    <label for="id_message" class="form-label">رسالة مخصصة (اختياري):</label>
+                    <textarea class="form-control" id="id_message" name="message" rows="4" placeholder="اكتب رسالة شخصية للخريجين..."></textarea>
+                    <div class="form-text text-muted">هذه الرسالة ستظهر في البريد الإلكتروني أو الإشعار المرسل للخريجين.</div>
+                </div>
+
+                <div class="col-12 mt-4">
+                    <button type="submit" class="btn btn-success btn-lg animate__animated animate__pulse animate__infinite"><i class="fas fa-paper-plane"></i> إرسال الاستبيان</button>
+                    <a href="{% url 'surveys:detail' pk=survey.pk %}" class="btn btn-secondary btn-lg ms-2"><i class="fas fa-times-circle"></i> إلغاء</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="alert alert-warning text-center animate__animated animate__fadeInUp">
+        <i class="fas fa-exclamation-triangle"></i> الاستبيان المطلوب غير موجود أو لم يتم تحديده.
+    </div>
+    {% endif %}
+
+    <div class="text-center mt-4">
+        <a href="{% url 'surveys:list' %}" class="btn btn-secondary btn-lg"><i class="fas fa-arrow-left"></i> العودة إلى قائمة الاستبيانات</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // تفعيل Select2 لاختيار الخريجين المتعدد
+        $(".select2").select2({
+            placeholder: "اختر الخريجين...",
+            allowClear: true,
+            dir: "rtl" // لدعم اللغة العربية
+        });
+
+        // تأثيرات Hover للبطاقات
+        $(".card").hover(function() {
+            $(this).addClass("shadow-lg").css("transform", "translateY(-3px)");
+        }, function() {
+            $(this).removeClass("shadow-lg").css("transform", "translateY(0)");
+        });
+    });
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+{% endblock %}
+

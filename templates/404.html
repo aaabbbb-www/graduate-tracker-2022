@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}الصفحة غير موجودة - 404{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            خطأ 404 - الصفحة غير موجودة
+                        </h3>
+                        <a href="{% url 'dashboard' %}" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-home me-1"></i>الرئيسية
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-search fa-5x text-muted mb-3"></i>
+                        <h4 class="mb-3">عذراً، الصفحة التي تبحث عنها غير موجودة</h4>
+                        <p class="text-muted">ربما تم نقل الصفحة أو حذفها، أو أن الرابط غير صحيح.</p>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg w-100">
+                                <i class="fas fa-home me-2"></i>العودة للرئيسية
+                            </a>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <a href="javascript:history.back()" class="btn btn-secondary btn-lg w-100">
+                                <i class="fas fa-arrow-left me-2"></i>العودة للصفحة السابقة
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-lightbulb me-2"></i>اقتراحات مفيدة
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        تأكد من صحة الرابط في شريط العنوان
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        جرب استخدام شريط البحث للعثور على ما تبحث عنه
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        تحقق من القائمة الرئيسية للوصول للصفحات المتاحة
+                                    </li>
+                                    <li>
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        إذا كنت تبحث عن صفحة محددة، اتصل بالدعم الفني
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border: 1px solid rgba(0, 0, 0, 0.125);
+    }
+    
+    .card-header {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    }
+</style>
+{% endblock %}

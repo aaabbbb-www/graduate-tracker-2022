@@ -1,0 +1,46 @@
+{
+    "user_rules": [
+      {
+        "description": "Write all code comments in Arabic only. Explain functions, classes, and complex logic in clear and concise Arabic.",
+        "priority": "high"
+      },
+      {
+        "description": "Use snake_case for variable and function names, and PascalCase for class names.",
+        "priority": "medium"
+      },
+      {
+        "description": "Keep the code clean, modular, and easy to understand, suitable for junior developers.",
+        "priority": "medium"
+      },
+      {
+        "description": "Avoid unnecessary comments. Only add comments where explanation is required.",
+        "priority": "low"
+      }
+    ],
+    "project_rules": [
+      {
+        "description": "Use class-based views (CBVs) only in Django. Avoid using function-based views (FBVs).",
+        "priority": "high"
+      },
+      {
+        "description": "Use the Django ORM for all database operations. Do not use raw SQL queries.",
+        "priority": "high"
+      },
+      {
+        "description": "Organize all HTML templates in 'templates/app_name/' structure.",
+        "priority": "high"
+      },
+      {
+        "description": "Include Arabic docstrings for every model and view to describe their purpose.",
+        "priority": "medium"
+      },
+      {
+        "description": "Check user permissions in all views that modify data.",
+        "priority": "high"
+      },
+      {
+        "description": "Use MySQL as the primary database. Avoid using SQLite or PostgreSQL.",
+        "priority": "medium"
+      }
+    ]
+  }

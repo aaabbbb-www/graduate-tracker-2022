@@ -1,0 +1,309 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}قائمة الخريجين - نظام تتبع الخريجين{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">قائمة الخريجين</h1>
+        <p class="text-muted">إجمالي {{ total_graduates }} خريج</p>
+    </div>
+    <div>
+        <a href="{% url 'graduates:create' %}" class="btn btn-primary">
+            <i class="bi bi-person-plus me-2"></i>
+            إضافة خريج
+        </a>
+    </div>
+</div>
+
+<!-- Search and Filter Form -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                {{ search_form.search.label_tag }}
+                {{ search_form.search }}
+            </div>
+            <div class="col-md-2">
+                {{ search_form.graduation_year.label_tag }}
+                {{ search_form.graduation_year }}
+            </div>
+            <div class="col-md-2">
+                {{ search_form.college.label_tag }}
+                {{ search_form.college }}
+            </div>
+            <div class="col-md-2">
+                {{ search_form.major.label_tag }}
+                {{ search_form.major }}
+            </div>
+            <div class="col-md-2">
+                {{ search_form.employment_status.label_tag }}
+                {{ search_form.employment_status }}
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search me-2"></i>
+                    بحث
+                </button>
+                <a href="{% url 'graduates:list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-clockwise me-2"></i>
+                    إعادة تعيين
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Graduates Table -->
+<div class="card">
+    <div class="card-body">
+        {% if page_obj %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>
+                            <input type="checkbox" id="selectAll" class="form-check-input">
+                        </th>
+                        <th>الاسم</th>
+                        <th>البريد الإلكتروني</th>
+                        <th>الرقم الجامعي</th>
+                        <th>التخصص</th>
+                        <th>الكلية</th>
+                        <th>سنة التخرج</th>
+                        <th>حالة التوظيف</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for graduate in page_obj %}
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="form-check-input graduate-checkbox" value="{{ graduate.pk }}">
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-sm bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-2">
+                                    <i class="bi bi-person text-primary"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">{{ graduate.full_name }}</h6>
+                                    <small class="text-muted">{{ graduate.gender|default:"غير محدد" }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <a href="mailto:{{ graduate.email }}" class="text-decoration-none">
+                                {{ graduate.email }}
+                            </a>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark">{{ graduate.student_id }}</span>
+                        </td>
+                        <td>{{ graduate.major }}</td>
+                        <td>{{ graduate.college }}</td>
+                        <td>
+                            <span class="badge bg-info">{{ graduate.graduation_year }}</span>
+                        </td>
+                        <td>
+                            {% if graduate.employment_status == 'employed' %}
+                                <span class="badge bg-success">{{ graduate.get_employment_status_display }}</span>
+                            {% elif graduate.employment_status == 'unemployed' %}
+                                <span class="badge bg-danger">{{ graduate.get_employment_status_display }}</span>
+                            {% elif graduate.employment_status == 'self_employed' %}
+                                <span class="badge bg-warning">{{ graduate.get_employment_status_display }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ graduate.get_employment_status_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'graduates:detail' graduate.pk %}" 
+                                   class="btn btn-sm btn-outline-primary" 
+                                   title="عرض التفاصيل">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{% url 'graduates:update' graduate.pk %}" 
+                                   class="btn btn-sm btn-outline-warning" 
+                                   title="تعديل">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <button type="button" 
+                                        class="btn btn-sm btn-outline-danger delete-graduate-btn" 
+                                        data-graduate-id="{{ graduate.pk }}"
+                                        data-graduate-name="{{ graduate.full_name }}"
+                                   title="حذف">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Bulk Actions -->
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <div class="d-flex align-items-center">
+                    <select class="form-select me-2" id="bulkAction" style="width: auto;">
+                        <option value="">اختر إجراء</option>
+                        <option value="delete">حذف المحدد</option>
+                        <option value="send_survey">إرسال استبيان</option>
+                    </select>
+                    <button type="button" class="btn btn-outline-primary" id="applyBulkAction">
+                        تطبيق
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-6 text-end">
+                <span id="selectedCount" class="text-muted">لم يتم تحديد أي عنصر</span>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-4">
+            {% include 'partials/_pagination.html' %}
+        </div>
+
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-people text-muted" style="font-size: 4rem;"></i>
+            <h4 class="mt-3">لا توجد خريجين</h4>
+            <p class="text-muted">لم يتم العثور على أي خريجين مطابقين لمعايير البحث</p>
+            <a href="{% url 'graduates:create' %}" class="btn btn-primary">
+                <i class="bi bi-person-plus me-2"></i>
+                إضافة أول خريج
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.avatar-sm {
+    width: 40px;
+    height: 40px;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+.btn-group .btn {
+    border-radius: 0.375rem;
+    margin-left: 2px;
+}
+
+.form-check-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .btn-group .btn {
+        padding: 0.25rem 0.5rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const graduateCheckboxes = document.querySelectorAll('.graduate-checkbox');
+    const selectedCountSpan = document.getElementById('selectedCount');
+    const bulkActionSelect = document.getElementById('bulkAction');
+    const applyBulkActionBtn = document.getElementById('applyBulkAction');
+
+    // Select All functionality
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+            graduateCheckboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+            updateSelectedCount();
+        });
+    }
+
+    // Individual checkbox change
+    graduateCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            updateSelectedCount();
+            
+            // Update select all checkbox
+            const checkedCount = document.querySelectorAll('.graduate-checkbox:checked').length;
+            if (selectAllCheckbox) {
+                selectAllCheckbox.checked = checkedCount === graduateCheckboxes.length;
+                selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < graduateCheckboxes.length;
+            }
+        });
+    });
+
+    // Update selected count
+    function updateSelectedCount() {
+        const checkedCount = document.querySelectorAll('.graduate-checkbox:checked').length;
+        if (selectedCountSpan) {
+            if (checkedCount === 0) {
+                selectedCountSpan.textContent = 'لم يتم تحديد أي عنصر';
+            } else {
+                selectedCountSpan.textContent = `تم تحديد ${checkedCount} عنصر`;
+            }
+        }
+    }
+
+    // Apply bulk action
+    if (applyBulkActionBtn) {
+        applyBulkActionBtn.addEventListener('click', function() {
+            const selectedIds = Array.from(document.querySelectorAll('.graduate-checkbox:checked'))
+                .map(checkbox => checkbox.value);
+            
+            if (selectedIds.length === 0) {
+                alert('يرجى تحديد خريج واحد على الأقل');
+                return;
+            }
+
+            const action = bulkActionSelect.value;
+            if (!action) {
+                alert('يرجى اختيار إجراء');
+                return;
+            }
+
+            if (action === 'delete') {
+                if (confirm(`هل أنت متأكد من حذف ${selectedIds.length} خريج؟`)) {
+                    // Implement bulk delete
+                    console.log('Bulk delete:', selectedIds);
+                }
+            } else if (action === 'export') {
+                // Implement bulk export
+                console.log('Bulk export:', selectedIds);
+            } else if (action === 'send_survey') {
+                // Redirect to send survey page with selected graduates
+                const params = new URLSearchParams();
+                selectedIds.forEach(id => params.append('graduates', id));
+                window.location.href = `/surveys/send/?${params.toString()}`;
+            }
+        });
+    }
+
+    // Initialize selected count
+    updateSelectedCount();
+});
+</script>
+{% endblock %}
+

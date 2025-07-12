@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if choice %}تعديل الخيار{% else %}إضافة خيار جديد{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h1 class="main-title mb-4 animate__animated animate__fadeInDown">
+        {% if choice %}
+            تعديل الخيار <i class="fas fa-edit"></i>
+        {% else %}
+            إضافة خيار جديد <i class="fas fa-plus-circle"></i>
+        {% endif %}
+    </h1>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm animate__animated animate__fadeInUp">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-list-alt"></i> إدارة خيارات السؤال</h4>
+                </div>
+                <div class="card-body">
+                    <!-- معلومات السياق -->
+                    <div class="alert alert-info mb-4">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h6><i class="fas fa-clipboard-list"></i> الاستبيان: <strong>{{ question.survey.title }}</strong></h6>
+                                <h6><i class="fas fa-question-circle"></i> السؤال: <strong>{{ question.question_text|truncatewords:10 }}</strong></h6>
+                                <p class="mb-0"><i class="fas fa-info-circle"></i> نوع السؤال: <span class="badge bg-secondary">{{ question.get_question_type_display }}</span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="post" id="choiceForm">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-12 mb-4">
+                                <label for="id_choice_text" class="form-label">نص الخيار <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-lg" id="id_choice_text" name="choice_text" 
+                                       value="{% if choice %}{{ choice.choice_text }}{% endif %}" 
+                                       placeholder="أدخل نص الخيار" required maxlength="200">
+                                <div class="form-text">اكتب نص الخيار بوضوح ودقة (الحد الأقصى 200 حرف)</div>
+                                <div class="character-counter text-muted mt-1">
+                                    <span id="charCount">{% if choice %}{{ choice.choice_text|length }}{% else %}0{% endif %}</span>/200 حرف
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label for="id_order" class="form-label">ترتيب الخيار</label>
+                                <input type="number" class="form-control" id="id_order" name="order" min="1" 
+                                       value="{% if choice %}{{ choice.order }}{% else %}{{ next_order }}{% endif %}">
+                                <div class="form-text">ترتيب ظهور الخيار في قائمة الخيارات</div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label">معاينة الخيار</label>
+                                <div class="form-control bg-light" id="choicePreview">
+                                    {% if choice %}{{ choice.choice_text }}{% else %}معاينة الخيار ستظهر هنا...{% endif %}
+                                </div>
+                                <div class="form-text">معاينة لكيفية ظهور الخيار للمشاركين</div>
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-save"></i> {% if choice %}حفظ التعديلات{% else %}إضافة الخيار{% endif %}
+                            </button>
+                            <a href="{% url 'surveys:question_edit' question.survey.id question.id %}" class="btn btn-secondary btn-lg ms-2">
+                                <i class="fas fa-times"></i> إلغاء
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- قائمة الخيارات الحالية -->
+            <div class="card shadow-sm mt-4 animate__animated animate__fadeInUp animate__delay-0-2s">
+                <div class="card-header bg-gradient-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-list"></i> الخيارات الحالية للسؤال</h5>
+                </div>
+                <div class="card-body">
+                    {% if question.choices.all %}
+                        <div class="row">
+                            {% for existing_choice in question.choices.all %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="card choice-card {% if choice and choice.id == existing_choice.id %}border-primary{% endif %}">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div class="flex-grow-1">
+                                                    <h6 class="card-title">
+                                                        <span class="badge bg-secondary me-2">{{ existing_choice.order }}</span>
+                                                        {{ existing_choice.choice_text }}
+                                                    </h6>
+                                                    {% if choice and choice.id == existing_choice.id %}
+                                                        <small class="text-primary"><i class="fas fa-edit"></i> يتم تعديله حالياً</small>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="btn-group-vertical btn-group-sm">
+                                                    <a href="{% url 'surveys:choice_edit' question.survey.id question.id existing_choice.id %}" 
+                                                       class="btn btn-outline-warning btn-sm">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a href="{% url 'surveys:choice_delete' question.survey.id question.id existing_choice.id %}" 
+                                                       class="btn btn-outline-danger btn-sm">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="alert alert-success mt-3">
+                            <i class="fas fa-info-circle"></i> 
+                            إجمالي الخيارات: <strong>{{ question.choices.count }}</strong>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning text-center">
+                            <i class="fas fa-exclamation-triangle"></i> لا توجد خيارات لهذا السؤال بعد.
+                        </div>
+                    {% endif %}
+                    
+                    <div class="text-center mt-3">
+                        <a href="{% url 'surveys:choice_create' question.survey.id question.id %}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> إضافة خيار جديد
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{% url 'surveys:detail' question.survey.id %}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left"></i> العودة إلى تفاصيل الاستبيان
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .choice-card {
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    
+    .choice-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
+    }
+    
+    .choice-card.border-primary {
+        border-width: 2px;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    }
+    
+    .character-counter {
+        font-size: 0.875rem;
+    }
+    
+    .character-counter.text-warning {
+        font-weight: bold;
+    }
+    
+    .character-counter.text-danger {
+        font-weight: bold;
+    }
+    
+    #choicePreview {
+        min-height: 38px;
+        display: flex;
+        align-items: center;
+        font-style: italic;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // تحديث معاينة الخيار ومعداد الأحرف
+        $('#id_choice_text').on('input', function() {
+            const text = $(this).val();
+            const charCount = text.length;
+            const maxLength = 200;
+            
+            // تحديث معداد الأحرف
+            $('#charCount').text(charCount);
+            
+            // تغيير لون المعداد حسب العدد
+            const counter = $('.character-counter');
+            counter.removeClass('text-warning text-danger');
+            
+            if (charCount > maxLength * 0.8) {
+                counter.addClass('text-warning');
+            }
+            if (charCount > maxLength * 0.95) {
+                counter.removeClass('text-warning').addClass('text-danger');
+            }
+            
+            // تحديث المعاينة
+            const preview = $('#choicePreview');
+            if (text.trim()) {
+                preview.text(text).removeClass('text-muted').css('font-style', 'normal');
+            } else {
+                preview.text('معاينة الخيار ستظهر هنا...').addClass('text-muted').css('font-style', 'italic');
+            }
+        });
+
+        // تأثيرات Hover للبطاقات
+        $(".card").hover(function() {
+            $(this).addClass("shadow-lg");
+        }, function() {
+            $(this).removeClass("shadow-lg");
+        });
+
+        // التحقق من صحة النموذج
+        $('#choiceForm').on('submit', function(e) {
+            const choiceText = $('#id_choice_text').val().trim();
+            
+            if (!choiceText) {
+                e.preventDefault();
+                alert('يرجى إدخال نص الخيار');
+                $('#id_choice_text').focus();
+                return false;
+            }
+            
+            if (choiceText.length > 200) {
+                e.preventDefault();
+                alert('نص الخيار طويل جداً. الحد الأقصى 200 حرف.');
+                $('#id_choice_text').focus();
+                return false;
+            }
+            
+            return true;
+        });
+
+        // تركيز على حقل النص عند تحميل الصفحة
+        $('#id_choice_text').focus();
+    });
+</script>
+{% endblock %}
+

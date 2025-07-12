@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}سجلات إرسال الاستبيان - {{ survey.title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- رأس الصفحة -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">
+                <i class="bi bi-envelope-paper me-2"></i>
+                سجلات إرسال الاستبيان
+            </h2>
+            <p class="text-muted mb-0">{{ survey.title }}</p>
+        </div>
+        <div>
+            <a href="{% url 'surveys:surveys_home' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-right me-1"></i>
+                العودة للاستبيانات
+            </a>
+        </div>
+    </div>
+
+    <!-- إحصائيات سريعة -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ total_sent }}</h4>
+                            <small>إجمالي المرسل إليهم</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-people-fill fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ successful_sent }}</h4>
+                            <small>تم الإرسال بنجاح</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-check-circle-fill fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ failed_sent }}</h4>
+                            <small>فشل في الإرسال</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-x-circle-fill fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ survey.responses.count }}</h4>
+                            <small>الردود المستلمة</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-chat-dots-fill fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- جدول السجلات -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="bi bi-list-ul me-2"></i>
+                تفاصيل الإرسال
+            </h5>
+        </div>
+        <div class="card-body">
+            {% if logs %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>الخريج</th>
+                                <th>طريقة الإرسال</th>
+                                <th>الحالة</th>
+                                <th>تاريخ الإرسال</th>
+                                <th>الرد</th>
+                                <th>تفاصيل</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in logs %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm bg-light rounded-circle d-flex align-items-center justify-content-center me-2">
+                                            <i class="bi bi-person"></i>
+                                        </div>
+                                        <div>
+                                            <strong>{{ log.graduate.full_name }}</strong><br>
+                                            <small class="text-muted">{{ log.graduate.email }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if log.send_method == 'email' %}
+                                        <span class="badge bg-primary">
+                                            <i class="bi bi-envelope me-1"></i>
+                                            بريد إلكتروني
+                                        </span>
+                                    {% elif log.send_method == 'whatsapp' %}
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-whatsapp me-1"></i>
+                                            واتساب
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ log.send_method }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if log.status == 'sent' %}
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle me-1"></i>
+                                            تم الإرسال
+                                        </span>
+                                    {% elif log.status == 'failed' %}
+                                        <span class="badge bg-danger">
+                                            <i class="bi bi-x-circle me-1"></i>
+                                            فشل
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-warning">{{ log.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small>{{ log.sent_at|date:"Y/m/d H:i" }}</small>
+                                </td>
+                                <td>
+                                    {% if log.graduate in survey.responses.all %}
+                                        <span class="badge bg-info">
+                                            <i class="bi bi-check me-1"></i>
+                                            رد
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-light text-dark">
+                                            <i class="bi bi-clock me-1"></i>
+                                            في الانتظار
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if log.error_message %}
+                                        <button class="btn btn-sm btn-outline-danger" 
+                                                data-bs-toggle="tooltip" 
+                                                title="{{ log.error_message }}">
+                                            <i class="bi bi-exclamation-triangle"></i>
+                                        </button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
+                    <h5 class="text-muted">لا توجد سجلات إرسال</h5>
+                    <p class="text-muted">لم يتم إرسال هذا الاستبيان بعد</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- تفعيل Tooltips -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+{% endblock %} 

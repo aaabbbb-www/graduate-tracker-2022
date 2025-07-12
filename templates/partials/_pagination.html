@@ -1,0 +1,79 @@
+{% if page_obj.has_other_pages %}
+<nav aria-label="تنقل الصفحات">
+    <ul class="pagination justify-content-center">
+        <!-- الصفحة الأولى -->
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}page=1" aria-label="الصفحة الأولى">
+                    <i class="bi bi-chevron-double-right"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}" aria-label="السابق">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">
+                    <i class="bi bi-chevron-double-right"></i>
+                </span>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link">
+                    <i class="bi bi-chevron-right"></i>
+                </span>
+            </li>
+        {% endif %}
+
+        <!-- أرقام الصفحات -->
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}page={{ num }}">{{ num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        <!-- الصفحة التالية والأخيرة -->
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.next_page_number }}" aria-label="التالي">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.paginator.num_pages }}" aria-label="الصفحة الأخيرة">
+                    <i class="bi bi-chevron-double-left"></i>
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">
+                    <i class="bi bi-chevron-left"></i>
+                </span>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link">
+                    <i class="bi bi-chevron-double-left"></i>
+                </span>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+
+<!-- معلومات الصفحة -->
+<div class="d-flex justify-content-between align-items-center mt-3">
+    <small class="text-muted">
+        عرض {{ page_obj.start_index }} إلى {{ page_obj.end_index }} من أصل {{ page_obj.paginator.count }} نتيجة
+    </small>
+    <small class="text-muted">
+        الصفحة {{ page_obj.number }} من {{ page_obj.paginator.num_pages }}
+    </small>
+</div>
+{% endif %}
+

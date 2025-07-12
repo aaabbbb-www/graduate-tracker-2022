@@ -1,0 +1,262 @@
+
+
+
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}مرحباً بك - نظام تتبع الخريجين{% endblock %}
+
+{% comment %}
+سنستخدم هذا البلوك لإضافة كلاس للمحتوى الرئيسي ليسهل استهدافه بالـ CSS
+{% endcomment %}
+{% block main_class %}content-on-bg{% endblock %}
+
+
+{% block content %}
+<section class="hero-section text-white text-center">
+    <div class="container">
+        <div class="row align-items-center justify-content-center min-vh-75">
+            <div class="col-lg-8">
+                <div class="hero-content">
+                    <h1 class="display-3 fw-bold mb-4">
+                        نظام تتبع الخريجين
+                        <span class="text-warning">في جامعة اقليم سبأ</span>
+                    </h1>
+                    <p class="lead mb-4">
+                        منصة شاملة لإدارة ومتابعة الخريجين، إجراء الاستبيانات، وإنتاج التقارير التفصيلية
+                        لمساعدة المؤسسات التعليمية في تطوير برامجها الأكاديمية
+                    </p>
+                    <div class="hero-buttons">
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'dashboard' %}" class="btn btn-warning btn-lg me-3">
+                                <i class="bi bi-speedometer2 me-2"></i>
+                              
+                            </a>
+                        {% else %}
+                            <a href="{% url 'accounts:login' %}" class="btn btn-warning btn-lg me-3">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>
+                                تسجيل الدخول
+                            </a>
+                            <a href="{% url 'accounts:signup' %}" class="btn btn-outline-light btn-lg">
+                                <i class="bi bi-person-plus me-2"></i>
+                                إنشاء حساب
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="features-section">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="display-5 fw-bold mb-3">مميزات النظام</h2>
+                <p class="lead">
+                    نظام متكامل يوفر جميع الأدوات اللازمة لمتابعة الخريجين في الجامعة بكفاءة عالية لتحسين جودة البرامج بمايناسب متطلبات سوق العمل وموكبة العصر والتميز لخريجي الجامعة
+                </p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="bi bi-people-fill" style="font-size: 3rem; color: #ffc107;"></i>
+                        </div>
+                        <h5 class="card-title">إدارة الخريجين</h5>
+                        <p class="card-text">
+                            إدارة شاملة لبيانات الخريجين مع إمكانية البحث والفلترة المتقدمة.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="bi bi-clipboard-data-fill" style="font-size: 3rem; color: #ffc107;"></i>
+                        </div>
+                        <h5 class="card-title">الاستبيانات التفاعلية</h5>
+                        <p class="card-text">
+                            إنشاء وإدارة استبيانات متنوعة مع أنواع أسئلة مختلفة وإرسالها للخريجين.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-3">
+
+
+<i class="bi bi-graph-up-arrow" style="font-size: 3rem; color: #ffc107;"></i>
+                        </div>
+                        <h5 class="card-title">التقارير والإحصائيات</h5>
+                        <p class="card-text">
+                            تقارير تفصيلية وإحصائيات متقدمة مع رسوم بيانية تفاعلية لاتخاذ القرارات.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics Section -->
+<section class="stats-section py-5">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-item">
+                    <h3 class="display-4 fw-bold text-primary mb-2">{{ total_graduates|default:"0" }}</h3>
+                    <p class="text-muted">خريج مسجل</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-item">
+                    <h3 class="display-4 fw-bold text-success mb-2">{{ total_surveys|default:"0" }}</h3>
+                    <p class="text-muted">استبيان نشط</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-item">
+                    <h3 class="display-4 fw-bold text-warning mb-2">{{ total_responses|default:"8,900" }}</h3>
+                    <p>استجابة مكتملة</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-item">
+                    <h3 class="display-4 fw-bold text-warning mb-2">{{ total_reports|default:"120" }}</h3>
+                    <p>تقرير منشور</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How it Works Section -->
+<section class="how-it-works py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="display-5 fw-bold mb-3">كيف يعمل النظام</h2>
+                <p class="lead text-muted">خطوات بسيطة للبدء في استخدام النظام</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="step-card text-center">
+                    <div class="step-number bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                        <span class="fw-bold">1</span>
+                    </div>
+                    <h5>إضافة الخريجين</h5>
+                    <p class="text-muted">
+                        قم بإضافة بيانات الخريجين أو استيرادها من ملفات Excel
+                        مع جميع المعلومات الأكاديمية والشخصية
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="step-card text-center">
+                    <div class="step-number bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                        <span class="fw-bold">2</span>
+                    </div>
+                    <h5>إنشاء الاستبيانات</h5>
+{% if not user.is_authenticated %}
+<section class="cta-section">
+    <div class="container text-center">
+        <h2 class="display-5 fw-bold mb-3">جاهز للبدء؟</h2>
+        <p class="lead mb-4">
+            انضم إلى المئات من المؤسسات التعليمية التي تستخدم نظامنا.
+        </p>
+        <a href="{% url 'accounts:signup' %}" class="btn btn-warning btn-lg">
+            <i class="bi bi-rocket-takeoff me-2"></i>
+            إنشاء حساب مجاني الآن
+        </a>
+    </div>
+</section>
+{% endif %}
+{% endblock %}
+
+
+{% block extra_css %}
+<style>
+/* ========================================================== */
+/* ====   تطبيق الخلفية على كامل الصفحة وتعديل الأقسام   ==== */
+/* ========================================================== */
+
+/* 1. تطبيق الخلفية على كامل الصفحة (body) */
+body {
+    background-image: url("{% static 'images/yes.jpg' %}");
+    background-size: cover;
+    background-position: center center;
+    background-attachment: fixed; /* أهم خاصية لجعل الخلفية ثابتة */
+    background-repeat: no-repeat;
+}
+
+/* 2. إزالة الهوامش والـ padding الافتراضي من الحاوية الرئيسية */
+main.content-on-bg {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    margin: 0;
+}
+
+/* 3. تعديل جميع الأقسام لجعلها متوافقة مع الخلفية */
+.content-on-bg section {
+    /* نعطي الأقسام خلفية شبه شفافة لتحسين قراءة النص */
+    background-color: rgba(0, 0, 0, 0.6); /* خلفية سوداء بشفافية 60% */
+    color: #f8f9fa; /* نجعل لون النص الأساسي أبيض فاتح */
+    
+    margin-bottom: 2rem; /* نضيف مسافة بين الأقسام */
+    border-radius: 0.75rem; /* نجعل حواف الأقسام دائرية */
+    padding: 3rem 1.5rem; /* نضيف حشوة داخلية للراحة البصرية */
+    border: 1px solid rgba(255, 255, 255, 0.1); /* حد خفيف لإبراز القسم */
+}
+
+/* 4. تعديل ألوان العناوين والنصوص لتكون واضحة */
+.content-on-bg h1,
+.content-on-bg h2,
+.content-on-bg h3,
+.content-on-bg h5 {
+    color: #ffffff; /* عناوين باللون الأبيض الناصع */
+}
+
+/* يجب أن نحدد لون النص الثانوي (text-muted) ليكون واضحاً أيضاً */
+.content-on-bg .text-muted {
+    color: #ced4da !important; /* لون أبيض مائل للرمادي، و!important لضمان التطبيق */
+}
+
+/* 5. القسم العلوي (Hero) نجعله بدون خلفية خاصة به لأنه سيكتسبها من body */
+.hero-section {
+   background: transparent !important;
+   border: none !important;
+   min-height: 70vh;
+}
+
+
+
+/* 6. تعديل تصميم البطاقات (Cards) لتناسب المظهر الجديد */
+.feature-card {
+    background-color: rgba(255, 255, 255, 0.05) !important; /* خلفية شفافة قليلاً للبطاقات */
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    transition: background-color 0.3s ease;
+    height: 100%;
+}
+.feature-card:hover {
+     background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.feature-card .card-text {
+    color: #ced4da;
+}
+</style>
+{% endblock %}

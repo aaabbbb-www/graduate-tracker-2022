@@ -1,0 +1,328 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ survey.title }} - أخذ الاستبيان{% endblock %}
+
+{% block extra_css %}
+<style>
+    .take-survey-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem 0;
+    }
+    
+    .survey-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 2rem;
+        padding: 3rem;
+        margin-bottom: 3rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    
+    .survey-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .survey-description {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+    }
+    
+    .survey-form {
+        background: white;
+        border-radius: 2rem;
+        padding: 3rem;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        border: none;
+    }
+    
+    .question-section {
+        margin-bottom: 3rem;
+        padding: 2rem;
+        background: #f8f9fa;
+        border-radius: 1.5rem;
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+    }
+    
+    .question-section:hover {
+        border-color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+    }
+    
+    .question-number {
+        display: inline-block;
+        background: #667eea;
+        color: white;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 2rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    
+    .question-text {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+    
+    .choices-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .choice-item {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        border: 2px solid #e9ecef;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .choice-item:hover {
+        border-color: #667eea;
+        background: #f8f9ff;
+        transform: translateX(5px);
+    }
+    
+    .choice-item.selected {
+        border-color: #667eea;
+        background: #f0f4ff;
+    }
+    
+    .choice-radio {
+        width: 1.5rem;
+        height: 1.5rem;
+        border: 2px solid #667eea;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: all 0.3s ease;
+    }
+    
+    .choice-radio::after {
+        content: '';
+        width: 0.7rem;
+        height: 0.7rem;
+        background: #667eea;
+        border-radius: 50%;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .choice-item.selected .choice-radio {
+        background: #667eea;
+    }
+    
+    .choice-item.selected .choice-radio::after {
+        opacity: 1;
+    }
+    
+    .choice-text {
+        color: #333;
+        font-weight: 500;
+        flex-grow: 1;
+        font-size: 1.1rem;
+    }
+    
+    .btn-submit {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        border-radius: 2rem;
+        padding: 1.5rem 3rem;
+        font-weight: 600;
+        font-size: 1.2rem;
+        color: white;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        width: 100%;
+        margin-top: 2rem;
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(40, 167, 69, 0.6);
+    }
+    
+    .progress-bar {
+        background: #e9ecef;
+        border-radius: 1rem;
+        height: 0.5rem;
+        margin-bottom: 2rem;
+        overflow: hidden;
+    }
+    
+    .progress-fill {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        height: 100%;
+        border-radius: 1rem;
+        transition: width 0.3s ease;
+    }
+    
+    .progress-text {
+        text-align: center;
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 2rem;
+    }
+    
+    .required-indicator {
+        color: #dc3545;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+    
+    .error-message {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="take-survey-container">
+    <!-- رأس الاستبيان -->
+    <div class="survey-header">
+        <h1 class="survey-title">{{ survey.title }}</h1>
+        <p class="survey-description">{{ survey.description }}</p>
+    </div>
+    
+    <!-- نموذج الاستبيان -->
+    <div class="survey-form">
+        <form method="post">
+            {% csrf_token %}
+            
+            <!-- شريط التقدم -->
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <div class="progress-text">
+                <span id="currentQuestion">1</span> من <span id="totalQuestions">{{ questions.count }}</span> سؤال
+            </div>
+            
+            <!-- الأسئلة -->
+            {% for question in questions %}
+            <div class="question-section" data-question="{{ forloop.counter }}">
+                <div class="question-number">{{ forloop.counter }}</div>
+                <div class="question-text">{{ question.question_text }}</div>
+                
+                <div class="choices-list">
+                    {% for choice in question.choices.all %}
+                    <div class="choice-item" data-question="{{ forloop.parentloop.counter }}" data-choice="{{ choice.id }}">
+                        <div class="choice-radio"></div>
+                        <div class="choice-text">{{ choice.choice_text }}</div>
+                        <input type="radio" name="question_{{ question.id }}" value="{{ choice.id }}" 
+                               style="display: none;" required>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                {% if question.is_required %}
+                <div class="required-indicator">
+                    <i class="fas fa-asterisk me-1"></i>هذا السؤال مطلوب
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-paper-plane me-2"></i>إرسال الاستبيان
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        var totalQuestions = {{ questions.count }};
+        var currentQuestion = 1;
+        
+        // تأثير ظهور العناصر
+        $('.survey-header, .survey-form').each(function(index) {
+            $(this).css('opacity', '0').animate({
+                opacity: 1
+            }, 500 + (index * 200));
+        });
+        
+        // تفاعل اختيار الإجابات
+        $('.choice-item').on('click', function() {
+            var questionId = $(this).data('question');
+            var choiceId = $(this).data('choice');
+            
+            // إلغاء اختيار الخيارات الأخرى في نفس السؤال
+            $('.choice-item[data-question="' + questionId + '"]').removeClass('selected');
+            $('input[name="question_' + questionId + '"]').prop('checked', false);
+            
+            // اختيار الخيار الحالي
+            $(this).addClass('selected');
+            $(this).find('input[type="radio"]').prop('checked', true);
+            
+            // تحديث شريط التقدم
+            updateProgress();
+        });
+        
+        // تحديث شريط التقدم
+        function updateProgress() {
+            var answeredQuestions = $('input[type="radio"]:checked').length;
+            var progress = (answeredQuestions / totalQuestions) * 100;
+            
+            $('#progressFill').css('width', progress + '%');
+            $('#currentQuestion').text(answeredQuestions);
+        }
+        
+        // التحقق من صحة النموذج
+        $('form').on('submit', function(e) {
+            var requiredQuestions = $('.question-section').length;
+            var answeredQuestions = $('input[type="radio"]:checked').length;
+            
+            if (answeredQuestions < requiredQuestions) {
+                e.preventDefault();
+                alert('يرجى الإجابة على جميع الأسئلة قبل الإرسال');
+                return false;
+            }
+            
+            return confirm('هل أنت متأكد من إرسال الاستبيان؟ لا يمكن تعديل الإجابات بعد الإرسال.');
+        });
+        
+        // تأثير الأزرار
+        $('.btn-submit').on('mouseenter', function() {
+            $(this).addClass('pulse');
+        }).on('mouseleave', function() {
+            $(this).removeClass('pulse');
+        });
+        
+        // تأثير البطاقات
+        $('.question-section').on('mouseenter', function() {
+            $(this).addClass('shadow-lg');
+        }).on('mouseleave', function() {
+            $(this).removeClass('shadow-lg');
+        });
+    });
+</script>
+{% endblock %} 

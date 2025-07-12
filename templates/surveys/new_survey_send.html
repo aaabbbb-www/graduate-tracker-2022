@@ -1,0 +1,431 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}إرسال الاستبيان - {{ survey.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .send-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem 0;
+    }
+    
+    .send-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 2rem;
+        padding: 3rem;
+        margin-bottom: 3rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .send-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .send-subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+    }
+    
+    .survey-info {
+        background: rgba(255,255,255,0.1);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .survey-name {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .survey-description {
+        opacity: 0.9;
+        font-size: 0.95rem;
+    }
+    
+    .send-form {
+        background: white;
+        border-radius: 2rem;
+        padding: 3rem;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        border: none;
+    }
+    
+    .form-section {
+        margin-bottom: 3rem;
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .graduates-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1rem;
+        max-height: 400px;
+        overflow-y: auto;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 1rem;
+        border: 2px solid #e9ecef;
+    }
+    
+    .graduate-card {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .graduate-card:hover {
+        border-color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+    }
+    
+    .graduate-card.selected {
+        border-color: #667eea;
+        background: #f8f9ff;
+    }
+    
+    .graduate-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .graduate-avatar {
+        width: 3rem;
+        height: 3rem;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 1.2rem;
+    }
+    
+    .graduate-details {
+        flex-grow: 1;
+    }
+    
+    .graduate-name {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.25rem;
+    }
+    
+    .graduate-email {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .graduate-checkbox {
+        width: 1.2rem;
+        height: 1.2rem;
+        border: 2px solid #667eea;
+        border-radius: 0.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: all 0.3s ease;
+    }
+    
+    .graduate-checkbox::after {
+        content: '✓';
+        color: white;
+        font-size: 0.8rem;
+        font-weight: 600;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .graduate-card.selected .graduate-checkbox {
+        background: #667eea;
+    }
+    
+    .graduate-card.selected .graduate-checkbox::after {
+        opacity: 1;
+    }
+    
+    .select-all-section {
+        background: #e8f5e8;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border-left: 4px solid #28a745;
+    }
+    
+    .select-all-title {
+        font-weight: 600;
+        color: #2e7d32;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .select-all-checkbox {
+        width: 1.5rem;
+        height: 1.5rem;
+        border: 2px solid #28a745;
+        border-radius: 0.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .select-all-checkbox::after {
+        content: '✓';
+        color: white;
+        font-size: 1rem;
+        font-weight: 600;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .select-all-checkbox.checked {
+        background: #28a745;
+    }
+    
+    .select-all-checkbox.checked::after {
+        opacity: 1;
+    }
+    
+    .btn-send {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        border-radius: 2rem;
+        padding: 1.5rem 3rem;
+        font-weight: 600;
+        font-size: 1.2rem;
+        color: white;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        width: 100%;
+        margin-top: 2rem;
+    }
+    
+    .btn-send:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(40, 167, 69, 0.6);
+    }
+    
+    .btn-back {
+        background: #6c757d;
+        border: none;
+        border-radius: 2rem;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        margin-bottom: 2rem;
+    }
+    
+    .btn-back:hover {
+        background: #5a6268;
+        color: white;
+        text-decoration: none;
+        transform: translateY(-1px);
+    }
+    
+    .stats-summary {
+        background: #f8f9fa;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .stats-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #667eea;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stats-label {
+        color: #666;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="send-container">
+    <!-- زر العودة -->
+    <a href="{% url 'surveys:detail' survey.pk %}" class="btn-back">
+        <i class="fas fa-arrow-right me-2"></i>العودة للاستبيان
+    </a>
+    
+    <!-- رأس إرسال الاستبيان -->
+    <div class="send-header">
+        <h1 class="send-title">إرسال الاستبيان</h1>
+        <p class="send-subtitle">
+            اختر الخريجين الذين تريد إرسال الاستبيان إليهم. سيتم إرسال رابط الاستبيان عبر البريد الإلكتروني.
+        </p>
+        
+        <!-- معلومات الاستبيان -->
+        <div class="survey-info">
+            <div class="survey-name">{{ survey.title }}</div>
+            <div class="survey-description">{{ survey.description|truncatewords:30 }}</div>
+        </div>
+    </div>
+    
+    <!-- نموذج إرسال الاستبيان -->
+    <div class="send-form">
+        <form method="post">
+            {% csrf_token %}
+            
+            <!-- إحصائيات سريعة -->
+            <div class="stats-summary">
+                <div class="stats-number">{{ graduates.count }}</div>
+                <div class="stats-label">إجمالي الخريجين المتاحين</div>
+            </div>
+            
+            <!-- اختيار الكل -->
+            <div class="select-all-section">
+                <div class="select-all-title">
+                    <i class="fas fa-check-double"></i>
+                    اختيار سريع
+                </div>
+                <div class="d-flex align-items-center">
+                    <div class="select-all-checkbox" id="selectAllCheckbox"></div>
+                    <span>اختيار جميع الخريجين</span>
+                </div>
+            </div>
+            
+            <!-- قائمة الخريجين -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-users"></i>
+                    اختر الخريجين
+                </h3>
+                
+                <div class="graduates-grid">
+                    {% for graduate in graduates %}
+                    <div class="graduate-card" data-graduate-id="{{ graduate.id }}">
+                        <div class="graduate-info">
+                            <div class="graduate-avatar">
+                                {{ graduate.full_name|first|upper }}
+                            </div>
+                            <div class="graduate-details">
+                                <div class="graduate-name">{{ graduate.full_name }}</div>
+                                <div class="graduate-email">{{ graduate.email }}</div>
+                            </div>
+                            <div class="graduate-checkbox"></div>
+                        </div>
+                        <input type="checkbox" name="graduates" value="{{ graduate.id }}" 
+                               style="display: none;" class="graduate-checkbox-input">
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <button type="submit" class="btn-send">
+                <i class="fas fa-paper-plane me-2"></i>إرسال الاستبيان
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // تأثير ظهور العناصر
+        $('.send-header, .send-form').each(function(index) {
+            $(this).css('opacity', '0').animate({
+                opacity: 1
+            }, 500 + (index * 200));
+        });
+        
+        // تفاعل اختيار الخريجين
+        $('.graduate-card').on('click', function() {
+            var checkbox = $(this).find('.graduate-checkbox-input');
+            var isChecked = checkbox.prop('checked');
+            
+            checkbox.prop('checked', !isChecked);
+            $(this).toggleClass('selected', !isChecked);
+            
+            updateSelectAllCheckbox();
+        });
+        
+        // تفاعل اختيار الكل
+        $('#selectAllCheckbox').on('click', function() {
+            var isChecked = $(this).hasClass('checked');
+            
+            if (isChecked) {
+                // إلغاء اختيار الكل
+                $('.graduate-checkbox-input').prop('checked', false);
+                $('.graduate-card').removeClass('selected');
+                $(this).removeClass('checked');
+            } else {
+                // اختيار الكل
+                $('.graduate-checkbox-input').prop('checked', true);
+                $('.graduate-card').addClass('selected');
+                $(this).addClass('checked');
+            }
+        });
+        
+        // تحديث حالة اختيار الكل
+        function updateSelectAllCheckbox() {
+            var totalGraduates = $('.graduate-checkbox-input').length;
+            var selectedGraduates = $('.graduate-checkbox-input:checked').length;
+            
+            if (selectedGraduates === 0) {
+                $('#selectAllCheckbox').removeClass('checked');
+            } else if (selectedGraduates === totalGraduates) {
+                $('#selectAllCheckbox').addClass('checked');
+            } else {
+                $('#selectAllCheckbox').removeClass('checked');
+            }
+        }
+        
+        // التحقق من صحة النموذج
+        $('form').on('submit', function() {
+            var selectedGraduates = $('.graduate-checkbox-input:checked').length;
+            
+            if (selectedGraduates === 0) {
+                alert('يرجى اختيار خريجين على الأقل');
+                return false;
+            }
+            
+            return confirm('هل أنت متأكد من إرسال الاستبيان إلى ' + selectedGraduates + ' خريج؟');
+        });
+        
+        // تأثير الأزرار
+        $('.btn-send').on('mouseenter', function() {
+            $(this).addClass('pulse');
+        }).on('mouseleave', function() {
+            $(this).removeClass('pulse');
+        });
+    });
+</script>
+{% endblock %} 

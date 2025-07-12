@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}تأكيد حذف الخيار{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h1 class="main-title mb-4 animate__animated animate__fadeInDown">تأكيد حذف الخيار <i class="fas fa-exclamation-triangle text-danger"></i></h1>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm animate__animated animate__fadeInUp">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="fas fa-trash-alt"></i> تأكيد الحذف</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                        <h5>تحذير: هذا الإجراء لا يمكن التراجع عنه!</h5>
+                        <p class="mb-0">سيتم حذف الخيار وجميع الإجابات المرتبطة به نهائياً من قاعدة البيانات.</p>
+                    </div>
+
+                    <!-- معلومات السياق -->
+                    <div class="card border-info mb-4">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0"><i class="fas fa-info-circle"></i> معلومات السياق</h6>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>الاستبيان:</strong> {{ choice.question.survey.title }}</p>
+                            <p><strong>السؤال:</strong> {{ choice.question.question_text|truncatewords:15 }}</p>
+                            <p><strong>نوع السؤال:</strong> <span class="badge bg-secondary">{{ choice.question.get_question_type_display }}</span></p>
+                            <p><strong>إجمالي خيارات السؤال:</strong> <span class="badge bg-info">{{ choice.question.choices.count }}</span></p>
+                        </div>
+                    </div>
+
+                    <!-- معلومات الخيار المراد حذفه -->
+                    <div class="card border-warning mb-4">
+                        <div class="card-header bg-warning text-dark">
+                            <h6 class="mb-0"><i class="fas fa-list-alt"></i> الخيار المراد حذفه</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="choice-preview p-4 border rounded bg-light">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <h5 class="text-primary mb-3">نص الخيار:</h5>
+                                        <p class="lead">{{ choice.choice_text }}</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h6 class="text-secondary">ترتيب الخيار:</h6>
+                                        <span class="badge bg-secondary fs-6">{{ choice.order }}</span>
+                                    </div>
+                                </div>
+                                
+                                <hr>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <small class="text-muted">تاريخ الإنشاء: {{ choice.created_at|date:"Y-m-d H:i" }}</small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <small class="text-muted">آخر تعديل: {{ choice.updated_at|date:"Y-m-d H:i" }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- إحصائيات الاستخدام -->
+                    <div class="card border-danger mb-4">
+                        <div class="card-header bg-danger text-white">
+                            <h6 class="mb-0"><i class="fas fa-chart-bar"></i> إحصائيات الاستخدام</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-4">
+                                    <div class="stat-card p-3 border rounded">
+                                        <i class="fas fa-mouse-pointer fa-2x text-info mb-2"></i>
+                                        <h4 class="text-info">{{ choice_selections }}</h4>
+                                        <p class="mb-0">مرات الاختيار</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="stat-card p-3 border rounded">
+                                        <i class="fas fa-users fa-2x text-success mb-2"></i>
+                                        <h4 class="text-success">{{ unique_selectors }}</h4>
+                                        <p class="mb-0">عدد المختارين</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="stat-card p-3 border rounded">
+                                        <i class="fas fa-percentage fa-2x text-warning mb-2"></i>
+                                        <h4 class="text-warning">{{ selection_percentage|floatformat:1 }}%</h4>
+                                        <p class="mb-0">نسبة الاختيار</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {% if choice_selections > 0 %}
+                            <div class="alert alert-warning mt-3">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <strong>تحذير:</strong> سيتم حذف جميع الاختيارات الـ {{ choice_selections }} المرتبطة بهذا الخيار نهائياً.
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- الخيارات المتبقية -->
+                    <div class="card border-success mb-4">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0"><i class="fas fa-list"></i> الخيارات المتبقية بعد الحذف</h6>
+                        </div>
+                        <div class="card-body">
+                            {% if remaining_choices %}
+                                <div class="row">
+                                    {% for remaining_choice in remaining_choices %}
+                                        <div class="col-md-6 mb-2">
+                                            <div class="d-flex align-items-center">
+                                                <span class="badge bg-success me-2">{{ remaining_choice.order }}</span>
+                                                <span>{{ remaining_choice.choice_text|truncatewords:8 }}</span>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="alert alert-success mt-3">
+                                    <i class="fas fa-check-circle"></i>
+                                    سيتبقى <strong>{{ remaining_choices|length }}</strong> خيار/خيارات بعد الحذف.
+                                </div>
+                            {% else %}
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <strong>تحذير:</strong> لن تتبقى أي خيارات بعد حذف هذا الخيار! هذا قد يجعل السؤال غير قابل للاستخدام.
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- نموذج التأكيد -->
+                    <form method="post" class="text-center">
+                        {% csrf_token %}
+                        
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="confirmDelete" required>
+                            <label class="form-check-label text-danger" for="confirmDelete">
+                                <strong>أؤكد أنني أريد حذف هذا الخيار وجميع الاختيارات المرتبطة به نهائياً</strong>
+                            </label>
+                        </div>
+                        
+                        {% if remaining_choices|length < 2 %}
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="confirmMinimum" required>
+                            <label class="form-check-label text-danger" for="confirmMinimum">
+                                <strong>أدرك أن حذف هذا الخيار سيترك السؤال بأقل من خيارين وقد يجعله غير قابل للاستخدام</strong>
+                            </label>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="btn-group" role="group">
+                            <button type="submit" class="btn btn-danger btn-lg" id="deleteButton" disabled>
+                                <i class="fas fa-trash-alt"></i> تأكيد الحذف
+                            </button>
+                            <a href="{% url 'surveys:choice_edit' choice.question.survey.id choice.question.id choice.id %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i> إلغاء
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{% url 'surveys:question_edit' choice.question.survey.id choice.question.id %}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left"></i> العودة إلى تعديل السؤال
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
+    }
+    
+    .choice-preview {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    #deleteButton:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // تفعيل/تعطيل زر الحذف حسب حالة checkboxes
+        function updateDeleteButton() {
+            const confirmDelete = $('#confirmDelete').is(':checked');
+            const confirmMinimum = $('#confirmMinimum').length === 0 || $('#confirmMinimum').is(':checked');
+            
+            if (confirmDelete && confirmMinimum) {
+                $('#deleteButton').prop('disabled', false).removeClass('btn-secondary').addClass('btn-danger');
+            } else {
+                $('#deleteButton').prop('disabled', true).removeClass('btn-danger').addClass('btn-secondary');
+            }
+        }
+        
+        $('#confirmDelete, #confirmMinimum').change(updateDeleteButton);
+
+        // تأثيرات Hover للبطاقات
+        $(".card").hover(function() {
+            $(this).addClass("shadow-lg").css("transform", "translateY(-3px)");
+        }, function() {
+            $(this).removeClass("shadow-lg").css("transform", "translateY(0)");
+        });
+
+        // تأكيد إضافي عند الإرسال
+        $('form').on('submit', function(e) {
+            const remainingChoices = {{ remaining_choices|length }};
+            let confirmMessage = 'هل أنت متأكد تماماً من حذف هذا الخيار؟ هذا الإجراء لا يمكن التراجع عنه!';
+            
+            if (remainingChoices < 2) {
+                confirmMessage += '\n\nتحذير: سيتبقى أقل من خيارين في السؤال مما قد يجعله غير قابل للاستخدام!';
+            }
+            
+            if (!confirm(confirmMessage)) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    });
+</script>
+{% endblock %}
+

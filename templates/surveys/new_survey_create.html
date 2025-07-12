@@ -1,0 +1,309 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}إنشاء استبيان جديد{% endblock %}
+{% block content %}
+<style>
+.survey-create-container {
+    max-width: 900px;
+    margin: 40px auto;
+    background: linear-gradient(135deg, #f8fafc 0%, #e9ecef 100%);
+    border-radius: 2.5rem;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.18);
+    padding: 2.5rem 2.5rem 2rem 2.5rem;
+    position: relative;
+    overflow: hidden;
+}
+.survey-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2.5rem;
+}
+.survey-header .org-title-box {
+    background: linear-gradient(135deg, #fff 60%, #e9ecef 100%);
+    border-radius: 1.5rem;
+    min-width: 270px;
+    min-height: 110px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 12px rgba(102, 126, 234, 0.10);
+    border: 1.5px solid #e0e0e0;
+    margin-left: 1.5rem;
+}
+.survey-header .org-title-input {
+    width: 100%;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #764ba2;
+    background: transparent;
+    border: none;
+    outline: none;
+    text-align: center;
+}
+.survey-header .logo-upload {
+    background: #fff;
+    border-radius: 50%;
+    width: 110px;
+    height: 110px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 12px rgba(102, 126, 234, 0.10);
+    border: 2px dashed #764ba2;
+    cursor: pointer;
+    transition: border 0.2s;
+    margin-right: 1.5rem;
+    position: relative;
+    overflow: hidden;
+}
+.survey-header .logo-upload:hover {
+    border: 2.5px solid #764ba2;
+}
+.survey-header .logo-upload input[type='file'] {
+    display: none;
+}
+.survey-header .logo-preview {
+    max-width: 90px;
+    max-height: 90px;
+    border-radius: 50%;
+    margin-bottom: 0.5rem;
+    object-fit: cover;
+}
+.survey-title-circle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+.survey-title-input-circle {
+    width: 270px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #fff 60%, #e9ecef 100%);
+    box-shadow: 0 2px 12px rgba(102, 126, 234, 0.10);
+    border: 1.5px solid #e0e0e0;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #333;
+    text-align: center;
+    outline: none;
+    padding: 2.5rem 1.5rem 1.5rem 1.5rem;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.survey-desc-input {
+    width: 100%;
+    min-height: 90px;
+    font-size: 1.1rem;
+    color: #555;
+    border: none;
+    border-radius: 1.5rem;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.08);
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 2rem;
+    outline: none;
+    resize: vertical;
+    transition: box-shadow 0.2s;
+}
+.survey-desc-input:focus {
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.13);
+}
+.survey-questions {
+    margin-bottom: 2.5rem;
+}
+.add-question-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 2rem;
+    padding: 0.8rem 2.5rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+    box-shadow: 0 3px 10px rgba(102, 126, 234, 0.13);
+    transition: all 0.2s;
+    margin-bottom: 1.5rem;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+.add-question-btn:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    box-shadow: 0 6px 18px rgba(102, 126, 234, 0.18);
+    color: #fff;
+}
+.survey-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+.survey-actions .create-btn {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    color: white;
+    border: none;
+    border-radius: 2rem;
+    padding: 0.9rem 2.8rem;
+    font-weight: 800;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.13);
+    transition: all 0.2s;
+}
+.survey-actions .create-btn:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.18);
+}
+.question-list {
+    margin-bottom: 1.5rem;
+}
+.question-item {
+    background: #f3f4f6;
+    border-radius: 1rem;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 1px 4px rgba(102, 126, 234, 0.07);
+}
+.question-item .question-text {
+    font-weight: 600;
+    color: #333;
+}
+.question-item .question-actions button {
+    margin-left: 0.5rem;
+}
+</style>
+<div class="survey-create-container animate__animated animate__fadeInDown">
+    <form method="post" enctype="multipart/form-data" id="survey-create-form">
+        {% csrf_token %}
+        <div class="survey-header">
+            <div class="org-title-box">
+                <input type="text" name="org_title" class="org-title-input" value="{{ org_title|default:'الجمهورية اليمنية\nوزارة التعليم العالي والبحث العلمي\nجامعة ...\nكلية ...' }}" placeholder="شعار البلاد أو الجهة (مثال: الجمهورية اليمنية...)" required />
+            </div>
+            <label class="logo-upload">
+                <span id="logo-label"><i class="fas fa-image"></i> رفع صورة</span>
+                <input type="file" name="logo" id="logo-input" accept="image/*" />
+                <img id="logo-preview" class="logo-preview" style="display:none;" />
+            </label>
+        </div>
+        <div class="survey-title-circle">
+            <input type="text" name="title" class="survey-title-input-circle" placeholder="عنوان الاستبيان (مثال: استبيان متابعة الخريجين)" required />
+        </div>
+        <textarea name="description" class="survey-desc-input" placeholder="وصف أو هدف الاستبيان (مثال: هذا الاستبيان يهدف إلى ...)"></textarea>
+        <div class="survey-questions">
+            <div class="question-list" id="question-list">
+                <!-- ستظهر الأسئلة هنا -->
+            </div>
+            <button type="button" class="add-question-btn" id="add-question-btn"><i class="fas fa-plus-circle"></i> إضافة سؤال</button>
+        </div>
+        <div class="survey-actions">
+            <button type="submit" class="create-btn">تم الإنشاء</button>
+        </div>
+    </form>
+</div>
+<!-- نافذة إضافة سؤال -->
+<div id="question-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.25); z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:1.5rem; padding:2rem 2.5rem; min-width:320px; max-width:95vw; box-shadow:0 8px 32px rgba(102,126,234,0.18);">
+        <h4 style="margin-bottom:1.2rem; color:#764ba2;">إضافة سؤال جديد</h4>
+        <div style="margin-bottom:1rem;">
+            <label>نوع السؤال:</label>
+            <select id="question-type" class="form-select">
+                <option value="text">سؤال نصي</option>
+                <option value="radio">سؤال اختيار من متعدد (إجابة واحدة)</option>
+                <option value="checkbox">سؤال اختيار متعدد (عدة إجابات)</option>
+                <option value="select">قائمة منسدلة</option>
+            </select>
+        </div>
+        <div style="margin-bottom:1rem;">
+            <label>نص السؤال:</label>
+            <input type="text" id="question-text" class="form-control" placeholder="اكتب نص السؤال هنا..." />
+        </div>
+        <div style="margin-bottom:1rem;">
+            <label>ترتيب السؤال:</label>
+            <input type="number" id="question-order" class="form-control" min="1" placeholder="مثال: 1" />
+        </div>
+        <div id="choice-options" style="display:none; margin-bottom:1rem;">
+            <label>الخيارات (كل خيار في سطر):</label>
+            <textarea id="question-choices" class="form-control" placeholder="خيار 1\nخيار 2\nخيار 3"></textarea>
+        </div>
+        <div style="text-align:left;">
+            <button type="button" class="btn btn-primary" id="save-question-btn">إضافة</button>
+            <button type="button" class="btn btn-secondary" id="cancel-question-btn">إلغاء</button>
+        </div>
+    </div>
+</div>
+<script>
+// رفع صورة الشعار
+const logoInput = document.getElementById('logo-input');
+const logoPreview = document.getElementById('logo-preview');
+logoInput.addEventListener('change', function(e) {
+    if (e.target.files && e.target.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            logoPreview.src = ev.target.result;
+            logoPreview.style.display = 'block';
+            document.getElementById('logo-label').style.display = 'none';
+        }
+        reader.readAsDataURL(e.target.files[0]);
+    }
+});
+// منطق إضافة سؤال ديناميكي
+const addQuestionBtn = document.getElementById('add-question-btn');
+const questionModal = document.getElementById('question-modal');
+const saveQuestionBtn = document.getElementById('save-question-btn');
+const cancelQuestionBtn = document.getElementById('cancel-question-btn');
+const questionList = document.getElementById('question-list');
+addQuestionBtn.onclick = function() {
+    questionModal.style.display = 'flex';
+    document.getElementById('question-type').value = 'text';
+    document.getElementById('question-text').value = '';
+    document.getElementById('question-choices').value = '';
+    document.getElementById('question-order').value = '';
+    document.getElementById('choice-options').style.display = 'none';
+};
+document.getElementById('question-type').onchange = function() {
+    if (['radio','checkbox','select'].includes(this.value)) {
+        document.getElementById('choice-options').style.display = 'block';
+    } else {
+        document.getElementById('choice-options').style.display = 'none';
+    }
+};
+cancelQuestionBtn.onclick = function() {
+    questionModal.style.display = 'none';
+};
+saveQuestionBtn.onclick = function() {
+    const type = document.getElementById('question-type').value;
+    const text = document.getElementById('question-text').value;
+    const order = document.getElementById('question-order').value;
+    const choices = document.getElementById('question-choices').value;
+    if (!text.trim()) {
+        alert('يرجى كتابة نص السؤال');
+        return;
+    }
+    if (!order || order < 1) {
+        alert('يرجى تحديد ترتيب السؤال');
+        return;
+    }
+    let html = `<div class='question-item'><span class='question-text'>${order}. ${text} (${type})</span><div class='question-actions'><button type='button' class='btn btn-danger btn-sm remove-question-btn'><i class='fas fa-trash'></i></button></div></div>`;
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    div.className = 'question-item-wrapper';
+    // حفظ البيانات في input مخفي
+    const hidden = document.createElement('input');
+    hidden.type = 'hidden';
+    hidden.name = 'questions[]';
+    hidden.value = JSON.stringify({type, text, order, choices});
+    div.appendChild(hidden);
+    // زر حذف
+    div.querySelector('.remove-question-btn').onclick = function() {
+        div.remove();
+    };
+    questionList.appendChild(div);
+    questionModal.style.display = 'none';
+};
+</script>
+{% endblock %} 

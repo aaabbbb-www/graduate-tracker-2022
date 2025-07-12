@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}تفاصيل الاستبيان{% endblock %}
+
+{% block content %}
+{% if messages %}
+  <div class="container mt-3">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} text-center">
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+<div class="container-fluid mt-4">
+    <h1 class="main-title mb-4 animate__animated animate__fadeInDown">تفاصيل الاستبيان <i class="fas fa-info-circle"></i></h1>
+
+    {% if survey %}
+    <div class="card shadow-sm mb-4 animate__animated animate__fadeInUp">
+        <div class="card-header bg-gradient-primary text-white">
+            <h4 class="mb-0"><i class="fas fa-clipboard-list"></i> {{ survey.title }}</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>الوصف:</strong> {{ survey.description }}</p>
+                    <p><strong>تاريخ البدء:</strong> {{ survey.start_date|date:"Y-m-d" }}</p>
+                    <p><strong>تاريخ الانتهاء:</strong> {{ survey.end_date|date:"Y-m-d" }}</p>
+                    {% if survey.google_form_url %}
+                    <p><strong>رابط جوجل فورم:</strong> 
+                        <a href="{{ survey.google_form_url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <i class="fab fa-google"></i> فتح في جوجل فورم
+                        </a>
+                    </p>
+                    {% endif %}
+                    <p><strong>الحالة:</strong> 
+                        {% if survey.is_active %}
+                            <span class="badge bg-success">نشط</span>
+                        {% else %}
+                            <span class="badge bg-danger">غير نشط</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>تاريخ الإنشاء:</strong> {{ survey.created_at|date:"Y-m-d H:i" }}</p>
+                    <p><strong>آخر تحديث:</strong> {{ survey.updated_at|date:"Y-m-d H:i" }}</p>
+                    <p><strong>عدد الأسئلة:</strong> <span class="badge bg-info">{{ survey.questions.count }}</span></p>
+                    <p><strong>عدد الردود:</strong> <span class="badge bg-success">{{ survey.responses.count }}</span></p>
+                </div>
+            </div>
+            <hr>
+            <div class="d-flex justify-content-end">
+                <a href="{% url 'surveys:delete' pk=survey.pk %}" class="btn btn-danger me-2"><i class="fas fa-trash-alt"></i> حذف</a>
+                <a href="{% url 'surveys:send_survey' pk=survey.pk %}" class="btn btn-success me-2"><i class="fas fa-paper-plane"></i> إرسال</a>
+                <a href="{% url 'surveys:analytics_detail' pk=survey.pk %}" class="btn btn-warning"><i class="fas fa-chart-bar"></i> عرض التحليلات</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm animate__animated animate__fadeInUp">
+        <div class="card-header bg-gradient-secondary text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0"><i class="fas fa-question-circle"></i> أسئلة الاستبيان</h4>
+            <a href="{% url 'surveys:question_create' survey_pk=survey.pk %}" class="btn btn-light btn-sm animate__animated animate__pulse animate__infinite">
+                <i class="fas fa-plus-circle"></i> إضافة سؤال جديد
+            </a>
+        </div>
+        <div class="card-body">
+            {% if survey.questions.all %}
+                <ul class="list-group list-group-flush">
+                    {% for question in survey.questions.all %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center animate__animated animate__fadeInUp animate__delay-{{ forloop.counter0|add:1 }}s">
+                            <div>
+                                <strong>{{ forloop.counter }}. {{ question.question_text }}</strong>
+                                <br>
+                                <small class="text-muted">النوع: {{ question.get_question_type_display }}</small>
+                                {% if question.question_type == 'multiple_choice' or question.question_type == 'single_choice' %}
+                                    <br>
+                                    <small class="text-muted">الخيارات: 
+                                        {% for choice in question.choices.all %}
+                                            {{ choice.choice_text }}{% if not forloop.last %}, {% endif %}
+                                        {% endfor %}
+                                    </small>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <a href="{% url 'surveys:question_edit' survey_pk=survey.pk question_pk=question.pk %}" class="btn btn-sm btn-outline-info me-2"><i class="fas fa-edit"></i></a>
+                                <a href="{% url 'surveys:delete_question' survey_pk=survey.pk question_pk=question.pk %}" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash-alt"></i></a>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-info-circle"></i> لا توجد أسئلة لهذا الاستبيان بعد. ابدأ بإضافة أسئلة!
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% else %}
+    <div class="alert alert-warning text-center animate__animated animate__fadeInUp">
+        <i class="fas fa-exclamation-triangle"></i> الاستبيان المطلوب غير موجود.
+    </div>
+    {% endif %}
+
+    <div class="text-center mt-4">
+        <a href="{% url 'surveys:list' %}" class="btn btn-secondary btn-lg"><i class="fas fa-arrow-left"></i> العودة إلى قائمة الاستبيانات</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // تأثيرات Hover للبطاقات
+        $(".card").hover(function() {
+            $(this).addClass("shadow-lg").css("transform", "translateY(-3px)");
+        }, function() {
+            $(this).removeClass("shadow-lg").css("transform", "translateY(0)");
+        });
+    });
+</script>
+{% endblock %}
+

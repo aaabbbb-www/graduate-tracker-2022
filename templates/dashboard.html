@@ -1,0 +1,659 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}لوحة التحكم - نظام تتبع الخريجين{% endblock %}
+
+{% block extra_css %}
+<style>
+.dashboard-hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 3rem 0;
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dashboard-pattern" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="white" opacity="0.1"/><rect x="5" y="5" width="10" height="2" fill="white" opacity="0.05"/><rect x="3" y="8" width="14" height="1" fill="white" opacity="0.05"/></pattern></defs><rect width="100" height="100" fill="url(%23dashboard-pattern)"/></svg>');
+    opacity: 0.3;
+}
+
+.dashboard-hero-content {
+    position: relative;
+    z-index: 2;
+}
+
+.app-card {
+    background: white;
+    border-radius: 24px;
+    padding: 2.5rem;
+    box-shadow: 0 15px 50px rgba(0,0,0,0.1);
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid rgba(255,255,255,0.1);
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+}
+
+.app-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: var(--app-gradient);
+    transform: scaleX(0);
+    transition: transform 0.4s ease;
+}
+
+.app-card:hover::before {
+    transform: scaleX(1);
+}
+
+.app-card:hover {
+    transform: translateY(-15px) scale(1.02);
+    box-shadow: 0 25px 70px rgba(0,0,0,0.2);
+    text-decoration: none;
+    color: inherit;
+}
+
+.app-icon {
+    width: 100px;
+    height: 100px;
+    background: var(--app-gradient);
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.app-icon::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+    transform: rotate(45deg);
+    transition: all 0.8s;
+    opacity: 0;
+}
+
+.app-card:hover .app-icon::before {
+    animation: shimmer 2s ease-in-out;
+    opacity: 1;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+.app-icon i {
+    font-size: 3rem;
+    color: white;
+    position: relative;
+    z-index: 2;
+}
+
+.app-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #2d3748;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.app-description {
+    color: #718096;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+    text-align: center;
+    font-size: 1rem;
+}
+
+.app-stats {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 2rem;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: 800;
+    background: var(--app-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: block;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: #a0aec0;
+    font-weight: 600;
+    margin-top: 0.25rem;
+}
+
+.app-actions {
+    text-align: center;
+}
+
+.app-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 2rem;
+    background: var(--app-gradient);
+    color: white;
+    text-decoration: none;
+    border-radius: 16px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    font-size: 0.9rem;
+}
+
+.app-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.6s;
+}
+
+.app-btn:hover::before {
+    left: 100%;
+}
+
+.app-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    color: white;
+    text-decoration: none;
+}
+
+.app-btn i {
+    margin-left: 0.5rem;
+    transition: transform 0.3s ease;
+}
+
+.app-btn:hover i {
+    transform: translateX(5px);
+}
+
+/* تدرجات مخصصة لكل تطبيق */
+.graduates-card {
+    --app-gradient: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.surveys-card {
+    --app-gradient: linear-gradient(135deg, #4facfe, #00f2fe);
+}
+
+.accounts-card {
+    --app-gradient: linear-gradient(135deg, #fa709a, #fee140);
+}
+
+.reports-card {
+    --app-gradient: linear-gradient(135deg, #43e97b, #38f9d7);
+}
+
+.stats-overview {
+    background: linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 3rem;
+}
+
+.overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.overview-item {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.overview-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+}
+
+.overview-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+}
+
+.overview-label {
+    color: #718096;
+    font-weight: 600;
+}
+
+.welcome-section {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.welcome-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+}
+
+.welcome-subtitle {
+    color: #718096;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+    .dashboard-hero {
+        padding: 2rem 0;
+    }
+    
+    .app-card {
+        margin-bottom: 2rem;
+        padding: 2rem;
+    }
+    
+    .app-icon {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .app-icon i {
+        font-size: 2.5rem;
+    }
+    
+    .welcome-title {
+        font-size: 2rem;
+    }
+}
+
+.pulse-animation {
+    animation: pulse 3s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+.floating-help {
+    position: fixed;
+    bottom: 2rem;
+    left: 2rem;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-decoration: none;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.floating-help:hover {
+    transform: scale(1.1);
+    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.floating-help i {
+    font-size: 1.5rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="dashboard-hero">
+    <div class="container">
+        <div class="dashboard-hero-content text-center">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <h1 class="display-4 fw-bold mb-3">
+                        <i class="bi bi-speedometer2 me-3"></i>
+                        لوحة التحكم الرئيسية
+                    </h1>
+                    <p class="lead mb-0">
+                        مرحباً بك في نظام تتبع الخريجين - اختر التطبيق الذي تريد إدارته
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+        <h2 class="welcome-title">أهلاً وسهلاً {{ user.get_full_name|default:user.username }}</h2>
+        <p class="welcome-subtitle">
+            يمكنك من خلال لوحة التحكم هذه الوصول إلى جميع أقسام النظام وإدارة بيانات الخريجين بكل سهولة ويسر
+        </p>
+    </div>
+
+    <!-- Statistics Overview -->
+    <div class="stats-overview">
+        <h4 class="text-center mb-4" style="color: #2d3748; font-weight: 700;">
+            <i class="bi bi-graph-up me-2"></i>
+            نظرة عامة على النظام
+        </h4>
+        <div class="overview-grid">
+            <div class="overview-item pulse-animation">
+                <div class="overview-number">{{ total_graduates|default:"0" }}</div>
+                <div class="overview-label">إجمالي الخريجين</div>
+            </div>
+            <div class="overview-item">
+                <div class="overview-number">{{ total_surveys|default:"0" }}</div>
+                <div class="overview-label">الاستبيانات النشطة</div>
+            </div>
+            <div class="overview-item">
+                <div class="overview-number">{{ total_users|default:"0" }}</div>
+                <div class="overview-label">المستخدمون</div>
+            </div>
+            <div class="overview-item">
+                <div class="overview-number">{{ total_reports|default:"0" }}</div>
+                <div class="overview-label">التقارير المنشأة</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Applications Grid -->
+    <div class="row g-4">
+        <!-- إدارة الخريجين -->
+        <div class="col-lg-6 col-md-6">
+            <a href="{% url 'graduates:home' %}" class="app-card graduates-card">
+                <div class="app-icon">
+                    <i class="bi bi-mortarboard-fill"></i>
+                </div>
+                <h3 class="app-title">إدارة الخريجين</h3>
+                <p class="app-description">
+                    إدارة شاملة لبيانات الخريجين، تتبع مسيرتهم المهنية، وبناء قاعدة بيانات متكاملة للخريجين
+                </p>
+                <div class="app-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">{{ total_graduates|default:"0" }}</span>
+                        <span class="stat-label">خريج</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">{{ employed_graduates|default:"0" }}</span>
+                        <span class="stat-label">موظف</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">{{ recent_graduates|default:"0" }}</span>
+                        <span class="stat-label">جديد</span>
+                    </div>
+                </div>
+                <div class="app-actions">
+                    <span class="app-btn">
+                        دخول إدارة الخريجين <i class="bi bi-arrow-left"></i>
+                    </span>
+                </div>
+            </a>
+        </div>
+
+        <!-- إدارة الاستبيانات -->
+        <div class="col-lg-6 col-md-6">
+            <a href="{% url 'surveys:home' %}" class="app-card surveys-card">
+                <div class="app-icon">
+                    <i class="bi bi-clipboard-data-fill"></i>
+                </div>
+                <h3 class="app-title">إدارة الاستبيانات</h3>
+                <p class="app-description">
+                    إنشاء وإدارة الاستبيانات، جمع آراء الخريجين، وتحليل البيانات للحصول على رؤى قيمة
+                </p>
+                <div class="app-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">{{ total_surveys|default:"0" }}</span>
+                        <span class="stat-label">استبيان</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">{{ active_surveys|default:"0" }}</span>
+                        <span class="stat-label">نشط</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">{{ total_responses|default:"0" }}</span>
+                        <span class="stat-label">استجابة</span>
+                    </div>
+                </div>
+                <div class="app-actions">
+                    <span class="app-btn">
+                        دخول إدارة الاستبيانات <i class="bi bi-arrow-left"></i>
+                    </span>
+                </div>
+            </a>
+        </div>
+
+        <!-- إدارة الحسابات -->
+        <div class="col-lg-6 col-md-6">
+            <a href="{% url 'accounts:home' %}" class="app-card accounts-card">
+                <div class="app-icon">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <h3 class="app-title">إدارة الحسابات</h3>
+                <p class="app-description">
+                    إدارة المستخدمين والصلاحيات، ضمان الأمان، وتنظيم الوصول لجميع أجزاء النظام
+                </p>
+                <div class="app-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">{{ total_users|default:"0" }}</span>
+                        <span class="stat-label">مستخدم</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">{{ active_users|default:"0" }}</span>
+                        <span class="stat-label">نشط</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">{{ admin_users|default:"0" }}</span>
+                        <span class="stat-label">مدير</span>
+                    </div>
+                </div>
+                <div class="app-actions">
+                    <span class="app-btn">
+                        دخول إدارة الحسابات <i class="bi bi-arrow-left"></i>
+                    </span>
+                </div>
+            </a>
+        </div>
+
+        <!-- إدارة التقارير -->
+        <div class="col-lg-6 col-md-6">
+            <a href="{% url 'reports:home' %}" class="app-card reports-card">
+                <div class="app-icon">
+                    <i class="bi bi-graph-up"></i>
+                </div>
+                <h3 class="app-title">إدارة التقارير</h3>
+                <p class="app-description">
+                    إنشاء التقارير التفاعلية، تحليل البيانات، والحصول على رؤى استراتيجية حول أداء الخريجين
+                </p>
+                <div class="app-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">{{ total_reports|default:"0" }}</span>
+                        <span class="stat-label">تقرير</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">{{ generated_today|default:"0" }}</span>
+                        <span class="stat-label">اليوم</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">{{ scheduled_reports|default:"0" }}</span>
+                        <span class="stat-label">مجدول</span>
+                    </div>
+                </div>
+                <div class="app-actions">
+                    <span class="app-btn">
+                        دخول إدارة التقارير <i class="bi bi-arrow-left"></i>
+                    </span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%); border-radius: 20px;">
+                <div class="card-body p-4">
+                    <h4 class="text-center mb-4" style="color: #2d3748; font-weight: 700;">
+                        <i class="bi bi-lightning-charge-fill me-2"></i>
+                        إجراءات سريعة
+                    </h4>
+                    <div class="row g-3">
+                        <div class="col-md-3 col-sm-6">
+                            <a href="{% url 'graduates:create' %}" class="btn btn-outline-primary w-100 py-3" style="border-radius: 12px;">
+                                <i class="bi bi-person-plus d-block mb-2" style="font-size: 1.5rem;"></i>
+                                إضافة خريج جديد
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <a href="{% url 'surveys:create' %}" class="btn btn-outline-info w-100 py-3" style="border-radius: 12px;">
+                                <i class="bi bi-clipboard-plus d-block mb-2" style="font-size: 1.5rem;"></i>
+                                إنشاء استبيان جديد
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <a href="{% url 'reports:custom' %}" class="btn btn-outline-success w-100 py-3" style="border-radius: 12px;">
+                                <i class="bi bi-file-earmark-plus d-block mb-2" style="font-size: 1.5rem;"></i>
+                                إنشاء تقرير جديد
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <a href="{% url 'accounts:user_create' %}" class="btn btn-outline-warning w-100 py-3" style="border-radius: 12px;">
+                                <i class="bi bi-person-gear d-block mb-2" style="font-size: 1.5rem;"></i>
+                                إضافة مستخدم جديد
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Help Button -->
+<a href="#" class="floating-help" title="المساعدة والدعم">
+    <i class="bi bi-question-lg"></i>
+</a>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add hover effects to app cards
+    document.querySelectorAll('.app-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-15px) scale(1.02)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+
+    // Add counter animation to stats
+    function animateCounter(element, target) {
+        let current = 0;
+        const increment = target / 100;
+        const timer = setInterval(() => {
+            current += increment;
+            element.textContent = Math.floor(current);
+            if (current >= target) {
+                element.textContent = target;
+                clearInterval(timer);
+            }
+        }, 20);
+    }
+
+    // Trigger counter animation when stats come into view
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const numbers = entry.target.querySelectorAll('.overview-number, .stat-number');
+                numbers.forEach(number => {
+                    const target = parseInt(number.textContent);
+                    if (target > 0) {
+                        animateCounter(number, target);
+                    }
+                });
+                observer.unobserve(entry.target);
+            }
+        });
+    });
+
+    document.querySelectorAll('.overview-item, .app-stats').forEach(item => {
+        observer.observe(item);
+    });
+
+    // Add loading animation to quick action buttons
+    document.querySelectorAll('.btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            if (!this.classList.contains('loading')) {
+                this.classList.add('loading');
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>جاري التحميل...';
+                
+                // Simulate loading (remove this in production)
+                setTimeout(() => {
+                    this.classList.remove('loading');
+                    this.innerHTML = originalText;
+                }, 1000);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
+

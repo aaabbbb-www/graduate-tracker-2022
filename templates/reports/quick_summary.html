@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}ملخص سريع - إدارة التقارير{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <h2 class="mb-4">ملخص سريع</h2>
+    <p>هذه الصفحة تعرض ملخصاً سريعاً لأهم الإحصائيات والتقارير في النظام.</p>
+    <ul>
+        <li>عدد التقارير: {{ total_reports|default:"-" }}</li>
+        <li>عدد الخريجين: {{ total_graduates|default:"-" }}</li>
+        <li>عدد الاستبيانات: {{ total_surveys|default:"-" }}</li>
+        <li>عدد الاستجابات: {{ total_responses|default:"-" }}</li>
+    </ul>
+</div>
+{% endblock %}

@@ -1,0 +1,307 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-section {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .form-section h4 {
+        color: #007bff;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .send-options {
+        background: #e3f2fd;
+        border-left: 4px solid #2196f3;
+    }
+    
+    .graduate-selection {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 10px;
+    }
+    
+    .graduate-item {
+        padding: 8px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .graduate-item:last-child {
+        border-bottom: none;
+    }
+    
+    .graduate-item:hover {
+        background: #f5f5f5;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h3 class="mb-0"><i class="fas fa-edit"></i> {{ title }}</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="surveyForm">
+                        {% csrf_token %}
+                        
+                        <!-- معلومات الاستبيان الأساسية -->
+                        <div class="form-section">
+                            <h4><i class="fas fa-info-circle"></i> معلومات الاستبيان</h4>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.title.id_for_label }}" class="form-label">
+                                            {{ form.title.label }} <span class="text-danger">*</span>
+                                        </label>
+                                        {{ form.title }}
+                                        {% if form.title.errors %}
+                                            <div class="text-danger">{{ form.title.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.status.id_for_label }}" class="form-label">
+                                            {{ form.status.label }}
+                                        </label>
+                                        {{ form.status }}
+                                        {% if form.status.errors %}
+                                            <div class="text-danger">{{ form.status.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.description.id_for_label }}" class="form-label">
+                                    {{ form.description.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.description }}
+                                {% if form.description.errors %}
+                                    <div class="text-danger">{{ form.description.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.start_date.id_for_label }}" class="form-label">
+                                            {{ form.start_date.label }} <span class="text-danger">*</span>
+                                        </label>
+                                        {{ form.start_date }}
+                                        {% if form.start_date.errors %}
+                                            <div class="text-danger">{{ form.start_date.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.end_date.id_for_label }}" class="form-label">
+                                            {{ form.end_date.label }} <span class="text-danger">*</span>
+                                        </label>
+                                        {{ form.end_date }}
+                                        {% if form.end_date.errors %}
+                                            <div class="text-danger">{{ form.end_date.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.google_form_url.id_for_label }}" class="form-label">
+                                    {{ form.google_form_url.label }}
+                                </label>
+                                {{ form.google_form_url }}
+                                <div class="form-text">رابط استبيان Google Forms (اختياري)</div>
+                                {% if form.google_form_url.errors %}
+                                    <div class="text-danger">{{ form.google_form_url.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.target_college.id_for_label }}" class="form-label">
+                                    {{ form.target_college.label }}
+                                </label>
+                                {{ form.target_college }}
+                                <div class="form-text">{{ form.target_college.help_text }}</div>
+                                {% if form.target_college.errors %}
+                                    <div class="text-danger">{{ form.target_college.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- خيارات الإرسال -->
+                        <div class="form-section send-options">
+                            <h4><i class="fas fa-paper-plane"></i> خيارات الإرسال</h4>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.send_method.id_for_label }}" class="form-label">
+                                            {{ form.send_method.label }}
+                                        </label>
+                                        {{ form.send_method }}
+                                        {% if form.send_method.errors %}
+                                            <div class="text-danger">{{ form.send_method.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <div class="form-check">
+                                            {{ form.auto_send }}
+                                            <label class="form-check-label" for="{{ form.auto_send.id_for_label }}">
+                                                {{ form.auto_send.label }}
+                                            </label>
+                                        </div>
+                                        <div class="form-text">{{ form.auto_send.help_text }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- رسائل مخصصة -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.email_subject.id_for_label }}" class="form-label">
+                                            {{ form.email_subject.label }}
+                                        </label>
+                                        {{ form.email_subject }}
+                                        <div class="form-text">{{ form.email_subject.help_text }}</div>
+                                        {% if form.email_subject.errors %}
+                                            <div class="text-danger">{{ form.email_subject.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="{{ form.email_message.id_for_label }}" class="form-label">
+                                            {{ form.email_message.label }}
+                                        </label>
+                                        {{ form.email_message }}
+                                        <div class="form-text">{{ form.email_message.help_text }}</div>
+                                        {% if form.email_message.errors %}
+                                            <div class="text-danger">{{ form.email_message.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="{{ form.whatsapp_message.id_for_label }}" class="form-label">
+                                            {{ form.whatsapp_message.label }}
+                                        </label>
+                                        {{ form.whatsapp_message }}
+                                        <div class="form-text">{{ form.whatsapp_message.help_text }}</div>
+                                        {% if form.whatsapp_message.errors %}
+                                            <div class="text-danger">{{ form.whatsapp_message.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- اختيار الخريجين -->
+                        <div class="form-section">
+                            <h4><i class="fas fa-users"></i> اختيار الخريجين</h4>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">{{ form.selected_graduates.label }}</label>
+                                <div class="graduate-selection">
+                                    {% for graduate in form.selected_graduates %}
+                                    <div class="graduate-item">
+                                        <div class="form-check">
+                                            {{ graduate.tag }}
+                                            <label class="form-check-label" for="{{ graduate.id_for_label }}">
+                                                {{ graduate.choice_label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="form-text">{{ form.selected_graduates.help_text }}</div>
+                                {% if form.selected_graduates.errors %}
+                                    <div class="text-danger">{{ form.selected_graduates.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- أزرار التحكم -->
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save"></i> حفظ الاستبيان
+                            </button>
+                            <a href="{% url 'surveys:list' %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i> إلغاء
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // تحديث عرض خيارات الإرسال
+    function updateSendOptions() {
+        const sendMethod = $('#id_send_method').val();
+        const autoSend = $('#id_auto_send').is(':checked');
+        
+        if (autoSend) {
+            $('.send-options').show();
+            if (sendMethod === 'email' || sendMethod === 'both') {
+                $('#id_email_subject, #id_email_message').closest('.mb-3').show();
+            } else {
+                $('#id_email_subject, #id_email_message').closest('.mb-3').hide();
+            }
+            
+            if (sendMethod === 'whatsapp' || sendMethod === 'both') {
+                $('#id_whatsapp_message').closest('.mb-3').show();
+            } else {
+                $('#id_whatsapp_message').closest('.mb-3').hide();
+            }
+        } else {
+            $('.send-options').hide();
+        }
+    }
+    
+    // استدعاء الدالة عند التحميل
+    updateSendOptions();
+    
+    // تحديث عند تغيير القيم
+    $('#id_send_method, #id_auto_send').change(function() {
+        updateSendOptions();
+    });
+    
+    // التحقق من صحة النموذج
+    $('#surveyForm').submit(function(e) {
+        const autoSend = $('#id_auto_send').is(':checked');
+        const selectedGraduates = $('input[name="selected_graduates"]:checked').length;
+        
+        if (autoSend && selectedGraduates === 0) {
+            e.preventDefault();
+            alert('يرجى اختيار خريجين واحد على الأقل عند تفعيل الإرسال التلقائي.');
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}
+

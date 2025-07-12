@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}تم إنشاء الاستبيان بنجاح{% endblock %}
+{% block content %}
+<style>
+.success-container {
+    max-width: 500px;
+    margin: 80px auto;
+    background: linear-gradient(135deg, #f8fafc 0%, #e9ecef 100%);
+    border-radius: 2.5rem;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.18);
+    padding: 2.5rem 2.5rem 2rem 2.5rem;
+    text-align: center;
+    position: relative;
+}
+.success-icon {
+    font-size: 5rem;
+    color: #ffb300;
+    margin-bottom: 1.5rem;
+    animation: tada 1.2s;
+}
+@keyframes tada {
+    0% { transform: scale(1); }
+    10%, 20% { transform: scale(0.9) rotate(-3deg); }
+    30%, 50%, 70%, 90% { transform: scale(1.1) rotate(3deg); }
+    40%, 60%, 80% { transform: scale(1.1) rotate(-3deg); }
+    100% { transform: scale(1) rotate(0); }
+}
+.success-title {
+    font-size: 2.1rem;
+    font-weight: 900;
+    color: #764ba2;
+    margin-bottom: 1rem;
+}
+.success-msg {
+    font-size: 1.2rem;
+    color: #333;
+    margin-bottom: 2rem;
+}
+</style>
+<div class="success-container animate__animated animate__fadeInDown">
+    <div class="success-icon">
+        <i class="fas fa-mug-hot"></i>
+    </div>
+    <div class="success-title">مبروك! 🎉</div>
+    <div class="success-msg">تم إنشاء الاستبيان بنجاح.<br>ستنتقل الآن إلى قائمة الاستبيانات الجاهزة.</div>
+</div>
+<script>
+setTimeout(function() {
+    window.location.href = "{% url 'surveys:list' %}";
+}, 3000);
+</script>
+{% endblock %} 

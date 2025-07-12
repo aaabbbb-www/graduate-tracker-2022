@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}الملف الشخصي - {{ user.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <i class="bi bi-person-circle me-2"></i>
+                            الملف الشخصي
+                        </h3>
+                        <a href="{% url 'accounts:profile_edit' %}" class="btn btn-light btn-sm">
+                            <i class="bi bi-pencil me-1"></i>تعديل
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row">
+                        <!-- معلومات المستخدم الأساسية -->
+                        <div class="col-md-6">
+                            <div class="text-center mb-4">
+                                <div class="avatar-lg mx-auto mb-3">
+                                    <i class="bi bi-person-circle text-primary" style="font-size: 5rem;"></i>
+                                </div>
+                                <h4>{{ user.get_full_name|default:user.username }}</h4>
+                                <p class="text-muted">{{ user.email }}</p>
+                                <div class="d-flex justify-content-center gap-2">
+                                    {% if user.is_staff %}
+                                        <span class="badge bg-warning">موظف</span>
+                                    {% endif %}
+                                    {% if user.is_active %}
+                                        <span class="badge bg-success">نشط</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">غير نشط</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- تفاصيل الملف الشخصي -->
+                        <div class="col-md-6">
+                            <h5 class="border-bottom pb-2 mb-3">
+                                <i class="bi bi-info-circle me-2"></i>معلومات شخصية
+                            </h5>
+                            
+                            <div class="row mb-3">
+                                <div class="col-sm-4">
+                                    <strong>اسم المستخدم:</strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    {{ user.username }}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-sm-4">
+                                    <strong>الاسم الأول:</strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    {{ user.first_name|default:"غير محدد" }}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-sm-4">
+                                    <strong>اسم العائلة:</strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    {{ user.last_name|default:"غير محدد" }}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-sm-4">
+                                    <strong>البريد الإلكتروني:</strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    {{ user.email|default:"غير محدد" }}
+                                </div>
+                            </div>
+                            
+                            {% if profile.phone %}
+                            <div class="row mb-3">
+                                <div class="col-sm-4">
+                                    <strong>رقم الهاتف:</strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    {{ profile.phone }}
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if profile.address %}
+                            <div class="row mb-3">
+                                <div class="col-sm-4">
+                                    <strong>العنوان:</strong>
+                                </div>
+                                <div class="col-sm-8">
+                                    {{ profile.address }}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <!-- معلومات النظام -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="border-bottom pb-2 mb-3">
+                                <i class="bi bi-gear me-2"></i>معلومات النظام
+                            </h5>
+                            
+                            <div class="row mb-3">
+                                <div class="col-sm-5">
+                                    <strong>تاريخ التسجيل:</strong>
+                                </div>
+                                <div class="col-sm-7">
+                                    {{ user.date_joined|date:"Y-m-d H:i" }}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-sm-5">
+                                    <strong>آخر تسجيل دخول:</strong>
+                                </div>
+                                <div class="col-sm-7">
+                                    {% if user.last_login %}
+                                        {{ user.last_login|date:"Y-m-d H:i" }}
+                                    {% else %}
+                                        <span class="text-muted">لم يسجل دخول بعد</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-sm-5">
+                                    <strong>الحالة:</strong>
+                                </div>
+                                <div class="col-sm-7">
+                                    {% if user.is_active %}
+                                        <span class="badge bg-success">نشط</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">غير نشط</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-sm-5">
+                                    <strong>الصلاحيات:</strong>
+                                </div>
+                                <div class="col-sm-7">
+                                    {% if user.is_staff %}
+                                        <span class="badge bg-warning">موظف</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">مستخدم عادي</span>
+                                    {% endif %}
+                                    {% if user.is_superuser %}
+                                        <span class="badge bg-danger ms-1">مدير</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5 class="border-bottom pb-2 mb-3">
+                                <i class="bi bi-people me-2"></i>المجموعات
+                            </h5>
+                            
+                            {% if user.groups.all %}
+                                {% for group in user.groups.all %}
+                                    <span class="badge bg-info me-2 mb-2">{{ group.name }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-muted">لا توجد مجموعات مخصصة</p>
+                            {% endif %}
+                            
+                            <h5 class="border-bottom pb-2 mb-3 mt-4">
+                                <i class="bi bi-clock-history me-2"></i>آخر الأنشطة
+                            </h5>
+                            
+                            <div class="list-group list-group-flush">
+                                {% for activity in recent_activities|slice:":3" %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <small class="text-muted">{{ activity.action }}</small>
+                                        <br>
+                                        <small>{{ activity.timestamp|date:"Y-m-d H:i" }}</small>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <p class="text-muted">لا توجد أنشطة حديثة</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- أزرار الإجراءات -->
+                    <div class="text-center mt-4">
+                        <a href="{% url 'accounts:profile_edit' %}" class="btn btn-primary me-2">
+                            <i class="bi bi-pencil me-1"></i>تعديل الملف الشخصي
+                        </a>
+                        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+                            <i class="bi bi-house me-1"></i>العودة للرئيسية
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .avatar-lg {
+        width: 100px;
+        height: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background-color: #f8f9fa;
+    }
+    
+    .list-group-item {
+        border: none;
+        padding: 0.5rem 0;
+    }
+    
+    .badge {
+        font-size: 0.75em;
+    }
+</style>
+{% endblock %} 

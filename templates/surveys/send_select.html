@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}اختيار استبيان للإرسال{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">اختر استبيان لإرساله</h2>
+    <ul class="list-group">
+        {% for survey in surveys %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>{{ survey.title }}</span>
+            <a href="{% url 'surveys:send' pk=survey.pk %}" class="btn btn-success btn-sm">إرسال</a>
+        </li>
+        {% empty %}
+        <li class="list-group-item">لا توجد استبيانات متاحة.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %} 

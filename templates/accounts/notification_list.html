@@ -1,0 +1,392 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}الإشعارات{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <i class="bi bi-bell me-2"></i>
+                            الإشعارات
+                        </h3>
+                        <div>
+                            <button type="button" class="btn btn-warning btn-sm me-2" onclick="markAllAsRead()">
+                                <i class="bi bi-check-all me-1"></i>تحديد الكل كمقروء
+                            </button>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="clearAll()">
+                                <i class="bi bi-trash me-1"></i>مسح الكل
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- فلترة الإشعارات -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">
+                                        <i class="bi bi-funnel me-2"></i>فلترة الإشعارات
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-3">
+                                            <label for="type_filter" class="form-label">نوع الإشعار</label>
+                                            <select class="form-select" id="type_filter">
+                                                <option value="">جميع الأنواع</option>
+                                                <option value="info">معلومات</option>
+                                                <option value="warning">تحذير</option>
+                                                <option value="error">خطأ</option>
+                                                <option value="success">نجح</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label for="status_filter" class="form-label">الحالة</label>
+                                            <select class="form-select" id="status_filter">
+                                                <option value="">جميع الحالات</option>
+                                                <option value="unread">غير مقروء</option>
+                                                <option value="read">مقروء</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label for="date_filter" class="form-label">التاريخ</label>
+                                            <select class="form-select" id="date_filter">
+                                                <option value="">جميع التواريخ</option>
+                                                <option value="today">اليوم</option>
+                                                <option value="week">هذا الأسبوع</option>
+                                                <option value="month">هذا الشهر</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3 d-flex align-items-end">
+                                            <button type="button" class="btn btn-primary me-2" onclick="applyFilter()">
+                                                <i class="bi bi-search me-1"></i>تطبيق
+                                            </button>
+                                            <button type="button" class="btn btn-secondary" onclick="clearFilter()">
+                                                <i class="bi bi-x-circle me-1"></i>إلغاء
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- قائمة الإشعارات -->
+                    <div class="notifications-list">
+                        {% if notifications %}
+                            {% for notification in notifications %}
+                            <div class="notification-item card mb-3 {% if not notification.is_read %}border-warning{% endif %}" 
+                                 data-id="{{ notification.id }}" data-type="{{ notification.notification_type }}">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <div class="notification-icon me-3">
+                                                    {% if notification.notification_type == 'info' %}
+                                                        <i class="bi bi-info-circle text-info fa-lg"></i>
+                                                    {% elif notification.notification_type == 'warning' %}
+                                                        <i class="bi bi-exclamation-triangle text-warning fa-lg"></i>
+                                                    {% elif notification.notification_type == 'error' %}
+                                                        <i class="bi bi-x-circle text-danger fa-lg"></i>
+                                                    {% elif notification.notification_type == 'success' %}
+                                                        <i class="bi bi-check-circle text-success fa-lg"></i>
+                                                    {% else %}
+                                                        <i class="bi bi-bell text-secondary fa-lg"></i>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <h6 class="mb-1 {% if not notification.is_read %}fw-bold{% endif %}">
+                                                        {{ notification.title }}
+                                                    </h6>
+                                                    <p class="mb-2 text-muted">{{ notification.message }}</p>
+                                                    <div class="d-flex align-items-center">
+                                                        <small class="text-muted me-3">
+                                                            <i class="bi bi-clock me-1"></i>
+                                                            {{ notification.created_at|date:"Y-m-d H:i" }}
+                                                        </small>
+                                                        {% if notification.sender %}
+                                                        <small class="text-muted">
+                                                            <i class="bi bi-person me-1"></i>
+                                                            {{ notification.sender.get_full_name|default:notification.sender.username }}
+                                                        </small>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="notification-actions">
+                                            {% if not notification.is_read %}
+                                            <button type="button" class="btn btn-sm btn-outline-success me-1" 
+                                                    onclick="markAsRead({{ notification.id }})" title="تحديد كمقروء">
+                                                <i class="bi bi-check"></i>
+                                            </button>
+                                            {% endif %}
+                                            <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                    onclick="deleteNotification({{ notification.id }})" title="حذف">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    {% if notification.related_url %}
+                                    <div class="mt-2">
+                                        <a href="{{ notification.related_url }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-arrow-right me-1"></i>عرض التفاصيل
+                                        </a>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="bi bi-bell-slash fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">لا توجد إشعارات</h5>
+                                <p class="text-muted">ستظهر هنا الإشعارات الجديدة عند وصولها</p>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- التقسيم إلى صفحات -->
+                    {% if notifications.has_other_pages %}
+                    <nav aria-label="صفحات الإشعارات" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if notifications.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1">
+                                        <i class="bi bi-chevron-double-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ notifications.previous_page_number }}">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% for num in notifications.paginator.page_range %}
+                                {% if notifications.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > notifications.number|add:'-3' and num < notifications.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if notifications.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ notifications.next_page_number }}">
+                                        <i class="bi bi-chevron-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ notifications.paginator.num_pages }}">
+                                        <i class="bi bi-chevron-double-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+
+                    <!-- إحصائيات سريعة -->
+                    <div class="row mt-4">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">{{ total_notifications }}</h5>
+                                    <p class="card-text">إجمالي الإشعارات</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">{{ unread_notifications }}</h5>
+                                    <p class="card-text">غير مقروء</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">{{ read_notifications }}</h5>
+                                    <p class="card-text">مقروء</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">{{ today_notifications }}</h5>
+                                    <p class="card-text">اليوم</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .notification-item {
+        transition: all 0.3s ease;
+    }
+    
+    .notification-item:hover {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    
+    .notification-item.border-warning {
+        border-left: 4px solid #ffc107 !important;
+    }
+    
+    .notification-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background-color: #f8f9fa;
+    }
+    
+    .notification-actions {
+        opacity: 0.7;
+        transition: opacity 0.3s ease;
+    }
+    
+    .notification-item:hover .notification-actions {
+        opacity: 1;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function markAsRead(notificationId) {
+    fetch(`/accounts/notifications/${notificationId}/mark-read/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const notificationItem = document.querySelector(`[data-id="${notificationId}"]`);
+            notificationItem.classList.remove('border-warning');
+            notificationItem.querySelector('.fw-bold').classList.remove('fw-bold');
+            updateNotificationCount();
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function markAllAsRead() {
+    if (confirm('هل أنت متأكد من تحديد جميع الإشعارات كمقروء؟')) {
+        fetch('/accounts/notifications/mark-all-read/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+}
+
+function deleteNotification(notificationId) {
+    if (confirm('هل أنت متأكد من حذف هذا الإشعار؟')) {
+        fetch(`/accounts/notifications/${notificationId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const notificationItem = document.querySelector(`[data-id="${notificationId}"]`);
+                notificationItem.remove();
+                updateNotificationCount();
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+}
+
+function clearAll() {
+    if (confirm('هل أنت متأكد من مسح جميع الإشعارات؟')) {
+        fetch('/accounts/notifications/clear-all/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+}
+
+function applyFilter() {
+    const typeFilter = document.getElementById('type_filter').value;
+    const statusFilter = document.getElementById('status_filter').value;
+    const dateFilter = document.getElementById('date_filter').value;
+    
+    const params = new URLSearchParams();
+    if (typeFilter) params.append('type', typeFilter);
+    if (statusFilter) params.append('status', statusFilter);
+    if (dateFilter) params.append('date', dateFilter);
+    
+    window.location.href = `?${params.toString()}`;
+}
+
+function clearFilter() {
+    document.getElementById('type_filter').value = '';
+    document.getElementById('status_filter').value = '';
+    document.getElementById('date_filter').value = '';
+    window.location.href = window.location.pathname;
+}
+
+function updateNotificationCount() {
+    // تحديث عداد الإشعارات في الشريط العلوي
+    const unreadCount = document.querySelectorAll('.notification-item.border-warning').length;
+    const badge = document.querySelector('.notification-badge');
+    if (badge) {
+        badge.textContent = unreadCount;
+        if (unreadCount === 0) {
+            badge.style.display = 'none';
+        }
+    }
+}
+
+// تحديث الإشعارات تلقائياً كل 30 ثانية
+setInterval(() => {
+    // يمكن إضافة كود لتحديث الإشعارات الجديدة هنا
+}, 30000);
+</script>
+{% endblock %} 

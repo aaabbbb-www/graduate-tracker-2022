@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}إدارة الاستبيانات{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- رأس الصفحة -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="main-title text-center animate__animated animate__fadeInDown">
+                <i class="fas fa-clipboard-list"></i> إدارة الاستبيانات
+            </h1>
+            <p class="text-center text-muted lead animate__animated animate__fadeInUp">
+                نظام متكامل لإنشاء وإدارة وإرسال الاستبيانات للخريجين
+            </p>
+        </div>
+    </div>
+
+    <!-- الإحصائيات -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card stat-card bg-gradient-primary text-white animate__animated animate__fadeInUp">
+                <div class="card-body text-center">
+                    <i class="fas fa-clipboard-list fa-3x mb-3"></i>
+                    <h3>{{ total_surveys }}</h3>
+                    <p class="mb-0">إجمالي الاستبيانات</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card stat-card bg-gradient-success text-white animate__animated animate__fadeInUp" style="animation-delay: 0.1s;">
+                <div class="card-body text-center">
+                    <i class="fas fa-toggle-on fa-3x mb-3"></i>
+                    <h3>{{ active_surveys }}</h3>
+                    <p class="mb-0">الاستبيانات النشطة</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card stat-card bg-gradient-info text-white animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-3x mb-3"></i>
+                    <h3>{{ total_responses }}</h3>
+                    <p class="mb-0">إجمالي الاستجابات</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card stat-card bg-gradient-warning text-white animate__animated animate__fadeInUp" style="animation-delay: 0.3s;">
+                <div class="card-body text-center">
+                    <i class="fas fa-percentage fa-3x mb-3"></i>
+                    <h3>{{ response_rate }}%</h3>
+                    <p class="mb-0">معدل الاستجابة</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- أزرار الإجراءات السريعة -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm animate__animated animate__fadeInUp" style="animation-delay: 0.4s;">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-rocket"></i> إجراءات سريعة
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <a href="{% url 'surveys:flexible_create' %}" class="btn btn-success btn-lg w-100 h-100 d-flex flex-column justify-content-center align-items-center">
+                                <i class="fas fa-plus-circle fa-2x mb-2"></i>
+                                <span>إنشاء استبيان جديد</span>
+                                <small class="text-light">نظام مرن ومحسن</small>
+                            </a>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <a href="{% url 'surveys:send' %}" class="btn btn-primary btn-lg w-100 h-100 d-flex flex-column justify-content-center align-items-center">
+                                <i class="fas fa-paper-plane fa-2x mb-2"></i>
+                                <span>إرسال استبيان</span>
+                                <small class="text-light">للخريجين</small>
+                            </a>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <a href="{% url 'surveys:analytics' %}" class="btn btn-info btn-lg w-100 h-100 d-flex flex-column justify-content-center align-items-center">
+                                <i class="fas fa-chart-bar fa-2x mb-2"></i>
+                                <span>التحليلات</span>
+                                <small class="text-light">والإحصائيات</small>
+                            </a>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <a href="{% url 'surveys:templates' %}" class="btn btn-warning btn-lg w-100 h-100 d-flex flex-column justify-content-center align-items-center">
+                                <i class="fas fa-copy fa-2x mb-2"></i>
+                                <span>القوالب</span>
+                                <small class="text-light">الجاهزة</small>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- الميزات الجديدة -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm animate__animated animate__fadeInUp" style="animation-delay: 0.5s;">
+                <div class="card-header bg-gradient-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-star"></i> الميزات الجديدة
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="feature-item text-center p-3">
+                                <i class="fas fa-magic fa-2x text-primary mb-3"></i>
+                                <h6>نظام مرن</h6>
+                                <p class="text-muted">إنشاء استبيانات مرنة مع أنواع أسئلة متعددة</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="feature-item text-center p-3">
+                                <i class="fas fa-paper-plane fa-2x text-success mb-3"></i>
+                                <h6>إرسال متقدم</h6>
+                                <p class="text-muted">إرسال عبر البريد الإلكتروني والواتساب</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="feature-item text-center p-3">
+                                <i class="fas fa-chart-line fa-2x text-info mb-3"></i>
+                                <h6>تحليلات ذكية</h6>
+                                <p class="text-muted">رسوم بيانية وإحصائيات مفصلة</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- روابط سريعة -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm animate__animated animate__fadeInUp" style="animation-delay: 0.6s;">
+                <div class="card-header bg-gradient-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-link"></i> روابط سريعة
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-list"></i> إدارة الاستبيانات</h6>
+                            <ul class="list-unstyled">
+                                <li><a href="{% url 'surveys:list' %}" class="text-decoration-none">
+                                    <i class="fas fa-arrow-left"></i> قائمة الاستبيانات
+                                </a></li>
+                                <li><a href="{% url 'surveys:flexible_create' %}" class="text-decoration-none">
+                                    <i class="fas fa-plus"></i> إنشاء استبيان مرن
+                                </a></li>
+                                <li><a href="{% url 'surveys:create' %}" class="text-decoration-none">
+                                    <i class="fas fa-copy"></i> إنشاء من قالب
+                                </a></li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-chart-bar"></i> التحليلات والنتائج</h6>
+                            <ul class="list-unstyled">
+                                <li><a href="{% url 'surveys:analytics' %}" class="text-decoration-none">
+                                    <i class="fas fa-chart-pie"></i> التحليلات العامة
+                                </a></li>
+                                <li><a href="{% url 'surveys:send' %}" class="text-decoration-none">
+                                    <i class="fas fa-paper-plane"></i> إرسال الاستبيانات
+                                </a></li>
+                                <li><a href="{% url 'surveys:templates' %}" class="text-decoration-none">
+                                    <i class="fas fa-copy"></i> قوالب الاستبيانات
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.main-title {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.card {
+    border: none;
+    border-radius: 15px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+}
+
+.stat-card {
+    border-radius: 15px;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2) !important;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.feature-item {
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.feature-item:hover {
+    border-color: #667eea;
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+}
+
+.animate__fadeInUp {
+    animation-duration: 0.6s;
+}
+
+.list-unstyled li {
+    margin-bottom: 8px;
+}
+
+.list-unstyled a {
+    color: #6c757d;
+    transition: color 0.3s ease;
+}
+
+.list-unstyled a:hover {
+    color: #667eea;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // تأثيرات إضافية
+    $('.stat-card').each(function(index) {
+        $(this).css('animation-delay', (index * 0.1) + 's');
+    });
+    
+    // تحسين تجربة المستخدم
+    $('.btn').hover(function() {
+        $(this).find('i').addClass('animate__animated animate__pulse');
+    }, function() {
+        $(this).find('i').removeClass('animate__animated animate__pulse');
+    });
+});
+</script>
+{% endblock %}
+

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}إنشاء تقرير مخصص - إدارة التقارير{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <h2 class="mb-4">إنشاء تقرير مخصص</h2>
+    <p>يمكنك من هنا إنشاء تقرير جديد مخصص حسب احتياجك. يرجى اختيار نوع التقرير وتعبئة البيانات المطلوبة.</p>
+    <form>
+        <div class="mb-3">
+            <label for="reportTitle" class="form-label">عنوان التقرير</label>
+            <input type="text" class="form-control" id="reportTitle" placeholder="أدخل عنوان التقرير">
+        </div>
+        <div class="mb-3">
+            <label for="reportType" class="form-label">نوع التقرير</label>
+            <select class="form-select" id="reportType">
+                <option value="">اختر النوع</option>
+                <option value="graduates">خريجين</option>
+                <option value="employment">توظيف</option>
+                <option value="surveys">استبيانات</option>
+                <option value="custom">مخصص</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="reportDesc" class="form-label">وصف التقرير</label>
+            <textarea class="form-control" id="reportDesc" rows="3" placeholder="أدخل وصفاً مختصراً"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">إنشاء التقرير</button>
+    </form>
+</div>
+{% endblock %}

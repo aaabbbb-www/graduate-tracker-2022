@@ -1,0 +1,309 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}إنشاء حساب - نظام تتبع الخريجين{% endblock %}
+
+{% block main_class %}{% endblock %}
+
+{% block content %}
+<div class="min-vh-100 d-flex align-items-center bg-light py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow-lg border-0">
+                    <div class="card-body p-5">
+                        <!-- Header -->
+                        <div class="text-center mb-4">
+                            <div class="mb-3">
+                                <i class="bi bi-person-plus-fill text-success" style="font-size: 3rem;"></i>
+                            </div>
+                            <h2 class="h4 mb-1">إنشاء حساب جديد</h2>
+                            <p class="text-muted">املأ البيانات التالية لإنشاء حسابك</p>
+                        </div>
+
+                        <!-- Signup Form -->
+                        <form method="post" novalidate>
+                            {% csrf_token %}
+                            
+                            <div class="row">
+                                <!-- First Name -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                                        <i class="bi bi-person me-1"></i>
+                                        الاسم الأول *
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control {% if form.first_name.errors %}is-invalid{% endif %}" 
+                                           id="{{ form.first_name.id_for_label }}" 
+                                           name="{{ form.first_name.name }}" 
+                                           value="{{ form.first_name.value|default:'' }}"
+                                           placeholder="الاسم الأول"
+                                           required>
+                                    {% if form.first_name.errors %}
+                                        <div class="invalid-feedback">
+                                            {{ form.first_name.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Last Name -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                                        <i class="bi bi-person me-1"></i>
+                                        اسم العائلة *
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control {% if form.last_name.errors %}is-invalid{% endif %}" 
+                                           id="{{ form.last_name.id_for_label }}" 
+                                           name="{{ form.last_name.name }}" 
+                                           value="{{ form.last_name.value|default:'' }}"
+                                           placeholder="اسم العائلة"
+                                           required>
+                                    {% if form.last_name.errors %}
+                                        <div class="invalid-feedback">
+                                            {{ form.last_name.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Username -->
+                            <div class="mb-3">
+                                <label for="{{ form.username.id_for_label }}" class="form-label">
+                                    <i class="bi bi-at me-1"></i>
+                                    اسم المستخدم *
+                                </label>
+                                <input type="text" 
+                                       class="form-control {% if form.username.errors %}is-invalid{% endif %}" 
+                                       id="{{ form.username.id_for_label }}" 
+                                       name="{{ form.username.name }}" 
+                                       value="{{ form.username.value|default:'' }}"
+                                       placeholder="اسم المستخدم"
+                                       required>
+                                {% if form.username.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.username.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    يجب أن يحتوي على أحرف وأرقام فقط، بدون مسافات
+                                </div>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="mb-3">
+                                <label for="{{ form.email.id_for_label }}" class="form-label">
+                                    <i class="bi bi-envelope me-1"></i>
+                                    البريد الإلكتروني *
+                                </label>
+                                <input type="email" 
+                                       class="form-control {% if form.email.errors %}is-invalid{% endif %}" 
+                                       id="{{ form.email.id_for_label }}" 
+                                       name="{{ form.email.name }}" 
+                                       value="{{ form.email.value|default:'' }}"
+                                       placeholder="example@email.com"
+                                       required>
+                                {% if form.email.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.email.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Password -->
+                            <div class="mb-3">
+                                <label for="{{ form.password1.id_for_label }}" class="form-label">
+                                    <i class="bi bi-lock me-1"></i>
+                                    كلمة المرور *
+                                </label>
+                                <div class="input-group">
+                                    <input type="password" 
+                                           class="form-control {% if form.password1.errors %}is-invalid{% endif %}" 
+                                           id="{{ form.password1.id_for_label }}" 
+                                           name="{{ form.password1.name }}"
+                                           placeholder="كلمة المرور"
+                                           required>
+                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword1">
+                                        <i class="bi bi-eye" id="toggleIcon1"></i>
+                                    </button>
+                                    {% if form.password1.errors %}
+                                        <div class="invalid-feedback">
+                                            {{ form.password1.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="form-text">
+                                    يجب أن تحتوي على 8 أحرف على الأقل وتكون قوية
+                                </div>
+                            </div>
+
+                            <!-- Confirm Password -->
+                            <div class="mb-3">
+                                <label for="{{ form.password2.id_for_label }}" class="form-label">
+                                    <i class="bi bi-lock-fill me-1"></i>
+                                    تأكيد كلمة المرور *
+                                </label>
+                                <div class="input-group">
+                                    <input type="password" 
+                                           class="form-control {% if form.password2.errors %}is-invalid{% endif %}" 
+                                           id="{{ form.password2.id_for_label }}" 
+                                           name="{{ form.password2.name }}"
+                                           placeholder="تأكيد كلمة المرور"
+                                           required>
+                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword2">
+                                        <i class="bi bi-eye" id="toggleIcon2"></i>
+                                    </button>
+                                    {% if form.password2.errors %}
+                                        <div class="invalid-feedback">
+                                            {{ form.password2.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Terms and Conditions -->
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="agreeTerms" required>
+                                <label class="form-check-label" for="agreeTerms">
+                                    أوافق على <a href="#" class="text-decoration-none">الشروط والأحكام</a> و <a href="#" class="text-decoration-none">سياسة الخصوصية</a>
+                                </label>
+                            </div>
+
+                            <!-- Non-field errors -->
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger" role="alert">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    {{ form.non_field_errors.0 }}
+                                </div>
+                            {% endif %}
+
+                            <!-- Submit Button -->
+                            <div class="d-grid mb-3">
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="bi bi-person-plus me-2"></i>
+                                    إنشاء الحساب
+                                </button>
+                            </div>
+
+                            <!-- Divider -->
+                            <hr class="my-4">
+
+                            <!-- Login Link -->
+                            <div class="text-center">
+                                <p class="mb-0">لديك حساب بالفعل؟</p>
+                                <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary">
+                                    <i class="bi bi-box-arrow-in-right me-2"></i>
+                                    تسجيل الدخول
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Back to Home -->
+                <div class="text-center mt-3">
+                    <a href="{% url 'home' %}" class="text-muted text-decoration-none">
+                        <i class="bi bi-arrow-right me-1"></i>
+                        العودة إلى الصفحة الرئيسية
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.min-vh-100 {
+    min-height: 100vh;
+}
+
+.card {
+    border-radius: 15px;
+}
+
+.form-control {
+    border-radius: 8px;
+}
+
+.btn-lg {
+    border-radius: 10px;
+    padding: 12px 24px;
+}
+
+.input-group .btn {
+    border-radius: 0 8px 8px 0;
+}
+
+.form-control:focus {
+    border-color: #198754;
+    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+}
+
+.password-strength {
+    height: 4px;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .card-body {
+        padding: 2rem !important;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle password visibility
+    function setupPasswordToggle(toggleId, passwordId, iconId) {
+        const toggle = document.getElementById(toggleId);
+        const password = document.getElementById(passwordId);
+        const icon = document.getElementById(iconId);
+
+        if (toggle && password && icon) {
+            toggle.addEventListener('click', function() {
+                const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                password.setAttribute('type', type);
+                
+                if (type === 'password') {
+                    icon.className = 'bi bi-eye';
+                } else {
+                    icon.className = 'bi bi-eye-slash';
+                }
+            });
+        }
+    }
+
+    setupPasswordToggle('togglePassword1', '{{ form.password1.id_for_label }}', 'toggleIcon1');
+    setupPasswordToggle('togglePassword2', '{{ form.password2.id_for_label }}', 'toggleIcon2');
+
+    // Password strength indicator
+    const password1 = document.getElementById('{{ form.password1.id_for_label }}');
+    if (password1) {
+        password1.addEventListener('input', function() {
+            const value = this.value;
+            let strength = 0;
+            
+            if (value.length >= 8) strength++;
+            if (/[a-z]/.test(value)) strength++;
+            if (/[A-Z]/.test(value)) strength++;
+            if (/[0-9]/.test(value)) strength++;
+            if (/[^A-Za-z0-9]/.test(value)) strength++;
+            
+            // You can add visual strength indicator here
+        });
+    }
+
+    // Auto-focus on first input
+    const firstInput = document.querySelector('input[type="text"]');
+    if (firstInput) {
+        firstInput.focus();
+    }
+});
+</script>
+{% endblock %}
+

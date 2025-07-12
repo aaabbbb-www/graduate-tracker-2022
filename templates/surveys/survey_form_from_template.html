@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}إنشاء استبيان من قالب{% endblock %}
+
+{% block content %}
+<div class="survey-template-container">
+  <form method="post">
+    {% csrf_token %}
+    <!-- قسم معلومات الاستبيان -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="mb-3">
+          <label for="surveyTitle" class="form-label">عنوان الاستبيان<span class="text-danger">*</span></label>
+          <input type="text" name="title" class="form-control" id="surveyTitle" value="{{ template.title }}" required>
+        </div>
+        <div class="mb-3">
+          <label for="surveyDescription" class="form-label">وصف الاستبيان</label>
+          <textarea name="description" class="form-control" id="surveyDescription" rows="4">{{ template.description }}</textarea>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="startDate" class="form-label">تاريخ البدء<span class="text-danger">*</span></label>
+            <input type="date" name="start_date" class="form-control" id="startDate" required>
+          </div>
+          <div class="col-md-6">
+            <label for="endDate" class="form-label">تاريخ الانتهاء<span class="text-danger">*</span></label>
+            <input type="date" name="end_date" class="form-control" id="endDate" required>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- قسم أسئلة الاستبيان -->
+    <h3 class="mb-3">أسئلة الاستبيان</h3>
+    {% for q in template.questions %}
+    <div class="question-block card mb-3">
+      <div class="card-body">
+        <div class="d-flex align-items-center mb-2">
+          <label class="mb-0 fw-bold">{{ q.text }}</label>
+          {% if q.required %}<span class="badge bg-danger ms-2">إلزامي</span>{% endif %}
+        </div>
+        <div class="ms-3">
+          {% for choice in q.choices %}
+          <div class="form-check">
+            <input class="form-check-input" type="radio" disabled>
+            <label class="form-check-label">{{ choice }}</label>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    <button type="button" class="btn btn-outline-primary w-100 mb-4 add-question-btn">
+      <span class="fw-bold">+</span> إضافة سؤال جديد
+    </button>
+
+    <!-- قسم الجمهور المستهدف -->
+    <h3 class="mb-3">الجمهور المستهدف</h3>
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="row g-3 mb-3">
+          <div class="col-md-4">
+            <label for="faculty" class="form-label">الكلية</label>
+            <select class="form-select" id="faculty" name="faculty">
+              <option value="">كل الكليات</option>
+              <option value="كلية الهندسة">كلية الحاسوب</option>
+              <option value="كلية العلوم">كلية العلوم</option>
+              <option value="كلية الآداب">كلية الآداب</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label for="major" class="form-label">التخصص</label>
+            <select class="form-select" id="major" name="major">
+              <option value="">كل التخصصات</option>
+              <option value="هندسة مدنية">هندسة مدنية</option>
+              <option value="هندسة حاسوب">هندسة حاسوب</option>
+              <option value="كيمياء">كيمياء</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label for="grad_year" class="form-label">سنوات التخرج</label>
+            <select class="form-select" id="grad_year" name="grad_year">
+              <option value="">كل السنوات</option>
+              <option value="2023">2023</option>
+              <option value="2022">2022</option>
+              <option value="2021">2021</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="form-label">الحالة الوظيفية</label>
+          <div class="d-flex flex-wrap gap-3">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="status_all" name="employment_status" value="all" checked>
+              <label class="form-check-label" for="status_all">الكل</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="status_employed" name="employment_status" value="employed">
+              <label class="form-check-label" for="status_employed">الموظفون</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="status_jobseeker" name="employment_status" value="jobseeker">
+              <label class="form-check-label" for="status_jobseeker">باحثون عن عمل</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="status_student" name="employment_status" value="student">
+              <label class="form-check-label" for="status_student">يكملون الدراسة</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- قسم وسائل الإرسال -->
+    <h3 class="mb-3">وسائل الإرسال</h3>
+    <div class="card mb-4">
+      <div class="card-body d-flex flex-wrap gap-4">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="send_email" name="send_email" checked>
+          <label class="form-check-label" for="send_email">البريد الإلكتروني</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="send_whatsapp" name="send_whatsapp" disabled>
+          <label class="form-check-label text-muted" for="send_whatsapp">واتساب (غير مفعل)</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="send_system" name="send_system" disabled>
+          <label class="form-check-label text-muted" for="send_system">إشعار داخل النظام (غير مفعل)</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- أزرار الإجراءات -->
+    <div class="d-flex justify-content-end gap-2 mt-4">
+      <a href="{% url 'surveys:create' %}" class="btn btn-secondary">إلغاء</a>
+      <button type="button" class="btn btn-outline-secondary">حفظ كمسودة</button>
+      <button type="submit" class="btn btn-primary">نشر الآن</button>
+    </div>
+  </form>
+</div>
+
+<style>
+.survey-template-container {
+  max-width: 800px;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+  padding: 32px 24px;
+  direction: rtl;
+}
+.add-question-btn {
+  border: 2px dashed #0d6efd;
+  background: #f8faff;
+  color: #0d6efd;
+  font-weight: 600;
+}
+.add-question-btn:hover {
+  background: #e7f1ff;
+}
+.card {
+  border-radius: 14px;
+}
+</style>
+{% endblock %}

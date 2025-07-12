@@ -1,0 +1,408 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}قوالب الاستبيانات{% endblock %}
+
+{% block extra_css %}
+<style>
+    .template-card {
+        transition: all 0.3s ease;
+        border: 1px solid #e0e0e0;
+    }
+    
+    .template-card:hover {
+        border-color: #007bff;
+    }
+    
+    .template-icon {
+        font-size: 3rem;
+        color: #007bff;
+    }
+    
+    .animate__delay-1-6s {
+        animation-delay: 1.6s;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="container-fluid mt-4">
+    <h1 class="main-title mb-4 animate__animated animate__fadeInDown">قوالب الاستبيانات <i class="fas fa-copy"></i></h1>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm animate__animated animate__fadeInUp">
+                <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="fas fa-plus-circle"></i> إنشاء قالب جديد</h4>
+                    <a href="{% url 'surveys:template_create' %}" class="btn btn-light btn-sm animate__animated animate__pulse animate__infinite">
+                        <i class="fas fa-plus"></i> قالب جديد
+                    </a>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">يمكنك إنشاء قوالب جاهزة للاستبيانات لتوفير الوقت عند إنشاء استبيانات متشابهة. القوالب تحتوي على أسئلة معدة مسبقاً يمكن استخدامها مباشرة أو تعديلها حسب الحاجة.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- القوالب الجاهزة -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm animate__animated animate__fadeInUp animate__delay-0-2s">
+                <div class="card-header bg-gradient-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-star"></i> القوالب الجاهزة</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- قالب تقييم الخريجين -->
+                        <div class="col-md-4 mb-4">
+                            <div class="card template-card h-100 animate__animated animate__fadeInUp animate__delay-0-4s">
+                                <div class="card-body text-center">
+                                    <div class="icon-wrapper mb-3">
+                                        <i class="fas fa-graduation-cap fa-3x text-primary"></i>
+                                    </div>
+                                    <h5 class="card-title">استبيان تقييم الخريجين</h5>
+                                    <p class="card-text">قالب شامل لتقييم رضا الخريجين عن البرنامج الأكاديمي والخدمات المقدمة.</p>
+                                    <div class="mb-3">
+                                        <span class="badge bg-info">15 سؤال</span>
+                                        <span class="badge bg-warning">متوسط</span>
+                                    </div>
+                                    <button class="btn btn-primary btn-sm" onclick="useTemplate('graduate_evaluation')">
+                                        <i class="fas fa-download"></i> استخدام القالب
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="previewTemplate('graduate_evaluation')">
+                                        <i class="fas fa-eye"></i> معاينة
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- قالب متابعة التوظيف -->
+                        <div class="col-md-4 mb-4">
+                            <div class="card template-card h-100 animate__animated animate__fadeInUp animate__delay-0-6s">
+                                <div class="card-body text-center">
+                                    <div class="icon-wrapper mb-3">
+                                        <i class="fas fa-briefcase fa-3x text-success"></i>
+                                    </div>
+                                    <h5 class="card-title">استبيان متابعة التوظيف</h5>
+                                    <p class="card-text">قالب لمتابعة حالة توظيف الخريجين ورضاهم عن وظائفهم الحالية.</p>
+                                    <div class="mb-3">
+                                        <span class="badge bg-info">12 سؤال</span>
+                                        <span class="badge bg-success">سهل</span>
+                                    </div>
+                                    <button class="btn btn-primary btn-sm" onclick="useTemplate('employment_follow_up')">
+                                        <i class="fas fa-download"></i> استخدام القالب
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="previewTemplate('employment_follow_up')">
+                                        <i class="fas fa-eye"></i> معاينة
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- قالب تقييم المهارات -->
+                        <div class="col-md-4 mb-4">
+                            <div class="card template-card h-100 animate__animated animate__fadeInUp animate__delay-0-8s">
+                                <div class="card-body text-center">
+                                    <div class="icon-wrapper mb-3">
+                                        <i class="fas fa-cogs fa-3x text-warning"></i>
+                                    </div>
+                                    <h5 class="card-title">استبيان تقييم المهارات</h5>
+                                    <p class="card-text">قالب لتقييم المهارات المكتسبة والمطلوبة في سوق العمل.</p>
+                                    <div class="mb-3">
+                                        <span class="badge bg-info">20 سؤال</span>
+                                        <span class="badge bg-danger">متقدم</span>
+                                    </div>
+                                    <button class="btn btn-primary btn-sm" onclick="useTemplate('skills_assessment')">
+                                        <i class="fas fa-download"></i> استخدام القالب
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="previewTemplate('skills_assessment')">
+                                        <i class="fas fa-eye"></i> معاينة
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- قالب الرضا العام -->
+                        <div class="col-md-4 mb-4">
+                            <div class="card template-card h-100 animate__animated animate__fadeInUp animate__delay-1s">
+                                <div class="card-body text-center">
+                                    <div class="icon-wrapper mb-3">
+                                        <i class="fas fa-smile fa-3x text-info"></i>
+                                    </div>
+                                    <h5 class="card-title">استبيان الرضا العام</h5>
+                                    <p class="card-text">قالب بسيط لقياس مستوى الرضا العام للخريجين.</p>
+                                    <div class="mb-3">
+                                        <span class="badge bg-info">8 أسئلة</span>
+                                        <span class="badge bg-success">سهل</span>
+                                    </div>
+                                    <button class="btn btn-primary btn-sm" onclick="useTemplate('general_satisfaction')">
+                                        <i class="fas fa-download"></i> استخدام القالب
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="previewTemplate('general_satisfaction')">
+                                        <i class="fas fa-eye"></i> معاينة
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- قالب التطوير المهني -->
+                        <div class="col-md-4 mb-4">
+                            <div class="card template-card h-100 animate__animated animate__fadeInUp animate__delay-1-2s">
+                                <div class="card-body text-center">
+                                    <div class="icon-wrapper mb-3">
+                                        <i class="fas fa-chart-line fa-3x text-secondary"></i>
+                                    </div>
+                                    <h5 class="card-title">استبيان التطوير المهني</h5>
+                                    <p class="card-text">قالب لتقييم احتياجات التطوير المهني والتدريب المستمر.</p>
+                                    <div class="mb-3">
+                                        <span class="badge bg-info">18 سؤال</span>
+                                        <span class="badge bg-warning">متوسط</span>
+                                    </div>
+                                    <button class="btn btn-primary btn-sm" onclick="useTemplate('professional_development')">
+                                        <i class="fas fa-download"></i> استخدام القالب
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="previewTemplate('professional_development')">
+                                        <i class="fas fa-eye"></i> معاينة
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- قالب Google Forms -->
+                        <div class="col-md-4 mb-4">
+                            <div class="card template-card h-100 animate__animated animate__fadeInUp animate__delay-1-4s border-primary">
+                                <div class="card-body text-center">
+                                    <div class="icon-wrapper mb-3">
+                                        <i class="fab fa-google fa-3x text-primary"></i>
+                                    </div>
+                                    <h5 class="card-title">استبيان Google Forms</h5>
+                                    <p class="card-text">إنشاء استبيان مرتبط بـ Google Forms للاستفادة من مميزاته المتقدمة.</p>
+                                    <div class="mb-3">
+                                        <span class="badge bg-primary">Google Forms</span>
+                                        <span class="badge bg-success">سهل</span>
+                                    </div>
+                                    <button class="btn btn-primary btn-sm" onclick="createGoogleFormSurvey()">
+                                        <i class="fab fa-google"></i> إنشاء استبيان
+                                    </button>
+                                    <a href="https://forms.google.com" target="_blank" class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-external-link-alt"></i> Google Forms
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- القوالب المخصصة -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm animate__animated animate__fadeInUp animate__delay-1-6s">
+                <div class="card-header bg-gradient-info text-white">
+                    <h4 class="mb-0"><i class="fas fa-user-cog"></i> القوالب المخصصة</h4>
+                </div>
+                <div class="card-body">
+                    {% if custom_templates %}
+                    <div class="row">
+                        {% for template in custom_templates %}
+                        <div class="col-md-4 mb-4">
+                            <div class="card template-card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ template.title }}</h5>
+                                    <p class="card-text">{{ template.description|truncatewords:15 }}</p>
+                                    <div class="mb-3">
+                                        <span class="badge bg-info">{{ template.questions_count }} سؤال</span>
+                                        <span class="badge bg-secondary">{{ template.created_at|date:"Y-m-d" }}</span>
+                                    </div>
+                                    <div class="btn-group w-100" role="group">
+                                        <button class="btn btn-primary btn-sm" onclick="useCustomTemplate({{ template.id }})">
+                                            <i class="fas fa-download"></i> استخدام
+                                        </button>
+                                        <a href="{% url 'surveys:template_edit' template.id %}" class="btn btn-outline-warning btn-sm">
+                                            <i class="fas fa-edit"></i> تعديل
+                                        </a>
+                                        <button class="btn btn-outline-danger btn-sm" onclick="deleteTemplate({{ template.id }})">
+                                            <i class="fas fa-trash"></i> حذف
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info text-center">
+                        <i class="fas fa-info-circle"></i> لم تقم بإنشاء أي قوالب مخصصة بعد. ابدأ بإنشاء قالب جديد!
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{% url 'surveys:list' %}" class="btn btn-secondary btn-lg">
+            <i class="fas fa-arrow-left"></i> العودة إلى قائمة الاستبيانات
+        </a>
+    </div>
+</div>
+
+<!-- Modal لمعاينة القوالب -->
+<div class="modal fade" id="templatePreviewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">معاينة القالب</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="templatePreviewContent">
+                <!-- سيتم تحميل محتوى المعاينة هنا -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                <button type="button" class="btn btn-primary" id="useTemplateFromPreview">استخدام هذا القالب</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal لإنشاء استبيان Google Forms -->
+<div class="modal fade" id="googleFormModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fab fa-google"></i> إنشاء استبيان Google Forms</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="googleFormSurveyForm">
+                    <div class="mb-3">
+                        <label for="googleFormTitle" class="form-label">عنوان الاستبيان</label>
+                        <input type="text" class="form-control" id="googleFormTitle" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="googleFormDescription" class="form-label">وصف الاستبيان</label>
+                        <textarea class="form-control" id="googleFormDescription" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="googleFormUrl" class="form-label">رابط Google Form</label>
+                        <input type="url" class="form-control" id="googleFormUrl" placeholder="https://forms.google.com/..." required>
+                        <div class="form-text">قم بإنشاء النموذج في Google Forms أولاً ثم انسخ الرابط هنا</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="googleFormStartDate" class="form-label">تاريخ البداية</label>
+                        <input type="datetime-local" class="form-control" id="googleFormStartDate" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="googleFormEndDate" class="form-label">تاريخ النهاية</label>
+                        <input type="datetime-local" class="form-control" id="googleFormEndDate" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" onclick="submitGoogleFormSurvey()">
+                    <i class="fab fa-google"></i> إنشاء الاستبيان
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // تأثيرات Hover للبطاقات
+        $(".template-card").hover(function() {
+            $(this).addClass("shadow-lg").css("transform", "translateY(-5px)");
+        }, function() {
+            $(this).removeClass("shadow-lg").css("transform", "translateY(0)");
+        });
+    });
+
+    // استخدام قالب جاهز
+    function useTemplate(templateType) {
+        if (confirm('هل تريد إنشاء استبيان جديد باستخدام هذا القالب؟')) {
+            // إرسال طلب لإنشاء استبيان من القالب
+            window.location.href = `{% url 'surveys:create' %}?template=${templateType}`;
+        }
+    }
+
+    // معاينة قالب
+    function previewTemplate(templateType) {
+        // تحميل محتوى المعاينة عبر AJAX
+        $.get(`{% url 'surveys:template_preview' %}?template=${templateType}`, function(data) {
+            $('#templatePreviewContent').html(data);
+            $('#useTemplateFromPreview').attr('onclick', `useTemplate('${templateType}')`);
+            $('#templatePreviewModal').modal('show');
+        });
+    }
+
+    // استخدام قالب مخصص
+    function useCustomTemplate(templateId) {
+        if (confirm('هل تريد إنشاء استبيان جديد باستخدام هذا القالب؟')) {
+            window.location.href = `{% url 'surveys:create' %}?custom_template=${templateId}`;
+        }
+    }
+
+    // حذف قالب مخصص
+    function deleteTemplate(templateId) {
+        if (confirm('هل أنت متأكد من حذف هذا القالب؟ لا يمكن التراجع عن هذا الإجراء.')) {
+            $.post(`{% url 'surveys:template_delete' %}`, {
+                'template_id': templateId,
+                'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+            }, function(response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert('حدث خطأ أثناء حذف القالب.');
+                }
+            });
+        }
+    }
+
+    // إنشاء استبيان Google Forms
+    function createGoogleFormSurvey() {
+        // تعيين قيم افتراضية للتواريخ
+        const now = new Date();
+        const endDate = new Date();
+        endDate.setDate(endDate.getDate() + 30); // تاريخ النهاية بعد 30 يوم
+        
+        $('#googleFormStartDate').val(now.toISOString().slice(0, 16));
+        $('#googleFormEndDate').val(endDate.toISOString().slice(0, 16));
+        
+        $('#googleFormModal').modal('show');
+    }
+
+    // إرسال بيانات استبيان Google Forms
+    function submitGoogleFormSurvey() {
+        const form = document.getElementById('googleFormSurveyForm');
+        if (form.checkValidity()) {
+            const formData = {
+                'title': $('#googleFormTitle').val(),
+                'description': $('#googleFormDescription').val(),
+                'google_form_url': $('#googleFormUrl').val(),
+                'start_date': $('#googleFormStartDate').val(),
+                'end_date': $('#googleFormEndDate').val(),
+                'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+            };
+
+            $.post('{% url "surveys:create_google_form" %}', formData, function(response) {
+                if (response.success) {
+                    window.location.href = response.redirect_url;
+                } else {
+                    alert('حدث خطأ أثناء إنشاء الاستبيان: ' + response.error);
+                }
+            });
+        } else {
+            form.reportValidity();
+        }
+    }
+</script>
+{% endblock %}
+

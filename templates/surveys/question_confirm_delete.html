@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}تأكيد حذف السؤال{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h1 class="main-title mb-4 animate__animated animate__fadeInDown">تأكيد حذف السؤال <i class="fas fa-exclamation-triangle text-danger"></i></h1>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm animate__animated animate__fadeInUp">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="fas fa-trash-alt"></i> تأكيد الحذف</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                        <h5>تحذير: هذا الإجراء لا يمكن التراجع عنه!</h5>
+                        <p class="mb-0">سيتم حذف السؤال وجميع الإجابات المرتبطة به نهائياً من قاعدة البيانات.</p>
+                    </div>
+
+                    <!-- معلومات الاستبيان -->
+                    <div class="card border-info mb-4">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0"><i class="fas fa-clipboard-list"></i> معلومات الاستبيان</h6>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>عنوان الاستبيان:</strong> {{ survey.title }}</p>
+                            <p><strong>وصف الاستبيان:</strong> {{ survey.description|truncatewords:20 }}</p>
+                            <p><strong>إجمالي الأسئلة:</strong> <span class="badge bg-info">{{ survey.questions.count }}</span></p>
+                        </div>
+                    </div>
+
+                    <!-- معلومات السؤال المراد حذفه -->
+                    <div class="card border-warning mb-4">
+                        <div class="card-header bg-warning text-dark">
+                            <h6 class="mb-0"><i class="fas fa-question-circle"></i> السؤال المراد حذفه</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="question-preview p-3 border rounded bg-light">
+                                <h6 class="text-primary">نص السؤال:</h6>
+                                <p class="lead">{{ question.question_text }}</p>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>نوع السؤال:</strong> 
+                                            <span class="badge bg-secondary">{{ question.get_question_type_display }}</span>
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>مطلوب:</strong> 
+                                            {% if question.is_required %}
+                                                <span class="badge bg-danger">نعم</span>
+                                            {% else %}
+                                                <span class="badge bg-success">لا</span>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                {% if question.help_text %}
+                                <p><strong>نص المساعدة:</strong> {{ question.help_text }}</p>
+                                {% endif %}
+                                
+                                <p><strong>ترتيب السؤال:</strong> {{ question.order }}</p>
+                                
+                                {% if question.choices.all %}
+                                <div class="mt-3">
+                                    <h6 class="text-primary">الخيارات المتاحة:</h6>
+                                    <ul class="list-group list-group-flush">
+                                        {% for choice in question.choices.all %}
+                                            <li class="list-group-item">{{ forloop.counter }}. {{ choice.choice_text }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- إحصائيات الإجابات -->
+                    <div class="card border-danger mb-4">
+                        <div class="card-header bg-danger text-white">
+                            <h6 class="mb-0"><i class="fas fa-chart-bar"></i> إحصائيات الإجابات</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-4">
+                                    <div class="stat-card p-3 border rounded">
+                                        <i class="fas fa-reply fa-2x text-info mb-2"></i>
+                                        <h4 class="text-info">{{ total_answers }}</h4>
+                                        <p class="mb-0">إجمالي الإجابات</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="stat-card p-3 border rounded">
+                                        <i class="fas fa-users fa-2x text-success mb-2"></i>
+                                        <h4 class="text-success">{{ unique_respondents }}</h4>
+                                        <p class="mb-0">عدد المجيبين</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="stat-card p-3 border rounded">
+                                        <i class="fas fa-percentage fa-2x text-warning mb-2"></i>
+                                        <h4 class="text-warning">{{ response_rate|floatformat:1 }}%</h4>
+                                        <p class="mb-0">معدل الإجابة</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {% if total_answers > 0 %}
+                            <div class="alert alert-warning mt-3">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <strong>تحذير:</strong> سيتم حذف جميع الإجابات الـ {{ total_answers }} المرتبطة بهذا السؤال نهائياً.
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- نموذج التأكيد -->
+                    <form method="post" class="text-center">
+                        {% csrf_token %}
+                        
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="confirmDelete" required>
+                            <label class="form-check-label text-danger" for="confirmDelete">
+                                <strong>أؤكد أنني أريد حذف هذا السؤال وجميع الإجابات المرتبطة به نهائياً</strong>
+                            </label>
+                        </div>
+                        
+                        <div class="btn-group" role="group">
+                            <button type="submit" class="btn btn-danger btn-lg" id="deleteButton" disabled>
+                                <i class="fas fa-trash-alt"></i> تأكيد الحذف
+                            </button>
+                            <a href="{% url 'surveys:detail' survey.id %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i> إلغاء
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{% url 'surveys:detail' survey.id %}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left"></i> العودة إلى تفاصيل الاستبيان
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
+    }
+    
+    .question-preview {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    #deleteButton:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // تفعيل/تعطيل زر الحذف حسب حالة checkbox
+        $('#confirmDelete').change(function() {
+            if ($(this).is(':checked')) {
+                $('#deleteButton').prop('disabled', false).removeClass('btn-secondary').addClass('btn-danger');
+            } else {
+                $('#deleteButton').prop('disabled', true).removeClass('btn-danger').addClass('btn-secondary');
+            }
+        });
+
+        // تأثيرات Hover للبطاقات
+        $(".card").hover(function() {
+            $(this).addClass("shadow-lg").css("transform", "translateY(-3px)");
+        }, function() {
+            $(this).removeClass("shadow-lg").css("transform", "translateY(0)");
+        });
+
+        // تأكيد إضافي عند الإرسال
+        $('form').on('submit', function(e) {
+            if (!confirm('هل أنت متأكد تماماً من حذف هذا السؤال؟ هذا الإجراء لا يمكن التراجع عنه!')) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    });
+</script>
+{% endblock %}
+

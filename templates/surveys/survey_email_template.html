@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دعوة للمشاركة في استبيان</title>
+    <style>
+        body {
+            font-family: 'Tahoma', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 1px solid #e0e0e0;
+        }
+        .header {
+            background-color: #0056b3; /* Dark Blue */
+            color: #ffffff;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            padding: 30px 25px;
+            line-height: 1.8;
+            text-align: right;
+        }
+        .content p {
+            margin: 0 0 15px;
+        }
+        .button-container {
+            text-align: center;
+            margin: 25px 0;
+        }
+        .button {
+            background-color: #28a745; /* Green */
+            color: #ffffff;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 16px;
+            display: inline-block;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            color: #6c757d;
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            border-top: 1px solid #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>دعوة للمشاركة في استبيان</h1>
+        </div>
+        <div class="content">
+            <p>مرحباً {{ graduate_name }}،</p>
+            <p>ندعوك للمشاركة في استبيان بعنوان "<strong>{{ survey_title }}</strong>". رأيك يهمنا جداً ويساعدنا في تحسين خدماتنا.</p>
+            {% if survey_description %}
+            <p><strong>وصف الاستبيان:</strong> {{ survey_description }}</p>
+            {% endif %}
+            <p>للمشاركة، يرجى الضغط على الزر أدناه:</p>
+            <div class="button-container">
+                <a href="{{ survey_link }}" class="button">بدء الاستبيان</a>
+            </div>
+            <p>إذا لم يعمل الزر، يمكنك نسخ الرابط التالي ولصقه في متصفحك:</p>
+            <p><a href="{{ survey_link }}">{{ survey_link }}</a></p>
+            <p>شكراً لك على وقتك ومساهمتك القيمة.</p>
+            <p>مع تحيات،<br>فريق متابعة الخريجين</p>
+        </div>
+        <div class="footer">
+            <p>هذه الرسالة تم إرسالها تلقائياً. يرجى عدم الرد عليها.</p>
+        </div>
+    </div>
+</body>
+</html>

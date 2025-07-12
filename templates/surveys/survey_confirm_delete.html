@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}تأكيد حذف الاستبيان{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-danger text-white">
+            <h2 class="h5 mb-0">تأكيد حذف الاستبيان</h2>
+        </div>
+        <div class="card-body">
+            <p class="lead">هل أنت متأكد من أنك تريد حذف الاستبيان: <strong>"{{ survey.title }}"</strong>؟</p>
+            <p class="text-danger font-weight-bold">تحذير: سيتم حذف جميع الدعوات والردود المرتبطة بهذا الاستبيان بشكل دائم. لا يمكن التراجع عن هذا الإجراء.</p>
+            <hr>
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">نعم، قم بالحذف</button>
+                <a href="{% url 'surveys:list' %}" class="btn btn-secondary">إلغاء</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

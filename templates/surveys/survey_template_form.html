@@ -1,0 +1,445 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if template %}تعديل قالب الاستبيان{% else %}إنشاء قالب استبيان جديد{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h1 class="main-title mb-4 animate__animated animate__fadeInDown">
+        {% if template %}
+            تعديل قالب الاستبيان <i class="fas fa-edit"></i>
+        {% else %}
+            إنشاء قالب استبيان جديد <i class="fas fa-plus-circle"></i>
+        {% endif %}
+    </h1>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm animate__animated animate__fadeInUp">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-info-circle"></i> معلومات القالب</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="templateForm">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="id_title" class="form-label">عنوان القالب <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="id_title" name="title" 
+                                       value="{% if template %}{{ template.title }}{% endif %}" required>
+                                <div class="form-text">اختر عنواناً وصفياً للقالب</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="id_description" class="form-label">وصف القالب <span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="id_description" name="description" rows="4" required>{% if template %}{{ template.description }}{% endif %}</textarea>
+                                <div class="form-text">اكتب وصفاً مفصلاً عن الغرض من هذا القالب</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_category" class="form-label">فئة القالب</label>
+                                <select class="form-control" id="id_category" name="category">
+                                    <option value="general" {% if template.category == 'general' %}selected{% endif %}>عام</option>
+                                    <option value="employment" {% if template.category == 'employment' %}selected{% endif %}>التوظيف</option>
+                                    <option value="satisfaction" {% if template.category == 'satisfaction' %}selected{% endif %}>الرضا</option>
+                                    <option value="skills" {% if template.category == 'skills' %}selected{% endif %}>المهارات</option>
+                                    <option value="development" {% if template.category == 'development' %}selected{% endif %}>التطوير</option>
+                                    <option value="feedback" {% if template.category == 'feedback' %}selected{% endif %}>التغذية الراجعة</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="id_difficulty" class="form-label">مستوى الصعوبة</label>
+                                <select class="form-control" id="id_difficulty" name="difficulty">
+                                    <option value="easy" {% if template.difficulty == 'easy' %}selected{% endif %}>سهل</option>
+                                    <option value="medium" {% if template.difficulty == 'medium' %}selected{% endif %}>متوسط</option>
+                                    <option value="hard" {% if template.difficulty == 'hard' %}selected{% endif %}>صعب</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="id_is_public" name="is_public" 
+                                           {% if template.is_public %}checked{% endif %}>
+                                    <label class="form-check-label" for="id_is_public">
+                                        جعل القالب متاحاً للجميع
+                                    </label>
+                                    <div class="form-text">إذا تم تفعيل هذا الخيار، سيكون القالب متاحاً لجميع المستخدمين</div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- قسم الأسئلة -->
+            <div class="card shadow-sm mt-4 animate__animated animate__fadeInUp animate__delay-0-2s">
+                <div class="card-header bg-gradient-success text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="fas fa-question-circle"></i> أسئلة القالب</h4>
+                    <button type="button" class="btn btn-light btn-sm" onclick="addQuestion()">
+                        <i class="fas fa-plus"></i> إضافة سؤال
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="questionsContainer">
+                        {% if template %}
+                            {% for question in template.questions.all %}
+                                <div class="question-item mb-4 p-3 border rounded" data-question-id="{{ question.id }}">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <h6 class="mb-0">السؤال {{ forloop.counter }}</h6>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeQuestion(this)">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-12 mb-3">
+                                            <label class="form-label">نص السؤال</label>
+                                            <textarea class="form-control question-text" rows="2" required>{{ question.question_text }}</textarea>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">نوع السؤال</label>
+                                            <select class="form-control question-type" onchange="toggleChoicesSection(this)">
+                                                <option value="text" {% if question.question_type == 'text' %}selected{% endif %}>نص قصير</option>
+                                                <option value="textarea" {% if question.question_type == 'textarea' %}selected{% endif %}>نص طويل</option>
+                                                <option value="radio" {% if question.question_type == 'radio' %}selected{% endif %}>اختيار من متعدد</option>
+                                                <option value="checkbox" {% if question.question_type == 'checkbox' %}selected{% endif %}>اختيار متعدد</option>
+                                                <option value="select" {% if question.question_type == 'select' %}selected{% endif %}>قائمة منسدلة</option>
+                                                <option value="number" {% if question.question_type == 'number' %}selected{% endif %}>رقم</option>
+                                                <option value="email" {% if question.question_type == 'email' %}selected{% endif %}>بريد إلكتروني</option>
+                                                <option value="date" {% if question.question_type == 'date' %}selected{% endif %}>تاريخ</option>
+                                                <option value="rating" {% if question.question_type == 'rating' %}selected{% endif %}>تقييم</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">نص المساعدة (اختياري)</label>
+                                            <input type="text" class="form-control question-help" value="{{ question.help_text }}">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-12 mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input question-required" type="checkbox" 
+                                                       {% if question.is_required %}checked{% endif %}>
+                                                <label class="form-check-label">
+                                                    سؤال مطلوب
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="choices-section" style="{% if question.question_type not in 'radio,checkbox,select' %}display: none;{% endif %}">
+                                        <label class="form-label">خيارات السؤال</label>
+                                        <div class="choices-container">
+                                            {% for choice in question.choices.all %}
+                                                <div class="input-group mb-2">
+                                                    <input type="text" class="form-control choice-text" value="{{ choice.choice_text }}">
+                                                    <button class="btn btn-outline-danger" type="button" onclick="removeChoice(this)">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="addChoice(this)">
+                                            <i class="fas fa-plus"></i> إضافة خيار
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    
+                    {% if not template or not template.questions.all %}
+                    <div class="alert alert-info text-center" id="noQuestionsAlert">
+                        <i class="fas fa-info-circle"></i> لم تتم إضافة أي أسئلة بعد. ابدأ بإضافة سؤال!
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <button type="button" class="btn btn-success btn-lg" onclick="saveTemplate()">
+                    <i class="fas fa-save"></i> {% if template %}حفظ التعديلات{% else %}إنشاء القالب{% endif %}
+                </button>
+                <a href="{% url 'surveys:templates' %}" class="btn btn-secondary btn-lg ms-2">
+                    <i class="fas fa-times"></i> إلغاء
+                </a>
+            </div>
+        </div>
+
+        <!-- الشريط الجانبي -->
+        <div class="col-md-4">
+            <div class="card shadow-sm animate__animated animate__fadeInUp animate__delay-0-4s">
+                <div class="card-header bg-gradient-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-lightbulb"></i> نصائح</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-check text-success"></i> اختر عنواناً وصفياً للقالب</li>
+                        <li class="mb-2"><i class="fas fa-check text-success"></i> اكتب وصفاً واضحاً للغرض من القالب</li>
+                        <li class="mb-2"><i class="fas fa-check text-success"></i> رتب الأسئلة بشكل منطقي</li>
+                        <li class="mb-2"><i class="fas fa-check text-success"></i> استخدم أنواع أسئلة متنوعة</li>
+                        <li class="mb-2"><i class="fas fa-check text-success"></i> اجعل الأسئلة المهمة مطلوبة</li>
+                        <li class="mb-2"><i class="fas fa-check text-success"></i> أضف نصوص مساعدة للأسئلة المعقدة</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mt-4 animate__animated animate__fadeInUp animate__delay-0-6s">
+                <div class="card-header bg-gradient-warning text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar"></i> إحصائيات</h5>
+                </div>
+                <div class="card-body">
+                    <div class="stat-item mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>عدد الأسئلة:</span>
+                            <span class="badge bg-primary" id="questionsCount">{% if template %}{{ template.questions.count }}{% else %}0{% endif %}</span>
+                        </div>
+                    </div>
+                    <div class="stat-item mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>الأسئلة المطلوبة:</span>
+                            <span class="badge bg-danger" id="requiredQuestionsCount">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-item mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>الوقت المتوقع:</span>
+                            <span class="badge bg-info" id="estimatedTime">0 دقيقة</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let questionCounter = {% if template %}{{ template.questions.count }}{% else %}0{% endif %};
+
+    $(document).ready(function() {
+        updateStatistics();
+    });
+
+    // إضافة سؤال جديد
+    function addQuestion() {
+        questionCounter++;
+        const questionHtml = `
+            <div class="question-item mb-4 p-3 border rounded animate__animated animate__fadeInUp">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h6 class="mb-0">السؤال ${questionCounter}</h6>
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeQuestion(this)">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label">نص السؤال</label>
+                        <textarea class="form-control question-text" rows="2" required></textarea>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">نوع السؤال</label>
+                        <select class="form-control question-type" onchange="toggleChoicesSection(this)">
+                            <option value="text">نص قصير</option>
+                            <option value="textarea">نص طويل</option>
+                            <option value="radio">اختيار من متعدد</option>
+                            <option value="checkbox">اختيار متعدد</option>
+                            <option value="select">قائمة منسدلة</option>
+                            <option value="number">رقم</option>
+                            <option value="email">بريد إلكتروني</option>
+                            <option value="date">تاريخ</option>
+                            <option value="rating">تقييم</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">نص المساعدة (اختياري)</label>
+                        <input type="text" class="form-control question-help">
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input question-required" type="checkbox" onchange="updateStatistics()">
+                            <label class="form-check-label">
+                                سؤال مطلوب
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="choices-section" style="display: none;">
+                    <label class="form-label">خيارات السؤال</label>
+                    <div class="choices-container"></div>
+                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="addChoice(this)">
+                        <i class="fas fa-plus"></i> إضافة خيار
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        $('#questionsContainer').append(questionHtml);
+        $('#noQuestionsAlert').hide();
+        updateStatistics();
+    }
+
+    // حذف سؤال
+    function removeQuestion(button) {
+        if (confirm('هل أنت متأكد من حذف هذا السؤال؟')) {
+            $(button).closest('.question-item').remove();
+            updateStatistics();
+            
+            if ($('.question-item').length === 0) {
+                $('#noQuestionsAlert').show();
+            }
+        }
+    }
+
+    // تبديل قسم الخيارات
+    function toggleChoicesSection(select) {
+        const questionItem = $(select).closest('.question-item');
+        const choicesSection = questionItem.find('.choices-section');
+        const selectedType = $(select).val();
+        
+        if (['radio', 'checkbox', 'select'].includes(selectedType)) {
+            choicesSection.show();
+            // إضافة خيارين افتراضيين إذا لم تكن موجودة
+            if (choicesSection.find('.choice-text').length === 0) {
+                addChoice(choicesSection.find('button')[0]);
+                addChoice(choicesSection.find('button')[0]);
+            }
+        } else {
+            choicesSection.hide();
+        }
+    }
+
+    // إضافة خيار
+    function addChoice(button) {
+        const choicesContainer = $(button).siblings('.choices-container');
+        const choiceHtml = `
+            <div class="input-group mb-2">
+                <input type="text" class="form-control choice-text" placeholder="نص الخيار">
+                <button class="btn btn-outline-danger" type="button" onclick="removeChoice(this)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+        choicesContainer.append(choiceHtml);
+    }
+
+    // حذف خيار
+    function removeChoice(button) {
+        $(button).closest('.input-group').remove();
+    }
+
+    // تحديث الإحصائيات
+    function updateStatistics() {
+        const totalQuestions = $('.question-item').length;
+        const requiredQuestions = $('.question-required:checked').length;
+        const estimatedTime = Math.max(totalQuestions * 0.5, 1); // نصف دقيقة لكل سؤال كحد أدنى دقيقة واحدة
+        
+        $('#questionsCount').text(totalQuestions);
+        $('#requiredQuestionsCount').text(requiredQuestions);
+        $('#estimatedTime').text(Math.round(estimatedTime) + ' دقيقة');
+    }
+
+    // حفظ القالب
+    function saveTemplate() {
+        // التحقق من صحة البيانات الأساسية
+        const title = $('#id_title').val().trim();
+        const description = $('#id_description').val().trim();
+        
+        if (!title || !description) {
+            alert('يرجى ملء جميع الحقول المطلوبة');
+            return;
+        }
+        
+        if ($('.question-item').length === 0) {
+            alert('يجب إضافة سؤال واحد على الأقل');
+            return;
+        }
+        
+        // جمع بيانات الأسئلة
+        const questions = [];
+        $('.question-item').each(function(index) {
+            const questionText = $(this).find('.question-text').val().trim();
+            const questionType = $(this).find('.question-type').val();
+            const questionHelp = $(this).find('.question-help').val().trim();
+            const isRequired = $(this).find('.question-required').is(':checked');
+            
+            if (!questionText) {
+                alert(`يرجى ملء نص السؤال رقم ${index + 1}`);
+                return false;
+            }
+            
+            const question = {
+                question_text: questionText,
+                question_type: questionType,
+                help_text: questionHelp,
+                is_required: isRequired,
+                order: index,
+                choices: []
+            };
+            
+            // جمع الخيارات إذا كانت موجودة
+            if (['radio', 'checkbox', 'select'].includes(questionType)) {
+                $(this).find('.choice-text').each(function(choiceIndex) {
+                    const choiceText = $(this).val().trim();
+                    if (choiceText) {
+                        question.choices.push({
+                            choice_text: choiceText,
+                            order: choiceIndex
+                        });
+                    }
+                });
+                
+                if (question.choices.length === 0) {
+                    alert(`يرجى إضافة خيارات للسؤال رقم ${index + 1}`);
+                    return false;
+                }
+            }
+            
+            questions.push(question);
+        });
+        
+        // إرسال البيانات
+        const templateData = {
+            title: title,
+            description: description,
+            category: $('#id_category').val(),
+            difficulty: $('#id_difficulty').val(),
+            is_public: $('#id_is_public').is(':checked'),
+            questions: questions,
+            csrfmiddlewaretoken: $('[name=csrfmiddlewaretoken]').val()
+        };
+        
+        const url = {% if template %}'{% url "surveys:template_edit" template.id %}'{% else %}'{% url "surveys:template_create" %}'{% endif %};
+        
+        $.post(url, templateData, function(response) {
+            if (response.success) {
+                window.location.href = '{% url "surveys:templates" %}';
+            } else {
+                alert('حدث خطأ أثناء حفظ القالب: ' + response.error);
+            }
+        }).fail(function() {
+            alert('حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.');
+        });
+    }
+</script>
+{% endblock %}
+

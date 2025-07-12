@@ -1,0 +1,264 @@
+
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}عرض الاستبيان{% endblock %}
+{% block content %}
+<style>
+.survey-main-flex {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 2.5rem;
+    margin: 40px auto;
+    max-width: 1100px;
+}
+.survey-id-box {
+    background: linear-gradient(135deg, #f8fafc 0%, #e9ecef 100%);
+    border-radius: 2.5rem;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.18);
+    padding: 2.5rem 2rem 2rem 2rem;
+    min-width: 270px;
+    max-width: 320px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.15rem;
+    color: #222;
+    line-height: 2.1;
+    letter-spacing: 0.5px;
+}
+.survey-content-box {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+}
+.survey-logo {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 2px 12px rgba(102, 126, 234, 0.10);
+    margin-bottom: 1.2rem;
+    border: 2px solid #764ba2;
+    background: #fff;
+    align-self: flex-start;
+}
+.survey-title {
+    font-size: 2.1rem;
+    font-weight: 900;
+    color: #333;
+    margin-bottom: 1.2rem;
+    margin-top: 0.7rem;
+    text-align: right;
+    align-self: flex-start;
+}
+.survey-desc {
+    font-size: 1.15rem;
+    color: #555;
+    margin-bottom: 2.2rem;
+    background: #fff;
+    border-radius: 1.2rem;
+    padding: 1.2rem 1.5rem;
+    display: inline-block;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.08);
+    text-align: right;
+    align-self: flex-start;
+    max-width: 600px;
+}
+.survey-questions-view {
+    margin-top: 1.5rem;
+    text-align: right;
+    width: 100%;
+}
+.survey-question-view {
+    background: linear-gradient(135deg, #fff 60%, #e9ecef 100%);
+    border-radius: 1.5rem;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.08);
+    padding: 1.2rem 1.5rem 1.5rem 1.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #333;
+    position: relative;
+    direction: rtl;
+}
+.survey-question-header {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    gap: 0.7rem;
+    margin-bottom: 1.1rem;
+}
+.survey-question-order {
+    font-size: 1.1rem;
+    color: #764ba2;
+    font-weight: bold;
+    margin-left: 0.5rem;
+    min-width: 2.2em;
+    text-align: right;
+}
+.survey-question-divider {
+    color: #bbb;
+    font-size: 1.3rem;
+    margin: 0 0.3rem;
+}
+.survey-question-input {
+    width: 100%;
+    margin-top: 0.7rem;
+    padding: 0.7rem 1rem;
+    border-radius: 0.8rem;
+    border: 1px solid #ddd;
+    font-size: 1.05rem;
+    background: #f8fafc;
+    resize: vertical;
+}
+.survey-question-choices {
+    margin-top: 0.7rem;
+    margin-right: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.survey-question-choice-label {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-size: 1.05rem;
+    cursor: pointer;
+    user-select: none;
+}
+.survey-question-choice-input {
+    accent-color: #764ba2;
+    width: 1.1rem;
+    height: 1.1rem;
+}
+.survey-back-btn {
+    margin: 2.5rem auto 0 auto;
+    display: block;
+    background: linear-gradient(90deg, #764ba2 0%, #667eea 100%);
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 1.2rem;
+    padding: 0.7rem 2.5rem;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.13);
+    cursor: pointer;
+    transition: background 0.2s;
+    text-decoration: none;
+}
+.survey-back-btn:hover {
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+}
+@media (max-width: 900px) {
+    .survey-main-flex {
+        flex-direction: column-reverse;
+        align-items: stretch;
+        gap: 1.5rem;
+    }
+    .survey-id-box {
+        max-width: 100%;
+        min-width: 0;
+        font-size: 1rem;
+        padding: 1.5rem 0.7rem 1.2rem 0.7rem;
+    }
+    .survey-content-box {
+        padding: 0 0.5rem;
+        width: 100%;
+    }
+    .survey-title {
+        font-size: 1.3rem;
+    }
+    .survey-desc {
+        font-size: 1rem;
+        padding: 0.7rem 0.7rem;
+        max-width: 100%;
+    }
+    .survey-logo {
+        width: 80px;
+        height: 80px;
+    }
+    .survey-question-view {
+        font-size: 1rem;
+        padding: 0.7rem 0.7rem 1rem 0.7rem;
+    }
+}
+</style>
+<div style="max-width: 850px; margin: 40px auto; background: #fafbfc; border-radius: 1.5rem; box-shadow: 0 6px 30px rgba(102,126,234,0.10); padding: 2.2rem 1.5rem; direction: rtl;">
+    <!-- الصف العلوي: صورتين (يسار/يمين) -->
+    <div style="display: flex; flex-direction: row-reverse; justify-content: space-between; align-items: flex-start; gap: 1.5rem; margin-bottom: 1.2rem;">
+        <!-- مربع الصورة (يمين) -->
+        <div style="border: 2px solid #bbb; border-radius: 1.3rem; background: #fff; width: 180px; height: 120px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+            {% if survey.logo %}
+                <img src="{{ survey.logo.url }}" alt="صورة الاستبيان" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+            {% else %}
+                <span style="font-weight: bold; color: #aaa; font-size: 1.1rem;">لا توجد صورة</span>
+            {% endif %}
+        </div>
+        <!-- مربع الشعار أو نص الجمهورية اليمنية (يسار) -->
+        <div style="border: 2px solid #bbb; border-radius: 1.3rem; background: #fff; width: 180px; height: 120px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 1.08rem; color: #764ba2; font-weight: bold;">
+            {% if survey.org_title and survey.org_title|length > 0 %}
+                {{ survey.org_title }}
+            {% else %}
+                <span style="color: #aaa;">لا يوجد شعار</span>
+            {% endif %}
+        </div>
+    </div>
+    <!-- دائرة في المنتصف فيها عنوان الاستبيان -->
+    <div style="width: 210px; height: 90px; border: 2px dashed #bbb; border-radius: 50%; margin: 0 auto 1.2rem auto; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #764ba2; font-size: 1.25rem; background: #fff;">
+        {{ survey.title }}
+    </div>
+    <!-- الوصف -->
+    <div style="font-size: 1.07rem; color: #555; margin-bottom: 1.2rem; text-align: center;">{{ survey.description }}</div>
+    <!-- الأسئلة -->
+    <div style="margin-top: 1.5rem;">
+        {% for question in questions %}
+        <div style="border: 2px solid #bbb; border-radius: 1.2rem; background: #fff; margin-bottom: 1.2rem; padding: 1.1rem 1.2rem;">
+            <div style="font-weight: bold; color: #764ba2; margin-bottom: 0.5rem;">{{ forloop.counter }}. {{ question.question_text }}</div>
+            {% if question.question_type == 'text' %}
+                <input type="text" style="width: 100%; border-radius: 0.6rem; border: 1px solid #ddd; padding: 0.6rem; background: #f8fafc;" placeholder="اكتب إجابتك هنا..." disabled />
+            {% elif question.question_type == 'textarea' %}
+                <textarea style="width: 100%; border-radius: 0.6rem; border: 1px solid #ddd; padding: 0.6rem; background: #f8fafc;" rows="3" placeholder="اكتب إجابتك هنا..." disabled></textarea>
+            {% elif question.question_type == 'radio' or question.question_type == 'select' %}
+                <div style="margin-top: 0.6rem;">
+                    {% for choice in question.choices.all %}
+                    <label style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.3rem; font-size: 1.04rem;">
+                        <input type="radio" name="q{{ question.id }}" disabled style="accent-color: #764ba2;" />
+                        {{ choice.choice_text }}
+                    </label>
+                    {% endfor %}
+                </div>
+            {% elif question.question_type == 'checkbox' %}
+                <div style="margin-top: 0.6rem;">
+                    {% for choice in question.choices.all %}
+                    <label style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.3rem; font-size: 1.04rem;">
+                        <input type="checkbox" name="q{{ question.id }}" disabled style="accent-color: #764ba2;" />
+                        {{ choice.choice_text }}
+                    </label>
+                    {% endfor %}
+                </div>
+            {% elif question.question_type == 'number' %}
+                <input type="number" style="width: 100%; border-radius: 0.6rem; border: 1px solid #ddd; padding: 0.6rem; background: #f8fafc;" placeholder="اكتب رقمًا..." disabled />
+            {% elif question.question_type == 'email' %}
+                <input type="email" style="width: 100%; border-radius: 0.6rem; border: 1px solid #ddd; padding: 0.6rem; background: #f8fafc;" placeholder="اكتب بريدك الإلكتروني..." disabled />
+            {% elif question.question_type == 'date' %}
+                <input type="date" style="width: 100%; border-radius: 0.6rem; border: 1px solid #ddd; padding: 0.6rem; background: #f8fafc;" disabled />
+            {% elif question.question_type == 'rating' %}
+                <input type="number" min="1" max="5" style="width: 100%; border-radius: 0.6rem; border: 1px solid #ddd; padding: 0.6rem; background: #f8fafc;" placeholder="قيم من 1 إلى 5" disabled />
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    <div style="text-align: left; margin-top: 2.5rem; display: flex; gap: 1rem; justify-content: flex-start;">
+        <a href="{% url 'surveys:send_survey_select' survey.pk %}" style="background: linear-gradient(90deg, #28a745 0%, #218838 100%); color: #fff; font-size: 1.1rem; font-weight: bold; border: none; border-radius: 1.2rem; padding: 0.7rem 2.5rem; box-shadow: 0 2px 8px rgba(40,167,69,0.2); text-decoration: none;">إرسال الاستبيان</a>
+        <a href="{% url 'surveys:list' %}" style="background: linear-gradient(90deg, #764ba2 0%, #667eea 100%); color: #fff; font-size: 1.1rem; font-weight: bold; border: none; border-radius: 1.2rem; padding: 0.7rem 2.5rem; box-shadow: 0 2px 8px rgba(102,126,234,0.13); text-decoration: none;">رجوع إلى قائمة الاستبيانات</a>
+    </div>
+</div>
+    <!-- الصف العلوي: الصورة يسار + تعليمات يمين -->
+    
+{% endblock %} 

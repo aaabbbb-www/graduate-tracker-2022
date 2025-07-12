@@ -1,0 +1,101 @@
+# Graduate Tracker System Requirements
+
+# Django Framework
+Django==4.2.7
+djangorestframework==3.14.0
+
+# Database
+mysqlclient==2.2.0
+PyMySQL==1.1.0
+
+# Authentication & Security
+django-allauth==0.57.0
+django-cors-headers==4.3.1
+django-crispy-forms==2.0
+crispy-bootstrap5==0.7
+
+# Forms & UI
+django-widget-tweaks==1.5.0
+django-bootstrap5==23.3
+
+# File Handling
+Pillow==10.1.0
+django-storages==1.14.2
+
+# Email
+django-ses==3.5.0
+
+# Utilities
+python-decouple==3.8
+django-extensions==3.2.3
+django-debug-toolbar==4.2.0
+
+# Export & Reports
+reportlab==4.0.7
+openpyxl==3.1.2
+xlsxwriter==3.1.9
+weasyprint==60.2
+
+# Date & Time
+python-dateutil==2.8.2
+
+# Validation
+django-phonenumber-field==7.2.0
+phonenumbers==8.13.25
+
+# Pagination
+django-pure-pagination==0.3.0
+
+# Caching
+redis==5.0.1
+django-redis==5.4.0
+
+# Celery for Background Tasks
+celery==5.3.4
+django-celery-beat==2.5.0
+django-celery-results==2.5.1
+
+# Monitoring & Logging
+sentry-sdk==1.38.0
+
+# Development Tools
+django-livereload-server==0.4
+factory-boy==3.3.0
+
+# Testing
+pytest==7.4.3
+pytest-django==4.7.0
+coverage==7.3.2
+
+# API Documentation
+drf-spectacular==0.26.5
+
+# Environment
+python-dotenv==1.0.0
+
+# Charts & Visualization
+django-chartjs==2.3.0
+
+# Search
+django-haystack==3.2.1
+
+# Internationalization
+django-modeltranslation==0.18.11
+
+# Social Authentication
+social-auth-app-django==5.4.0
+
+# Admin Interface Enhancement
+django-admin-interface==0.26.1
+django-colorfield==0.10.1
+
+# Performance
+django-compressor==4.4
+django-htmlmin==0.11.0
+
+# Security
+django-ratelimit==4.1.0
+django-axes==6.1.1
+
+# Backup
+django-dbbackup==4.0.2

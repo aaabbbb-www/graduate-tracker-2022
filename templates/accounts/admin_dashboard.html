@@ -1,0 +1,343 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}لوحة تحكم المدير{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- إحصائيات سريعة -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-3x mb-3"></i>
+                    <h4 class="card-title">إجمالي الموظفين</h4>
+                    <h2 class="mb-0">{{ stats.total_employees }}</h2>
+                    <small>{{ stats.active_employees }} نشط</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-tag fa-3x mb-3"></i>
+                    <h4 class="card-title">الأدوار</h4>
+                    <h2 class="mb-0">{{ stats.total_roles }}</h2>
+                    <small>{{ stats.active_roles }} نشط</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-key fa-3x mb-3"></i>
+                    <h4 class="card-title">الصلاحيات</h4>
+                    <h2 class="mb-0">{{ stats.total_permissions }}</h2>
+                    <small>إجمالي الصلاحيات</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-history fa-3x mb-3"></i>
+                    <h4 class="card-title">الأنشطة اليوم</h4>
+                    <h2 class="mb-0">{{ stats.today_activities }}</h2>
+                    <small>أنشطة مسجلة</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- الوصول السريع -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-rocket me-2"></i>الوصول السريع
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="d-grid">
+                                <a href="{% url 'accounts:employee_list' %}" class="btn btn-outline-primary btn-lg">
+                                    <i class="fas fa-users me-2"></i>
+                                    <div>إدارة الموظفين</div>
+                                    <small class="text-muted">{{ stats.total_employees }} موظف</small>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="d-grid">
+                                <a href="{% url 'accounts:role_list' %}" class="btn btn-outline-success btn-lg">
+                                    <i class="fas fa-user-tag me-2"></i>
+                                    <div>إدارة الأدوار</div>
+                                    <small class="text-muted">{{ stats.total_roles }} دور</small>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="d-grid">
+                                <a href="{% url 'accounts:bulk_permissions' %}" class="btn btn-outline-info btn-lg">
+                                    <i class="fas fa-users-cog me-2"></i>
+                                    <div>منح صلاحيات جماعية</div>
+                                    <small class="text-muted">إدارة سريعة</small>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="d-grid">
+                                <a href="{% url 'accounts:activity_log' %}" class="btn btn-outline-warning btn-lg">
+                                    <i class="fas fa-history me-2"></i>
+                                    <div>سجل الأنشطة</div>
+                                    <small class="text-muted">{{ stats.today_activities }} اليوم</small>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- الإشعارات والتنبيهات -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bell me-2"></i>الإشعارات والتنبيهات
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if notifications %}
+                        <div class="list-group list-group-flush">
+                            {% for notification in notifications %}
+                            <div class="list-group-item d-flex align-items-center">
+                                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ notification.title }}</h6>
+                                    <p class="mb-1 small">{{ notification.message }}</p>
+                                    <small class="text-muted">{{ notification.created_at|timesince }} مضت</small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-check-circle fa-3x mb-3 text-success"></i>
+                            <p>لا توجد تنبيهات جديدة</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <!-- آخر الأنشطة -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clock me-2"></i>آخر الأنشطة
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_activities %}
+                        <div class="list-group list-group-flush">
+                            {% for activity in recent_activities %}
+                            <div class="list-group-item d-flex align-items-center">
+                                <div class="avatar-sm me-3">
+                                    <i class="fas fa-user-circle fa-2x text-primary"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-1">{{ activity.user.get_full_name }}</h6>
+                                        <small class="text-muted">{{ activity.timestamp|timesince }} مضت</small>
+                                    </div>
+                                    <p class="mb-1">{{ activity.details|truncatechars:60 }}</p>
+                                    <span class="badge {% if activity.action == 'login' %}bg-success{% elif activity.action == 'logout' %}bg-secondary{% elif activity.action == 'create' %}bg-primary{% elif activity.action == 'update' %}bg-warning{% elif activity.action == 'delete' %}bg-danger{% else %}bg-info{% endif %}">
+                                        {{ activity.get_action_display }}
+                                    </span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="{% url 'accounts:activity_log' %}" class="btn btn-outline-info btn-sm">
+                                <i class="fas fa-eye me-1"></i>عرض جميع الأنشطة
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-history fa-3x mb-3"></i>
+                            <p>لا توجد أنشطة حديثة</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- الموظفون الجدد -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-plus me-2"></i>الموظفون الجدد
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if new_employees %}
+                        <div class="list-group list-group-flush">
+                            {% for employee in new_employees %}
+                            <div class="list-group-item d-flex align-items-center">
+                                <div class="avatar-sm me-3">
+                                    <i class="fas fa-user-circle fa-2x text-success"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-1">{{ employee.user.get_full_name }}</h6>
+                                        <small class="text-muted">{{ employee.created_at|timesince }} مضت</small>
+                                    </div>
+                                    <p class="mb-1">{{ employee.position }} - {{ employee.department }}</p>
+                                    <span class="badge bg-success">جديد</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="{% url 'accounts:employee_list' %}" class="btn btn-outline-success btn-sm">
+                                <i class="fas fa-eye me-1"></i>عرض جميع الموظفين
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-users fa-3x mb-3"></i>
+                            <p>لا يوجد موظفون جدد</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- رسوم بيانية -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>توزيع الموظفين حسب الأقسام
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="departmentChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>الأنشطة الشهرية
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="activityChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border: 1px solid rgba(0, 0, 0, 0.125);
+        margin-bottom: 1rem;
+    }
+    
+    .card-header {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    }
+    
+    .avatar-sm {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f8f9fa;
+    }
+    
+    .list-group-item {
+        border: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    }
+    
+    .list-group-item:last-child {
+        border-bottom: none;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// رسم بياني دائري لتوزيع الموظفين حسب الأقسام
+const departmentCtx = document.getElementById('departmentChart').getContext('2d');
+const departmentChart = new Chart(departmentCtx, {
+    type: 'pie',
+    data: {
+        labels: {{ department_labels|safe }},
+        datasets: [{
+            data: {{ department_data|safe }},
+            backgroundColor: [
+                '#FF6384',
+                '#36A2EB',
+                '#FFCE56',
+                '#4BC0C0',
+                '#9966FF',
+                '#FF9F40'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// رسم بياني شريطي للأنشطة الشهرية
+const activityCtx = document.getElementById('activityChart').getContext('2d');
+const activityChart = new Chart(activityCtx, {
+    type: 'bar',
+    data: {
+        labels: {{ activity_labels|safe }},
+        datasets: [{
+            label: 'عدد الأنشطة',
+            data: {{ activity_data|safe }},
+            backgroundColor: '#28a745',
+            borderColor: '#28a745',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

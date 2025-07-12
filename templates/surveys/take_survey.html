@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}إكمال الاستبيان{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h1 class="main-title mb-4 animate__animated animate__fadeInDown">إكمال الاستبيان <i class="fas fa-poll-h"></i></h1>
+
+    {% if survey %}
+    <div class="card shadow-sm animate__animated animate__fadeInUp">
+        <div class="card-header bg-gradient-primary text-white">
+            <h4 class="mb-0"><i class="fas fa-clipboard-list"></i> {{ survey.title }}</h4>
+        </div>
+        <div class="card-body">
+            <p class="lead text-center">{{ survey.description }}</p>
+            
+            {% if survey.google_form_url %}
+            <!-- إذا كان الاستبيان من Google Forms -->
+            <div class="alert alert-info text-center mb-4">
+                <i class="fab fa-google fa-2x mb-3"></i>
+                <h5>هذا الاستبيان متوفر عبر Google Forms</h5>
+                <p>يمكنك إكمال الاستبيان مباشرة عبر Google Forms أو استخدام النموذج أدناه.</p>
+                <a href="{{ survey.google_form_url }}" target="_blank" class="btn btn-primary btn-lg">
+                    <i class="fab fa-google"></i> فتح في Google Forms
+                </a>
+            </div>
+            
+            <div class="text-center mb-3">
+                <button type="button" class="btn btn-outline-secondary" onclick="toggleLocalForm()">
+                    <i class="fas fa-toggle-off" id="toggle-icon"></i> استخدام النموذج المحلي
+                </button>
+            </div>
+            
+            <div id="local-form" style="display: none;">
+            {% endif %}
+            
+            <hr>
+            <form method="post" class="survey-form">
+                {% csrf_token %}
+                <input type="hidden" name="survey_id" value="{{ survey.pk }}">
+
+                {% for question in survey.questions.all %}
+                <div class="question-block mb-4 p-3 border rounded animate__animated animate__fadeInUp animate__delay-{{ forloop.counter0|add:1 }}s">
+                    <h5 class="mb-3">السؤال {{ forloop.counter }}: {{ question.question_text }}</h5>
+                    
+                    {% if question.question_type == 'text' %}
+                        <div class="form-group">
+                            <textarea name="question_{{ question.pk }}" class="form-control" rows="3" placeholder="أدخل إجابتك هنا..."></textarea>
+                        </div>
+                    {% elif question.question_type == 'single_choice' %}
+                        <div class="form-group">
+                            {% for choice in question.choices.all %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="question_{{ question.pk }}" id="choice_{{ choice.pk }}" value="{{ choice.pk }}">
+                                    <label class="form-check-label" for="choice_{{ choice.pk }}">
+                                        {{ choice.choice_text }}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% elif question.question_type == 'multiple_choice' %}
+                        <div class="form-group">
+                            {% for choice in question.choices.all %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="question_{{ question.pk }}" id="choice_{{ choice.pk }}" value="{{ choice.pk }}">
+                                    <label class="form-check-label" for="choice_{{ choice.pk }}">
+                                        {{ choice.choice_text }}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% elif question.question_type == 'rating' %}
+                        <div class="form-group rating-stars">
+                            {% for i in "12345"|make_list %}
+                                <input type="radio" id="rating_{{ question.pk }}_{{ i }}" name="question_{{ question.pk }}" value="{{ i }}" />
+                                <label for="rating_{{ question.pk }}_{{ i }}" class="star"><i class="fas fa-star"></i></label>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-info-circle"></i> لا توجد أسئلة في هذا الاستبيان حالياً.
+                </div>
+                {% endfor %}
+
+                <div class="col-12 mt-4 text-center">
+                    <button type="submit" class="btn btn-success btn-lg animate__animated animate__pulse animate__infinite"><i class="fas fa-check-circle"></i> إرسال الاستبيان</button>
+                    <a href="{% url 'surveys:list' %}" class="btn btn-secondary btn-lg ms-2"><i class="fas fa-times-circle"></i> إلغاء</a>
+                </div>
+            </form>
+            
+            {% if survey.google_form_url %}
+            </div> <!-- إغلاق local-form -->
+            {% endif %}
+        </div>
+    </div>
+
+    {% else %}
+    <div class="alert alert-warning text-center animate__animated animate__fadeInUp">
+        <i class="fas fa-exclamation-triangle"></i> الاستبيان المطلوب غير موجود.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .rating-stars {
+        direction: rtl; /* لجعل النجوم من اليمين لليسار */
+        display: inline-block;
+        unicode-bidi: bidi-override;
+    }
+    .rating-stars input {
+        display: none;
+    }
+    .rating-stars label {
+        font-size: 2em;
+        color: #ccc;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+    .rating-stars label:hover,
+    .rating-stars label:hover ~ label,
+    .rating-stars input:checked ~ label {
+        color: #ffc107; /* لون النجمة عند التحديد أو التحويم */
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // تأثيرات Hover للبطاقات
+        $(".card").hover(function() {
+            $(this).addClass("shadow-lg").css("transform", "translateY(-3px)");
+        }, function() {
+            $(this).removeClass("shadow-lg").css("transform", "translateY(0)");
+        });
+
+        // تأثيرات Hover لكتل الأسئلة
+        $(".question-block").hover(function() {
+            $(this).addClass("border-primary").css("box-shadow", "0 .5rem 1rem rgba(0, 123, 255, .15) !important");
+        }, function() {
+            $(this).removeClass("border-primary").css("box-shadow", "none");
+        });
+    });
+
+    // دالة لتبديل عرض النموذج المحلي
+    function toggleLocalForm() {
+        const localForm = document.getElementById('local-form');
+        const toggleIcon = document.getElementById('toggle-icon');
+        
+        if (localForm.style.display === 'none') {
+            localForm.style.display = 'block';
+            toggleIcon.className = 'fas fa-toggle-on';
+        } else {
+            localForm.style.display = 'none';
+            toggleIcon.className = 'fas fa-toggle-off';
+        }
+    }
+</script>
+{% endblock %}
+

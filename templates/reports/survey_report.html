@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}تقرير الاستبيانات{% endblock %}
+{% block extra_css %}
+<style>
+.eq-box {background: #f8f9ff; border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 4px 20px rgba(102,126,234,0.08);}
+.eq-title {font-size: 1.2rem; font-weight: 700; color: #2d3748; margin-bottom: 1rem;}
+.eq-value {font-size: 2.2rem; font-weight: 800; color: #43e97b;}
+.table thead {background: linear-gradient(90deg, #43e97b, #38f9d7); color: white;}
+.filter-form {margin-bottom: 2rem; background: #f1f5f9; border-radius: 12px; padding: 1rem 1.5rem;}
+</style>
+{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4 gradient-text"><i class="bi bi-clipboard-data me-2"></i> تقرير الاستبيانات</h2>
+    <!-- ملخص سريع -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="eq-box text-center">
+                <div class="eq-title">إجمالي الاستبيانات</div>
+                <div class="eq-value">{{ survey_stats.total }}</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="eq-box text-center">
+                <div class="eq-title">الاستبيانات النشطة</div>
+                <div class="eq-value">{{ survey_stats.active }}</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="eq-box text-center">
+                <div class="eq-title">إجمالي الاستجابات</div>
+                <div class="eq-value">{{ survey_stats.total_responses }}</div>
+            </div>
+        </div>
+    </div>
+    <!-- جدول أكثر الاستبيانات استجابة -->
+    <div class="card mb-4">
+        <div class="card-header bg-light">أكثر الاستبيانات استجابة</div>
+        <div class="card-body p-0">
+            <table class="table table-bordered mb-0">
+                <thead><tr><th>العنوان</th><th>عدد الاستجابات</th><th>الحالة</th><th>تاريخ الإنشاء</th></tr></thead>
+                <tbody>
+                {% for s in top_surveys %}
+                    <tr>
+                        <td>{{ s.title }}</td>
+                        <td>{{ s.response_count }}</td>
+                        <td>{% if s.status == 'active' %}<span class="badge bg-success">نشط</span>{% elif s.status == 'closed' %}<span class="badge bg-danger">مغلق</span>{% else %}<span class="badge bg-secondary">مسودة</span>{% endif %}</td>
+                        <td>{{ s.created_at|date:'Y-m-d' }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="4" class="text-center">لا يوجد بيانات</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- جدول جميع الاستبيانات -->
+    <div class="card mb-4">
+        <div class="card-header bg-light">جميع الاستبيانات</div>
+        <div class="card-body p-0">
+            <table class="table table-striped mb-0">
+                <thead><tr><th>العنوان</th><th>الحالة</th><th>عدد الاستجابات</th><th>تاريخ الإنشاء</th></tr></thead>
+                <tbody>
+                {% for s in surveys %}
+                    <tr>
+                        <td>{{ s.title }}</td>
+                        <td>{% if s.status == 'active' %}<span class="badge bg-success">نشط</span>{% elif s.status == 'closed' %}<span class="badge bg-danger">مغلق</span>{% else %}<span class="badge bg-secondary">مسودة</span>{% endif %}</td>
+                        <td>{{ s.response_count }}</td>
+                        <td>{{ s.created_at|date:'Y-m-d' }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="4" class="text-center">لا يوجد استبيانات</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- إحصائيات الاستجابات الشهرية -->
+    <div class="card mb-4">
+        <div class="card-header bg-light">إحصائيات الاستجابات الشهرية (آخر 12 شهر)</div>
+        <div class="card-body p-0">
+            <table class="table table-sm table-bordered mb-0">
+                <thead><tr><th>السنة</th><th>الشهر</th><th>عدد الاستجابات</th></tr></thead>
+                <tbody>
+                {% for m in monthly_responses %}
+                    <tr>
+                        <td>{{ m.year }}</td>
+                        <td>{{ m.month }}</td>
+                        <td>{{ m.count }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="3" class="text-center">لا يوجد بيانات شهرية</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

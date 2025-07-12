@@ -1,0 +1,353 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}تفاصيل النسخة الاحتياطية - {{ backup.filename }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <i class="bi bi-file-earmark-text me-2"></i>
+                            تفاصيل النسخة الاحتياطية
+                        </h3>
+                        <div>
+                            <a href="{% url 'accounts:backup_list' %}" class="btn btn-light btn-sm me-2">
+                                <i class="bi bi-arrow-left me-1"></i>عودة
+                            </a>
+                            {% if backup.status == 'success' %}
+                            <button type="button" class="btn btn-success btn-sm me-2" onclick="downloadBackup()">
+                                <i class="bi bi-download me-1"></i>تحميل
+                            </button>
+                            <button type="button" class="btn btn-warning btn-sm" onclick="restoreBackup()">
+                                <i class="bi bi-arrow-clockwise me-1"></i>استعادة
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- معلومات أساسية -->
+                        <div class="col-md-8">
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-info-circle me-2"></i>معلومات النسخة الاحتياطية
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <strong>اسم الملف:</strong>
+                                                <p class="text-muted">{{ backup.filename }}</p>
+                                            </div>
+                                            <div class="mb-3">
+                                                <strong>النوع:</strong>
+                                                <p>
+                                                    {% if backup.backup_type == 'manual' %}
+                                                        <span class="badge bg-primary">يدوية</span>
+                                                    {% elif backup.backup_type == 'automatic' %}
+                                                        <span class="badge bg-success">تلقائية</span>
+                                                    {% elif backup.backup_type == 'scheduled' %}
+                                                        <span class="badge bg-warning">مجدولة</span>
+                                                    {% endif %}
+                                                </p>
+                                            </div>
+                                            <div class="mb-3">
+                                                <strong>الحالة:</strong>
+                                                <p>
+                                                    {% if backup.status == 'success' %}
+                                                        <span class="badge bg-success">ناجحة</span>
+                                                    {% elif backup.status == 'failed' %}
+                                                        <span class="badge bg-danger">فاشلة</span>
+                                                    {% elif backup.status == 'in_progress' %}
+                                                        <span class="badge bg-warning">قيد التنفيذ</span>
+                                                    {% else %}
+                                                        <span class="badge bg-secondary">غير معروف</span>
+                                                    {% endif %}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <strong>الحجم:</strong>
+                                                <p class="text-muted">{{ backup.size|filesizeformat }}</p>
+                                            </div>
+                                            <div class="mb-3">
+                                                <strong>تاريخ الإنشاء:</strong>
+                                                <p class="text-muted">{{ backup.created_at|date:"Y-m-d H:i:s" }}</p>
+                                            </div>
+                                            <div class="mb-3">
+                                                <strong>المدة:</strong>
+                                                <p class="text-muted">{{ backup.duration|default:"غير محدد" }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    {% if backup.description %}
+                                    <div class="mb-3">
+                                        <strong>الوصف:</strong>
+                                        <p class="text-muted">{{ backup.description }}</p>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if backup.error_message %}
+                                    <div class="alert alert-danger">
+                                        <strong>رسالة الخطأ:</strong>
+                                        <p class="mb-0">{{ backup.error_message }}</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- تفاصيل المحتوى -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-folder me-2"></i>محتوى النسخة الاحتياطية
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    {% if backup.content_details %}
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h6>قاعدة البيانات:</h6>
+                                                <ul class="list-unstyled">
+                                                    {% for table in backup.content_details.database %}
+                                                    <li class="mb-1">
+                                                        <i class="bi bi-table me-1"></i>
+                                                        {{ table.name }} ({{ table.records }} سجل)
+                                                    </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6>الملفات:</h6>
+                                                <ul class="list-unstyled">
+                                                    {% for file in backup.content_details.files %}
+                                                    <li class="mb-1">
+                                                        <i class="bi bi-file-earmark me-1"></i>
+                                                        {{ file.name }} ({{ file.size|filesizeformat }})
+                                                    </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <p class="text-muted">لا توجد تفاصيل متاحة للمحتوى</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- معلومات إضافية -->
+                        <div class="col-md-4">
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-gear me-2"></i>معلومات تقنية
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <strong>المستخدم المنشئ:</strong>
+                                        <p class="text-muted">{{ backup.created_by.get_full_name|default:backup.created_by.username }}</p>
+                                    </div>
+                                    <div class="mb-3">
+                                        <strong>إصدار النظام:</strong>
+                                        <p class="text-muted">{{ backup.system_version|default:"غير محدد" }}</p>
+                                    </div>
+                                    <div class="mb-3">
+                                        <strong>نوع الضغط:</strong>
+                                        <p class="text-muted">{{ backup.compression_type|default:"غير مضغوط" }}</p>
+                                    </div>
+                                    <div class="mb-3">
+                                        <strong>التشفير:</strong>
+                                        <p class="text-muted">{{ backup.encryption_type|default:"غير مشفر" }}</p>
+                                    </div>
+                                    <div class="mb-3">
+                                        <strong>التحقق من التكامل:</strong>
+                                        <p class="text-muted">{{ backup.checksum|default:"غير متوفر" }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- إحصائيات سريعة -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-graph-up me-2"></i>إحصائيات
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row text-center">
+                                        <div class="col-6 mb-3">
+                                            <div class="border rounded p-2">
+                                                <h6 class="mb-1">{{ backup.size|filesizeformat }}</h6>
+                                                <small class="text-muted">الحجم</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 mb-3">
+                                            <div class="border rounded p-2">
+                                                <h6 class="mb-1">{{ backup.duration|default:"0" }}</h6>
+                                                <small class="text-muted">المدة (ثانية)</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 mb-3">
+                                            <div class="border rounded p-2">
+                                                <h6 class="mb-1">{{ backup.records_count|default:"0" }}</h6>
+                                                <small class="text-muted">السجلات</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 mb-3">
+                                            <div class="border rounded p-2">
+                                                <h6 class="mb-1">{{ backup.files_count|default:"0" }}</h6>
+                                                <small class="text-muted">الملفات</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- الإجراءات السريعة -->
+                            <div class="card">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-lightning me-2"></i>إجراءات سريعة
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-grid gap-2">
+                                        {% if backup.status == 'success' %}
+                                        <button type="button" class="btn btn-success" onclick="downloadBackup()">
+                                            <i class="bi bi-download me-1"></i>تحميل النسخة الاحتياطية
+                                        </button>
+                                        <button type="button" class="btn btn-warning" onclick="restoreBackup()">
+                                            <i class="bi bi-arrow-clockwise me-1"></i>استعادة النسخة الاحتياطية
+                                        </button>
+                                        <button type="button" class="btn btn-info" onclick="verifyBackup()">
+                                            <i class="bi bi-check-circle me-1"></i>التحقق من التكامل
+                                        </button>
+                                        {% endif %}
+                                        <button type="button" class="btn btn-danger" onclick="deleteBackup()">
+                                            <i class="bi bi-trash me-1"></i>حذف النسخة الاحتياطية
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal تأكيد الاستعادة -->
+<div class="modal fade" id="restoreModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">تأكيد استعادة النسخة الاحتياطية</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <strong>تحذير!</strong> سيتم استبدال جميع البيانات الحالية بالبيانات من النسخة الاحتياطية.
+                </div>
+                <p>هل أنت متأكد من استعادة النسخة الاحتياطية "{{ backup.filename }}"؟</p>
+                <p class="text-muted">لا يمكن التراجع عن هذا الإجراء.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-warning" onclick="confirmRestore()">تأكيد الاستعادة</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function downloadBackup() {
+    window.open(`/accounts/backups/{{ backup.pk }}/download/`, '_blank');
+}
+
+function restoreBackup() {
+    const modal = new bootstrap.Modal(document.getElementById('restoreModal'));
+    modal.show();
+}
+
+function confirmRestore() {
+    fetch(`/accounts/backups/{{ backup.pk }}/restore/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('تم استعادة النسخة الاحتياطية بنجاح');
+            window.location.href = '{% url "accounts:backup_list" %}';
+        } else {
+            alert('حدث خطأ أثناء استعادة النسخة الاحتياطية');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('حدث خطأ أثناء استعادة النسخة الاحتياطية');
+    });
+}
+
+function verifyBackup() {
+    fetch(`/accounts/backups/{{ backup.pk }}/verify/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('النسخة الاحتياطية سليمة');
+        } else {
+            alert('النسخة الاحتياطية تالفة أو غير مكتملة');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('حدث خطأ أثناء التحقق من النسخة الاحتياطية');
+    });
+}
+
+function deleteBackup() {
+    if (confirm('هل أنت متأكد من حذف هذه النسخة الاحتياطية؟')) {
+        fetch(`/accounts/backups/{{ backup.pk }}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = '{% url "accounts:backup_list" %}';
+            } else {
+                alert('حدث خطأ أثناء حذف النسخة الاحتياطية');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('حدث خطأ أثناء حذف النسخة الاحتياطية');
+        });
+    }
+}
+</script>
+{% endblock %} 

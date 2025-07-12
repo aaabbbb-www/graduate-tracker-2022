@@ -1,0 +1,16 @@
+{
+    "active_employees": {{ active_employees }},
+    "suspended_employees": {{ suspended_employees }},
+    "inactive_employees": {{ inactive_employees }},
+    "total_employees": {{ total_employees }},
+    "departments": {
+        {% for dept, count in departments.items %}
+        "{{ dept }}": {{ count }}{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    },
+    "roles": {
+        {% for role, count in roles.items %}
+        "{{ role }}": {{ count }}{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    }
+}

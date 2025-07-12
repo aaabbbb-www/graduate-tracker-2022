@@ -1,0 +1,390 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}تحليلات تفصيلية - {{ survey.title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h1 class="main-title mb-4 animate__animated animate__fadeInDown">تحليلات تفصيلية <i class="fas fa-chart-line"></i></h1>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm animate__animated animate__fadeInUp">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-clipboard-list"></i> {{ survey.title }}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <p><strong>الوصف:</strong> {{ survey.description }}</p>
+                            <p><strong>فترة الاستبيان:</strong> {{ survey.start_date|date:"Y-m-d" }} إلى {{ survey.end_date|date:"Y-m-d" }}</p>
+                            {% if survey.google_form_url %}
+                            <p><strong>رابط Google Form:</strong> 
+                                <a href="{{ survey.google_form_url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="fab fa-google"></i> عرض في Google Forms
+                                </a>
+                            </p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <div class="progress mb-2" style="height: 20px;">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ completion_percentage }}%">
+                                        {{ completion_percentage|floatformat:1 }}%
+                                    </div>
+                                </div>
+                                <small class="text-muted">معدل الإكمال</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <!-- بطاقة إجمالي الردود -->
+        <div class="col-md-3 mb-4">
+            <div class="card dashboard-card animate__animated animate__fadeInUp animate__delay-0-2s">
+                <div class="card-body text-center">
+                    <div class="icon-wrapper mb-3">
+                        <i class="fas fa-reply-all fa-3x text-info"></i>
+                    </div>
+                    <h5 class="card-title">إجمالي الردود</h5>
+                    <p class="card-text display-4 font-weight-bold text-info" data-toggle="counterup">{{ total_responses }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- بطاقة الردود المكتملة -->
+        <div class="col-md-3 mb-4">
+            <div class="card dashboard-card animate__animated animate__fadeInUp animate__delay-0-4s">
+                <div class="card-body text-center">
+                    <div class="icon-wrapper mb-3">
+                        <i class="fas fa-check-circle fa-3x text-success"></i>
+                    </div>
+                    <h5 class="card-title">ردود مكتملة</h5>
+                    <p class="card-text display-4 font-weight-bold text-success" data-toggle="counterup">{{ completed_responses }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- بطاقة الردود الجزئية -->
+        <div class="col-md-3 mb-4">
+            <div class="card dashboard-card animate__animated animate__fadeInUp animate__delay-0-6s">
+                <div class="card-body text-center">
+                    <div class="icon-wrapper mb-3">
+                        <i class="fas fa-hourglass-half fa-3x text-warning"></i>
+                    </div>
+                    <h5 class="card-title">ردود جزئية</h5>
+                    <p class="card-text display-4 font-weight-bold text-warning" data-toggle="counterup">{{ partial_responses }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- بطاقة متوسط الوقت -->
+        <div class="col-md-3 mb-4">
+            <div class="card dashboard-card animate__animated animate__fadeInUp animate__delay-0-8s">
+                <div class="card-body text-center">
+                    <div class="icon-wrapper mb-3">
+                        <i class="fas fa-clock fa-3x text-danger"></i>
+                    </div>
+                    <h5 class="card-title">متوسط وقت الإكمال</h5>
+                    <p class="card-text display-4 font-weight-bold text-danger">{{ average_completion_time }} دقيقة</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm animate__animated animate__fadeInUp animate__delay-1s">
+                <div class="card-header bg-gradient-info text-white">
+                    <h4 class="mb-0"><i class="fas fa-chart-bar"></i> توزيع الردود حسب التاريخ</h4>
+                </div>
+                <div class="card-body">
+                    <canvas id="responsesTimelineChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm animate__animated animate__fadeInUp animate__delay-1-2s">
+                <div class="card-header bg-gradient-warning text-white">
+                    <h4 class="mb-0"><i class="fas fa-chart-pie"></i> حالة الردود</h4>
+                </div>
+                <div class="card-body">
+                    <canvas id="responseStatusChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- تحليل الأسئلة الفردية -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm animate__animated animate__fadeInUp animate__delay-1-4s">
+                <div class="card-header bg-gradient-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-question-circle"></i> تحليل الأسئلة الفردية</h4>
+                </div>
+                <div class="card-body">
+                    {% for question_analysis in questions_analysis %}
+                    <div class="question-analysis mb-4 p-3 border rounded">
+                        <h5 class="mb-3">{{ forloop.counter }}. {{ question_analysis.question_text }}</h5>
+                        <div class="row">
+                            <div class="col-md-8">
+                                {% if question_analysis.question_type == 'radio' or question_analysis.question_type == 'checkbox' %}
+                                    <canvas id="questionChart{{ question_analysis.question_id }}"></canvas>
+                                {% elif question_analysis.question_type == 'rating' %}
+                                    <div class="rating-analysis">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span>متوسط التقييم:</span>
+                                            <span class="badge bg-warning fs-6">{{ question_analysis.average_rating|floatformat:1 }}/5</span>
+                                        </div>
+                                        <div class="progress mb-2" style="height: 25px;">
+                                            <div class="progress-bar bg-warning" style="width: {{ question_analysis.average_rating|mul:20 }}%"></div>
+                                        </div>
+                                        <small class="text-muted">{{ question_analysis.total_responses }} إجابة</small>
+                                    </div>
+                                {% elif question_analysis.question_type == 'text' or question_analysis.question_type == 'textarea' %}
+                                    <div class="text-responses">
+                                        <p><strong>عدد الإجابات النصية:</strong> {{ question_analysis.text_responses_count }}</p>
+                                        <div class="text-sample">
+                                            <h6>عينة من الإجابات:</h6>
+                                            {% for sample in question_analysis.text_samples %}
+                                                <blockquote class="blockquote-sm border-start border-primary ps-3 mb-2">
+                                                    <p class="mb-0">{{ sample|truncatewords:20 }}</p>
+                                                </blockquote>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <div class="question-stats">
+                                    <div class="stat-item mb-2">
+                                        <i class="fas fa-reply text-info"></i>
+                                        <span>إجمالي الردود: <strong>{{ question_analysis.total_responses }}</strong></span>
+                                    </div>
+                                    <div class="stat-item mb-2">
+                                        <i class="fas fa-percentage text-success"></i>
+                                        <span>معدل الإجابة: <strong>{{ question_analysis.response_rate|floatformat:1 }}%</strong></span>
+                                    </div>
+                                    {% if question_analysis.most_common_answer %}
+                                    <div class="stat-item mb-2">
+                                        <i class="fas fa-trophy text-warning"></i>
+                                        <span>الإجابة الأكثر شيوعاً: <strong>{{ question_analysis.most_common_answer }}</strong></span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="alert alert-info text-center">
+                        <i class="fas fa-info-circle"></i> لا توجد أسئلة لتحليلها في هذا الاستبيان.
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- قائمة المشاركين -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm animate__animated animate__fadeInUp animate__delay-1-6s">
+                <div class="card-header bg-gradient-secondary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="fas fa-users"></i> قائمة المشاركين</h4>
+                    <a href="{% url 'surveys:response_list' survey.id %}" class="btn btn-light btn-sm">
+                        <i class="fas fa-list"></i> عرض جميع الردود
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped">
+                            <thead>
+                                <tr>
+                                    <th>اسم الخريج</th>
+                                    <th>البريد الإلكتروني</th>
+                                    <th>تاريخ الرد</th>
+                                    <th>الحالة</th>
+                                    <th>نسبة الإكمال</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for response in recent_responses %}
+                                <tr>
+                                    <td>{{ response.graduate.full_name }}</td>
+                                    <td>{{ response.graduate.email }}</td>
+                                    <td>{{ response.submitted_at|date:"Y-m-d H:i" }}</td>
+                                    <td>
+                                        {% if response.is_complete %}
+                                            <span class="badge bg-success">مكتمل</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">جزئي</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar" style="width: {{ response.completion_percentage }}%">
+                                                {{ response.completion_percentage|floatformat:0 }}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'surveys:response_detail' response.id %}" class="btn btn-sm btn-outline-info">
+                                            <i class="fas fa-eye"></i> عرض
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center">لا توجد ردود على هذا الاستبيان بعد.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{% url 'surveys:analytics' %}" class="btn btn-secondary btn-lg me-2">
+            <i class="fas fa-arrow-left"></i> العودة إلى التحليلات العامة
+        </a>
+        <a href="{% url 'surveys:detail' survey.id %}" class="btn btn-primary btn-lg">
+            <i class="fas fa-info-circle"></i> تفاصيل الاستبيان
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    $(document).ready(function() {
+        // تفعيل تأثير العدادات
+        $('[data-toggle="counterup"]').counterUp({
+            delay: 10,
+            time: 1000
+        });
+
+        // تأثيرات Hover للبطاقات
+        $(".dashboard-card").hover(function() {
+            $(this).addClass("shadow-lg").css("transform", "translateY(-5px)");
+        }, function() {
+            $(this).removeClass("shadow-lg").css("transform", "translateY(0)");
+        });
+
+        // بيانات الرسوم البيانية
+        const responsesTimelineData = {
+            labels: [{% for label in timeline_labels %}'{{ label }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+            datasets: [{
+                label: 'عدد الردود',
+                data: [{% for data in timeline_data %}{{ data }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                backgroundColor: 'rgba(23, 162, 184, 0.2)',
+                borderColor: 'rgba(23, 162, 184, 1)',
+                borderWidth: 2,
+                fill: true
+            }]
+        };
+
+        const responseStatusData = {
+            labels: ['مكتمل', 'جزئي'],
+            datasets: [{
+                data: [{{ completed_responses }}, {{ partial_responses }}],
+                backgroundColor: [
+                    'rgba(40, 167, 69, 0.7)',
+                    'rgba(255, 193, 7, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(40, 167, 69, 1)',
+                    'rgba(255, 193, 7, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        // رسم بياني للردود حسب الوقت
+        const responsesTimelineCtx = document.getElementById('responsesTimelineChart').getContext('2d');
+        new Chart(responsesTimelineCtx, {
+            type: 'line',
+            data: responsesTimelineData,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true
+                    },
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // رسم بياني لحالة الردود
+        const responseStatusCtx = document.getElementById('responseStatusChart').getContext('2d');
+        new Chart(responseStatusCtx, {
+            type: 'doughnut',
+            data: responseStatusData,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                }
+            }
+        });
+
+        // رسوم بيانية للأسئلة الفردية
+        {% for question_analysis in questions_analysis %}
+        {% if question_analysis.question_type == 'radio' or question_analysis.question_type == 'checkbox' %}
+        const questionData{{ question_analysis.question_id }} = {
+            labels: [{% for choice in question_analysis.choices_data %}'{{ choice.label }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+            datasets: [{
+                data: [{% for choice in question_analysis.choices_data %}{{ choice.count }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 205, 86, 0.7)',
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(153, 102, 255, 0.7)',
+                    'rgba(255, 159, 64, 0.7)'
+                ]
+            }]
+        };
+
+        const questionCtx{{ question_analysis.question_id }} = document.getElementById('questionChart{{ question_analysis.question_id }}').getContext('2d');
+        new Chart(questionCtx{{ question_analysis.question_id }}, {
+            type: 'bar',
+            data: questionData{{ question_analysis.question_id }},
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        {% endif %}
+        {% endfor %}
+    });
+</script>
+{% endblock %}
+

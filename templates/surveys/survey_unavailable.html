@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}الاستبيان غير متاح{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card text-center shadow-sm">
+                <div class="card-header bg-warning text-white">
+                    <h4 class="mb-0"><i class="fas fa-exclamation-triangle"></i> الاستبيان غير متاح</h4>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ survey.title }}</h5>
+                    <div class="alert alert-warning mt-4">
+                        {% if messages %}
+                            {% for message in messages %}
+                                <p class="lead">{{ message }}</p>
+                            {% endfor %}
+                        {% else %}
+                            <p class="lead">عذراً، هذا الاستبيان غير متوفر حالياً. قد يكون مغلقاً أو انتهت صلاحيته.</p>
+                        {% endif %}
+                    </div>
+                    <a href="{% url 'home' %}" class="btn btn-primary mt-3">العودة إلى الصفحة الرئيسية</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

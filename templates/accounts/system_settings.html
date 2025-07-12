@@ -1,0 +1,337 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}إعدادات النظام{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <i class="bi bi-gear me-2"></i>
+                            إعدادات النظام
+                        </h3>
+                        <button type="submit" form="settings-form" class="btn btn-success btn-sm">
+                            <i class="bi bi-check-circle me-1"></i>حفظ الإعدادات
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="settings-form">
+                        {% csrf_token %}
+                        
+                        <!-- إعدادات عامة -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="bi bi-info-circle me-2"></i>إعدادات عامة
+                                </h5>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="site_name" class="form-label">اسم الموقع</label>
+                                <input type="text" class="form-control" id="site_name" name="site_name" 
+                                       value="نظام تتبع الخريجين" placeholder="اسم الموقع">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="site_description" class="form-label">وصف الموقع</label>
+                                <input type="text" class="form-control" id="site_description" name="site_description" 
+                                       value="نظام متكامل لتتبع الخريجين وإدارة البيانات" placeholder="وصف الموقع">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="admin_email" class="form-label">بريد المدير</label>
+                                <input type="email" class="form-control" id="admin_email" name="admin_email" 
+                                       value="admin@example.com" placeholder="admin@example.com">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="timezone" class="form-label">المنطقة الزمنية</label>
+                                <select class="form-select" id="timezone" name="timezone">
+                                    <option value="Asia/Riyadh" selected>الرياض (GMT+3)</option>
+                                    <option value="Asia/Dubai">دبي (GMT+4)</option>
+                                    <option value="Asia/Kuwait">الكويت (GMT+3)</option>
+                                    <option value="Asia/Qatar">قطر (GMT+3)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- إعدادات الأمان -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="bi bi-shield-lock me-2"></i>إعدادات الأمان
+                                </h5>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="session_timeout" class="form-label">مهلة الجلسة (دقائق)</label>
+                                <input type="number" class="form-control" id="session_timeout" name="session_timeout" 
+                                       value="120" min="30" max="1440">
+                                <div class="form-text">الوقت قبل انتهاء صلاحية الجلسة</div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="max_login_attempts" class="form-label">أقصى محاولات تسجيل دخول</label>
+                                <input type="number" class="form-control" id="max_login_attempts" name="max_login_attempts" 
+                                       value="5" min="3" max="10">
+                                <div class="form-text">عدد المحاولات قبل قفل الحساب</div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="require_strong_password" 
+                                           name="require_strong_password" checked>
+                                    <label class="form-check-label" for="require_strong_password">
+                                        إلزام كلمات مرور قوية
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="enable_two_factor" 
+                                           name="enable_two_factor">
+                                    <label class="form-check-label" for="enable_two_factor">
+                                        تفعيل المصادقة الثنائية
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- إعدادات النسخ الاحتياطي -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="bi bi-cloud-arrow-up me-2"></i>إعدادات النسخ الاحتياطي
+                                </h5>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="auto_backup" 
+                                           name="auto_backup" checked>
+                                    <label class="form-check-label" for="auto_backup">
+                                        النسخ الاحتياطي التلقائي
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="backup_frequency" class="form-label">تكرار النسخ الاحتياطي</label>
+                                <select class="form-select" id="backup_frequency" name="backup_frequency">
+                                    <option value="daily">يومياً</option>
+                                    <option value="weekly" selected>أسبوعياً</option>
+                                    <option value="monthly">شهرياً</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="backup_retention" class="form-label">فترة الاحتفاظ بالنسخ (أيام)</label>
+                                <input type="number" class="form-control" id="backup_retention" name="backup_retention" 
+                                       value="30" min="7" max="365">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="backup_path" class="form-label">مسار النسخ الاحتياطي</label>
+                                <input type="text" class="form-control" id="backup_path" name="backup_path" 
+                                       value="/backups/" placeholder="/path/to/backups/">
+                            </div>
+                        </div>
+
+                        <!-- إعدادات الإشعارات -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="bi bi-bell me-2"></i>إعدادات الإشعارات
+                                </h5>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="email_notifications" 
+                                           name="email_notifications" checked>
+                                    <label class="form-check-label" for="email_notifications">
+                                        إشعارات البريد الإلكتروني
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="sms_notifications" 
+                                           name="sms_notifications">
+                                    <label class="form-check-label" for="sms_notifications">
+                                        إشعارات الرسائل النصية
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="login_notifications" 
+                                           name="login_notifications" checked>
+                                    <label class="form-check-label" for="login_notifications">
+                                        إشعارات تسجيل الدخول
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="error_notifications" 
+                                           name="error_notifications" checked>
+                                    <label class="form-check-label" for="error_notifications">
+                                        إشعارات الأخطاء
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- إعدادات الواجهة -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="bi bi-palette me-2"></i>إعدادات الواجهة
+                                </h5>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="theme" class="form-label">المظهر</label>
+                                <select class="form-select" id="theme" name="theme">
+                                    <option value="light" selected>فاتح</option>
+                                    <option value="dark">داكن</option>
+                                    <option value="auto">تلقائي</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="language" class="form-label">اللغة</label>
+                                <select class="form-select" id="language" name="language">
+                                    <option value="ar" selected>العربية</option>
+                                    <option value="en">English</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="items_per_page" class="form-label">عدد العناصر في الصفحة</label>
+                                <select class="form-select" id="items_per_page" name="items_per_page">
+                                    <option value="10">10</option>
+                                    <option value="20" selected>20</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="show_help_tooltips" 
+                                           name="show_help_tooltips" checked>
+                                    <label class="form-check-label" for="show_help_tooltips">
+                                        إظهار تلميحات المساعدة
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- أزرار الإجراءات -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <button type="button" class="btn btn-secondary me-2" onclick="resetSettings()">
+                                            <i class="bi bi-arrow-clockwise me-1"></i>إعادة تعيين
+                                        </button>
+                                        <button type="button" class="btn btn-info" onclick="exportSettings()">
+                                            <i class="bi bi-download me-1"></i>تصدير الإعدادات
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-check-circle me-1"></i>حفظ الإعدادات
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function resetSettings() {
+    if (confirm('هل أنت متأكد من إعادة تعيين جميع الإعدادات؟')) {
+        // إعادة تعيين النموذج
+        document.getElementById('settings-form').reset();
+        
+        // إعادة تعيين القيم الافتراضية
+        document.getElementById('site_name').value = 'نظام تتبع الخريجين';
+        document.getElementById('site_description').value = 'نظام متكامل لتتبع الخريجين وإدارة البيانات';
+        document.getElementById('admin_email').value = 'admin@example.com';
+        document.getElementById('timezone').value = 'Asia/Riyadh';
+        document.getElementById('session_timeout').value = '120';
+        document.getElementById('max_login_attempts').value = '5';
+        document.getElementById('backup_retention').value = '30';
+        document.getElementById('backup_path').value = '/backups/';
+        document.getElementById('backup_frequency').value = 'weekly';
+        document.getElementById('theme').value = 'light';
+        document.getElementById('language').value = 'ar';
+        document.getElementById('items_per_page').value = '20';
+        
+        // إعادة تعيين الخانات المحددة
+        document.getElementById('require_strong_password').checked = true;
+        document.getElementById('auto_backup').checked = true;
+        document.getElementById('email_notifications').checked = true;
+        document.getElementById('login_notifications').checked = true;
+        document.getElementById('error_notifications').checked = true;
+        document.getElementById('show_help_tooltips').checked = true;
+        
+        alert('تم إعادة تعيين الإعدادات بنجاح');
+    }
+}
+
+function exportSettings() {
+    // تصدير الإعدادات كملف JSON
+    const form = document.getElementById('settings-form');
+    const formData = new FormData(form);
+    const settings = {};
+    
+    for (let [key, value] of formData.entries()) {
+        if (formData.getAll(key).length > 1) {
+            if (!settings[key]) {
+                settings[key] = [];
+            }
+            settings[key].push(value);
+        } else {
+            settings[key] = value;
+        }
+    }
+    
+    const dataStr = JSON.stringify(settings, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'system_settings.json';
+    link.click();
+    URL.revokeObjectURL(url);
+}
+
+// حفظ الإعدادات تلقائياً
+document.getElementById('settings-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // هنا يمكن إرسال البيانات إلى الخادم
+    alert('تم حفظ الإعدادات بنجاح');
+});
+</script>
+{% endblock %} 
