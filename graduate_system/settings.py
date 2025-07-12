@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 import pymysql
+import dj_database_url
 pymysql.install_as_MySQLdb()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -23,12 +24,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-your-secret-key-here'
+SECRET_KEY = os.environ.get('SECRET_KEY', default='django-insecure-your-secret-key-here')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# SECURITY WARNING: don't run with debug turned on in production!
+# سيتم تعيين القيمة إلى False على خادم Render تلقائيًا
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
+
+# اسم النطاق الذي سيتم النشر عليه في Render
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
+# السماح بالوصول المحلي للتطوير
+if not RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.extend(['localhost', '127.0.0.1'])
 
 
 # Application definition
@@ -51,6 +63,7 @@ SITE_ID = 1 # Required for Sites Framework
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -83,20 +96,27 @@ WSGI_APPLICATION = 'graduate_system.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# إعدادات MySQL الأصلية (محفوظة للاستخدام لاحقاً)
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-         'NAME': 'abeew',
-        'USER': 'root',
-        'PASSWORD': 'aboo',
-        'HOST': 'localhost',
-        'PORT': '3306',
-        'OPTIONS': {
-        'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
+# إعدادات قاعدة البيانات
+# سيتم استخدام PostgreSQL على خادم Render، و MySQL محليًا
+if 'DATABASE_URL' in os.environ:
+    DATABASES = {
+        'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
     }
-}
+else:
+    # إعدادات MySQL الأصلية (محفوظة للاستخدام المحلي)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'abeew',
+            'USER': 'root',
+            'PASSWORD': 'aboo',
+            'HOST': 'localhost',
+            'PORT': '3306',
+            'OPTIONS': {
+                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            },
+        }
+    }
 
 
 
@@ -142,6 +162,9 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# تفعيل whitenoise لتخديم الملفات الثابتة في بيئة الإنتاج
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 # Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -157,19 +180,16 @@ LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/'
 
 # Email settings (for sending surveys)
-# للاختبار - استخدام البريد الإلكتروني المحلي (مفعل مؤقتاً)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-# للإنتاج - استخدام Gmail (معطل حتى إعداد كلمة مرور التطبيقات)
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'qqqwwweerrr13@gmail.com'
-EMAIL_HOST_PASSWORD = 'mwus wlir mqwa seva' # ضع كلمة مرور التطبيقات هنا (16 حرف)
+# سيتم استخدام إعدادات SMTP للإنتاج، و console للتطوير المحلي
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-EMAIL_USE_SSL = False
-EMAIL_TIMEOUT = 20
+EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', 'False') == 'True'
+EMAIL_TIMEOUT = int(os.environ.get('EMAIL_TIMEOUT', 20))
 
 
 
