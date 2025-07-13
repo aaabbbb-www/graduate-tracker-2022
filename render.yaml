@@ -3,8 +3,12 @@ services:
     name: graduate-tracker
     env: python
     plan: free
-    buildCommand: "./build.sh"
-    startCommand: "gunicorn graduate_system.wsgi:application"
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py collectstatic --no-input
+      python manage.py migrate
+      python manage.py shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admin', '', '${{ADMIN_PASSWORD}}') if not User.objects.filter(username='admin').exists() else None"
+    startCommand: gunicorn graduate_system.wsgi:application
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -20,6 +24,8 @@ services:
         value: "qqqwwweerrr13@gmail.com"
       - key: EMAIL_HOST_PASSWORD
         sync: false
+      - key: ADMIN_PASSWORD
+        generateValue: true
 
 databases:
   - name: graduate-tracker-db
