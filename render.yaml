@@ -7,7 +7,7 @@ services:
       pip install -r requirements.txt
       python manage.py collectstatic --no-input
       python manage.py migrate
-      python manage.py shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admin', '', '${{ADMIN_PASSWORD}}') if not User.objects.filter(username='admin').exists() else None"
+      python manage.py shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admin', '', '$ADMIN_PASSWORD') if not User.objects.filter(username='admin').exists() else None"
     startCommand: gunicorn graduate_system.wsgi:application
     envVars:
       - key: DATABASE_URL
